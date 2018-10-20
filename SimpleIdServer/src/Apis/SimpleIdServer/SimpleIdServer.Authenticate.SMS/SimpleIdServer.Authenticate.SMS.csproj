@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net461;netcoreapp2.0</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>  
+    <ProjectReference Include="..\..\Common\SimpleIdServer.Module\SimpleIdServer.Module.csproj" />  
+    <ProjectReference Include="..\SimpleIdServer.Authenticate.Basic\SimpleIdServer.Authenticate.Basic.csproj" />  
+    <ProjectReference Include="..\SimpleIdServer.Authenticate.SMS.Common\SimpleIdServer.Authenticate.SMS.Common.csproj" />  
+    <ProjectReference Include="..\SimpleIdServer.Host\SimpleIdServer.Host.csproj" />  
+    <ProjectReference Include="..\SimpleIdServer.Twilio.Client\SimpleIdServer.Twilio.Client.csproj" />  
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Areas\**\*.cshtml" />
+  </ItemGroup>
+</Project>

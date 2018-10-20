@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>SimpleIdServer.Host.Tests Integration test project</Description>
+    <Authors>thierry habart</Authors>
+    <TargetFramework>net461</TargetFramework>
+    <AssemblyName>SimpleIdServer.Host.Tests</AssemblyName>
+    <PackageId>SimpleIdServer.Host.Tests</PackageId>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyOriginatorKeyFile>testCert.pfx</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\testCert.pfx" Link="testCert.pfx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json;testCert.pfx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Apis\Common\SimpleIdServer.Common.Dtos\SimpleIdServer.Common.Dtos.csproj" />
+    <ProjectReference Include="..\..\src\Apis\SimpleIdServer\SimpleIdServer.AccountFilter.Basic.Client\SimpleIdServer.AccountFilter.Basic.Client.csproj" />
+    <ProjectReference Include="..\..\src\Apis\SimpleIdServer\SimpleIdServer.AccountFilter.Basic\SimpleIdServer.AccountFilter.Basic.csproj" />
+    <ProjectReference Include="..\..\src\Apis\SimpleIdServer\SimpleIdServer.Authenticate.LoginPassword\SimpleIdServer.Authenticate.LoginPassword.csproj" />
+    <ProjectReference Include="..\..\src\Apis\SimpleIdServer\SimpleIdServer.Authenticate.SMS.Client\SimpleIdServer.Authenticate.SMS.Client.csproj" />
+    <ProjectReference Include="..\..\src\Apis\SimpleIdServer\SimpleIdServer.Authenticate.SMS\SimpleIdServer.Authenticate.SMS.csproj" />
+    <ProjectReference Include="..\..\src\Apis\SimpleIdServer\SimpleIdServer.Client\SimpleIdServer.Client.csproj" />
+    <ProjectReference Include="..\..\src\Apis\SimpleIdServer\SimpleIdServer.Core\SimpleIdServer.Core.csproj" />
+    <ProjectReference Include="..\..\src\Apis\SimpleIdServer\SimpleIdServer.Host\SimpleIdServer.Host.csproj" />
+    <ProjectReference Include="..\..\src\Apis\SimpleIdServer\SimpleIdServer.UserInfoIntrospection\SimpleIdServer.UserInfoIntrospection.csproj" />
+    <ProjectReference Include="..\..\src\Apis\SimpleIdServer\SimpleIdServer.UserManagement.Client\SimpleIdServer.UserManagement.Client.csproj" />
+    <ProjectReference Include="..\..\src\Apis\SimpleIdServer\SimpleIdServer.UserManagement\SimpleIdServer.UserManagement.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.6.1" />
+    <PackageReference Include="xunit" Version="2.3.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
+    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="2.1.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
+    <PackageReference Include="Moq" Version="4.8.1" />
+    <PackageReference Include="Microsoft.NETCore.Platforms" Version="2.1.0" />
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+</Project>

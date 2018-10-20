@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net461;netcoreapp2.0</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>  
+    <ProjectReference Include="..\..\Common\SimpleIdServer.Module\SimpleIdServer.Module.csproj" />  
+    <ProjectReference Include="..\SimpleIdServer.Client\SimpleIdServer.Client.csproj" />  
+    <ProjectReference Include="..\SimpleIdServer.Host\SimpleIdServer.Host.csproj" />  
+    <ProjectReference Include="..\SimpleIdServer.UserManagement.Common\SimpleIdServer.UserManagement.Common.csproj" />  
+  </ItemGroup>
+  <ItemGroup>  
+    <EmbeddedResource Include="Areas\**\*.cshtml" />
+  </ItemGroup>
+</Project>
