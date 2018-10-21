@@ -15,7 +15,7 @@ namespace SimpleIdServer.Shell
             }
 
             var assembly = typeof(HomeController).Assembly;
-            var embeddedFileProvider = new EmbeddedFileProvider(assembly, "SimpleIdentityServer.Shell.wwwroot");
+            var embeddedFileProvider = new EmbeddedFileProvider(assembly, "SimpleIdServer.Shell.wwwroot");
             app.UseStaticFiles(new StaticFileOptions
             {
                 FileProvider = embeddedFileProvider
