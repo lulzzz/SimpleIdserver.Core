@@ -1,64 +1,62 @@
-﻿using SimpleIdServer.Core.Common.Models;
+﻿using SimpleIdServer.Core.Common;
+using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Helpers;
-using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Security.Claims;
+using System.Security.Cryptography;
 
 namespace SimpleIdServer.Startup
 {
     public static class DefaultConfiguration
     {
-        public static List<SimpleIdServer.Core.Common.Models.Client> GetClients()
+        public static List<JsonWebKey> GetJsonWebKeys()
         {
-            return new List<SimpleIdServer.Core.Common.Models.Client>
+            var serializedRsa = string.Empty;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                new SimpleIdServer.Core.Common.Models.Client
+                using (var provider = new RSACryptoServiceProvider())
                 {
-                        ClientId = "website",
-                        ClientName = "Website",
-                        Secrets = new List<ClientSecret>
-                        {
-                            new ClientSecret
-                            {
-                                Type = ClientSecretTypes.SharedSecret,
-                                Value = "website"
-                            }
-                        },
-                        TokenEndPointAuthMethod = TokenEndPointAuthenticationMethods.client_secret_basic,
-                        LogoUri = "http://img.over-blog-kiwi.com/1/47/73/14/20150513/ob_06dc4f_chiot-shiba-inu-a-vendre-prix-2015.jpg",
-                        PolicyUri = "http://openid.net",
-                        TosUri = "http://openid.net",
-                        AllowedScopes = new List<Scope>
-                        {
-                            new Scope
-                            {
-                                Name = "openid"
-                            },
-                            new Scope
-                            {
-                                Name = "role"
-                            },
-                            new Scope
-                            {
-                                Name = "profile"
-                            }
-                        },
-                        GrantTypes = new List<GrantType>
-                        {
-                            GrantType.@implicit
-                        },
-                        ResponseTypes = new List<ResponseType>
-                        {
-                            ResponseType.code,
-                            ResponseType.id_token,
-                            ResponseType.token
-                        },
-                        IdTokenSignedResponseAlg = "RS256",
-                        ApplicationType = ApplicationTypes.web,
-                        RedirectionUrls = new List<string> { "http://localhost:64950/callback" },
-                        PostLogoutRedirectUris = new List<string> { "http://localhost:64950/end_session" },
-                        UpdateDateTime = DateTime.UtcNow,
-                        CreateDateTime = DateTime.UtcNow
+                    serializedRsa = provider.ToXmlStringNetCore(true);
+                }
+            }
+            else
+            {
+                using (var rsa = new RSAOpenSsl())
+                {
+                    serializedRsa = rsa.ToXmlStringNetCore(true);
+                }
+            }
+
+            serializedRsa = "<RSAKeyValue><Modulus>t91zX9do7VnkX9ZO5UDjbyriZEdB8ATFid9j7NrVV9Ej024xK1J2kTyUDNS8MAc+jBgYe9OcVmXz/Ctn9SZVwV+6ksbZUuzOvQty3c1u6viu6lJjg9lUfJLVaL+RPbzHzyVr007pvYeHwfhsILLYQO4IhoLwNjJY99M/1Vmk/8E=</Modulus><Exponent>AQAB</Exponent><P>y6TrTIB3uBehTIWw5uFIz3/ELNM6nSYP/0Pkfe+HC4VBMrMXlj28PSb9cnQIL71EU85QKcoDUjPDYeUoF5RuPw==</P><Q>5yK+ArbJGexcqWYdfZ5yAVPqWEg1Mmz1BbAaOC3qZhN0JSly7TOBFjqFXDiifmg5bTS7H4q5+Wx5OCAWEkcR/w==</Q><DP>vrb0pfCqLf3zUXbi9VaGmc1OK6ymeAXtdWJf2pE4J9Hj/Vc7/7hRUfPx5/5CrHLUSqgs6vYFpjZUBJpXsb2QgQ==</DP><DQ>YBkhxx8YHZ8YJ5Y9TK1D2Sl6lZnwBDco6GR/gjwU6LvN3mWNUvHHCebq65zgco4C0lTKOCMFj556B8vPYWoLIQ==</DQ><InverseQ>FFs7vMX4zmCrMMHvY/iuPtf8wGWDGBacqZl1bdZBeBwmSuvw2YQk5/sru5avevFigTlQYqTGoEWLPZM1gzn0/A==</InverseQ><D>t6KOq8dp/bzNMcbKT4AKZypOqFbfDUjGvpgFpjc94xJ3lKC2rQ0UbKQzPclvFwz1NFiQg4Pq3gO/tjjoAFnERMcIaZNZpHlry4NFvGdSlScJeGXjulewCacD3rMIG59vsHa0x8CoXms3U9hvaADzRan+kn8Lv6m4EQ3sbbmFpz0=</D></RSAKeyValue>";
+            return  new List<JsonWebKey>
+            {
+                new JsonWebKey
+                {
+                    Alg = AllAlg.RS256,
+                    KeyOps = new []
+                    {
+                        KeyOperations.Sign,
+                        KeyOperations.Verify
+                    },
+                    Kid = "1",
+                    Kty = KeyType.RSA,
+                    Use = Use.Sig,
+                    SerializedKey = serializedRsa,
+                },
+                new JsonWebKey
+                {
+                    Alg = AllAlg.RSA1_5,
+                    KeyOps = new []
+                    {
+                        KeyOperations.Encrypt,
+                        KeyOperations.Decrypt
+                    },
+                    Kid = "2",
+                    Kty = KeyType.RSA,
+                    Use = Use.Enc,
+                    SerializedKey = serializedRsa,
                 }
             };
         }

@@ -14,10 +14,10 @@
 // limitations under the License.
 #endregion
 
-using System.Collections.Generic;
 using SimpleIdServer.Core;
 using SimpleIdServer.Core.Common;
 using SimpleIdServer.Core.Common.Models;
+using System.Collections.Generic;
 
 namespace SimpleIdServer.Host.Extensions
 {
@@ -30,7 +30,7 @@ namespace SimpleIdServer.Host.Extensions
     public class OpenIdServerConfiguration
     {
         public List<ResourceOwner> Users { get; set; }
-        public List<Core.Common.Models.Client> Clients { get; set; }
+        public List<Client> Clients { get; set; }
         public List<Translation> Translations { get; set; }
         public List<JsonWebKey> JsonWebKeys { get; set; }
     }
@@ -40,6 +40,7 @@ namespace SimpleIdServer.Host.Extensions
         public IdentityServerOptions()
         {
             Scim = new ScimOptions();
+            Configuration = new OpenIdServerConfiguration();
         }
 
         /// <summary>

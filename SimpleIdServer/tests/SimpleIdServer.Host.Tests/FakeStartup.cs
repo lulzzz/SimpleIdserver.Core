@@ -98,11 +98,10 @@ namespace SimpleIdServer.Host.Tests
                 o.ClientId = "stateless_client";
                 o.ClientSecret = "stateless_client";
                 o.IdentityServerClientFactory = new IdentityServerClientFactory(_context.Oauth2IntrospectionHttpClientFactory.Object);
-            })
-            .AddFakeUserInfoIntrospection(o => { });
+            });
             services.AddAuthorization(opt =>
             {
-                opt.AddOpenIdSecurityPolicy(DefaultSchema);
+                opt.AddOpenIdSecurityPolicy();
             });
             // 3. Configure MVC
             var mvc = services.AddMvc();

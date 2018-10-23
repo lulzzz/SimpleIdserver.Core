@@ -29,6 +29,7 @@ using SimpleIdServer.OpenId.Logging;
 using SimpleIdServer.Storage;
 using SimpleIdServer.Store;
 using SimpleIdServer.Logging;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace SimpleIdServer.Host.Extensions
 {
@@ -76,7 +77,7 @@ namespace SimpleIdServer.Host.Extensions
             return serviceCollection;
         }
 
-        public static AuthorizationOptions AddOpenIdSecurityPolicy(this AuthorizationOptions authenticateOptions, string cookieName)
+        public static AuthorizationOptions AddOpenIdSecurityPolicy(this AuthorizationOptions authenticateOptions)
         {
             if (authenticateOptions == null)
             {
@@ -85,22 +86,22 @@ namespace SimpleIdServer.Host.Extensions
 
             authenticateOptions.AddPolicy("Connected", policy => // User is connected
             {
-                policy.AddAuthenticationSchemes(cookieName);
+                policy.AddAuthenticationSchemes(Constants.CookieNames.CookieName);
                 policy.RequireAuthenticatedUser();
             });
             authenticateOptions.AddPolicy("registration", policy => // Access token with scope = register_client
             {
-                policy.AddAuthenticationSchemes("OAuth2Introspection");
+                policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
                 policy.RequireClaim("scope", "register_client");
             });
             authenticateOptions.AddPolicy("connected_user", policy => // Introspect the identity token.
             {
-                policy.AddAuthenticationSchemes("UserInfoIntrospection");
+                policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
                 policy.RequireAuthenticatedUser();
             });
             authenticateOptions.AddPolicy("manage_profile", policy => // Access token with scope = manage_profile or with role = administrator
             {
-                policy.AddAuthenticationSchemes("UserInfoIntrospection", "OAuth2Introspection");
+                policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
                 policy.RequireAssertion(p =>
                 {
                     if (p.User == null || p.User.Identity == null || !p.User.Identity.IsAuthenticated)
@@ -108,19 +109,19 @@ namespace SimpleIdServer.Host.Extensions
                         return false;
                     }
 
-                    var claimRole = p.User.Claims.FirstOrDefault(c => c.Type == "role");
+                    var claimRoles = p.User.Claims.Where(c => c.Type == "role");
                     var claimScopes = p.User.Claims.Where(c => c.Type == "scope");
-                    if (claimRole == null && !claimScopes.Any())
+                    if (!claimRoles.Any() && !claimScopes.Any())
                     {
                         return false;
                     }
 
-                    return claimRole != null && claimRole.Value == "administrator" || claimScopes.Any(s => s.Value == "manage_profile");
+                    return claimRoles.Any(s => s.Value == "administrator") || claimScopes.Any(s => s.Value == "manage_profile");
                 });
             });
             authenticateOptions.AddPolicy("manage_account_filtering", policy => // Access token with scope = manage_account_filtering or role = administrator
             {
-                policy.AddAuthenticationSchemes("UserInfoIntrospection", "OAuth2Introspection");
+                policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
                 policy.RequireAssertion(p =>
                 {
                     if (p.User == null || p.User.Identity == null || !p.User.Identity.IsAuthenticated)
@@ -128,14 +129,14 @@ namespace SimpleIdServer.Host.Extensions
                         return false;
                     }
 
-                    var claimRole = p.User.Claims.FirstOrDefault(c => c.Type == "role");
+                    var claimRoles = p.User.Claims.Where(c => c.Type == "role");
                     var claimScopes = p.User.Claims.Where(c => c.Type == "scope");
-                    if (claimRole == null && !claimScopes.Any())
+                    if (!claimRoles.Any() && !claimScopes.Any())
                     {
                         return false;
                     }
 
-                    return claimRole != null && claimRole.Value == "administrator" || claimScopes.Any(s => s.Value == "manage_account_filtering");
+                    return claimRoles.Any(s => s.Value == "administrator") || claimScopes.Any(s => s.Value == "manage_account_filtering");
                 });
             });
             return authenticateOptions;

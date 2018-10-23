@@ -22,6 +22,7 @@ namespace SimpleIdServer.Module
 
         public event EventHandler Initialized;
         public event EventHandler AuthenticationCookieAdded;
+        public event EventHandler AuthenticationAdded;
         public event EventHandler AuthorizationAdded;
         public event EventHandler MvcAdded;
 
@@ -94,6 +95,14 @@ namespace SimpleIdServer.Module
             if (AuthorizationAdded != null)
             {
                 AuthorizationAdded(this, EventArgs.Empty);
+            }
+        }
+
+        public void AddAuthentication()
+        {
+            if (AuthenticationAdded != null)
+            {
+                AuthenticationAdded(this, EventArgs.Empty);
             }
         }
 

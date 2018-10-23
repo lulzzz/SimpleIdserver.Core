@@ -24,6 +24,8 @@ namespace SimpleIdServer.Core.Common.DTOs.Requests
     {
         [DataMember(Name = ClientNames.RedirectUris)]
         public IEnumerable<string> RedirectUris { get; set; }
+        [DataMember(Name = ClientNames.PostLogoutRedirectUris)]
+        public IEnumerable<string> PostLogoutRedirectUris { get; set; }
         [DataMember(Name = ClientNames.ResponseTypes)]
         public IEnumerable<string> ResponseTypes { get; set; }
         [DataMember(Name = ClientNames.GrantTypes)]
@@ -84,5 +86,7 @@ namespace SimpleIdServer.Core.Common.DTOs.Requests
         public IEnumerable<string> RequestUris { get; set; }
         [DataMember(Name = ClientNames.ScimProfile)]
         public bool ScimProfile { get; set; }
+        [DataMember(Name = ClientNames.RequirePkce)]
+        public bool RequirePkce { get; set; }
     }
 }

@@ -304,7 +304,12 @@ namespace SimpleIdServer.Host.Tests.Apis
                 {
                     "https://localhost"
                 },
-                ScimProfile = true
+                ScimProfile = true,
+                PostLogoutRedirectUris = new []
+                {
+                    "http://localhost:5000/callback"
+                },
+                RequirePkce = true
             }, baseUrl + "/.well-known/openid-configuration", grantedToken.Content.AccessToken);
 
             // ASSERT

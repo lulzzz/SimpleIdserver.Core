@@ -14,16 +14,23 @@
 // limitations under the License.
 #endregion
 
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using SimpleIdServer.Authenticate.Basic;
 using SimpleIdServer.Authenticate.LoginPassword;
+using SimpleIdServer.Core.Common.Extensions;
 using SimpleIdServer.Host.Extensions;
+using SimpleIdServer.OAuth2Introspection;
 using SimpleIdServer.Shell;
 using SimpleIdServer.UserManagement;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 
 namespace SimpleIdServer.Startup
 {
@@ -50,7 +57,7 @@ namespace SimpleIdServer.Startup
                 Configuration = new OpenIdServerConfiguration
                 {
                     Users = DefaultConfiguration.GetUsers(),
-                    Clients = DefaultConfiguration.GetClients()
+                    JsonWebKeys = DefaultConfiguration.GetJsonWebKeys()
                 }
             };
             _env = env;
@@ -77,9 +84,40 @@ namespace SimpleIdServer.Startup
                 {
                     opts.LoginPath = "/Authenticate";
                 });
+            var xml = _options.Configuration.JsonWebKeys.First().SerializedKey;
+            RsaSecurityKey rsa = null;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                var provider = new RSACryptoServiceProvider();
+                provider.FromXmlStringNetCore(xml);
+                rsa = new RsaSecurityKey(provider);
+            }
+            else
+            {
+                var r = new RSAOpenSsl();
+                r.FromXmlStringNetCore(xml);
+                rsa = new RsaSecurityKey(r);
+            }
+
+            services.AddAuthentication(cfg =>
+            {
+                cfg.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                cfg.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(cfg =>
+            {
+                cfg.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = "http://localhost:60000",
+                    ValidateAudience = false,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = rsa
+                };
+            });
             services.AddAuthorization(opts =>
             {
-                opts.AddOpenIdSecurityPolicy(Host.Constants.CookieNames.CookieName);
+                opts.AddOpenIdSecurityPolicy();
             });
             // 5. Configure MVC
             var mvcBuilder = services.AddMvc();

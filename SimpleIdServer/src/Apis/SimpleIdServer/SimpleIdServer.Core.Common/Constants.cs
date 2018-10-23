@@ -83,7 +83,9 @@ namespace SimpleIdServer.Core.Common
 
     public static class ClientNames
     {
+        public const string RequirePkce = "require_pkce";
         public const string RedirectUris = "redirect_uris";
+        public const string PostLogoutRedirectUris = "post_logout_redirect_uris";
         public const string ResponseTypes = "response_types";
         public const string GrantTypes = "grant_types";
         public const string ApplicationType = "application_type";

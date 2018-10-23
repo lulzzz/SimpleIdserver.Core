@@ -73,7 +73,8 @@ namespace SimpleIdServer.Core.Common
                 InitiateLoginUri = registrationParameter.InitiateLoginUri,
                 RequestUris = registrationParameter.RequestUris,
                 LogoUri = registrationParameter.LogoUri,
-                ScimProfile = registrationParameter.ScimProfile
+                ScimProfile = registrationParameter.ScimProfile,
+                RequirePkce = registrationParameter.RequirePkce
             };
 
             // If omitted then the default value is authorization code response type

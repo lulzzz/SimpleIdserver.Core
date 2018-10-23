@@ -16,6 +16,7 @@
 
 using System;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace SimpleIdServer.Host.Tests.MiddleWares
 {
@@ -28,12 +29,7 @@ namespace SimpleIdServer.Host.Tests.MiddleWares
 
         public static AuthenticationBuilder AddFakeOAuth2Introspection(this AuthenticationBuilder builder, Action<FakeOAuth2IntrospectionOptions> configureOptions)
         {
-            return builder.AddScheme<FakeOAuth2IntrospectionOptions, FakeOauth2IntrospectionHandler>(FakeOAuth2IntrospectionOptions.AuthenticationScheme, configureOptions);
-        }
-
-        public static AuthenticationBuilder AddFakeUserInfoIntrospection(this AuthenticationBuilder builder, Action<FakeUserInfoIntrospectionOptions> configureOptions)
-        {
-            return builder.AddScheme<FakeUserInfoIntrospectionOptions, FakeUserInfoIntrospectionHandler>(FakeUserInfoIntrospectionOptions.AuthenticationScheme, configureOptions);
+            return builder.AddScheme<FakeOAuth2IntrospectionOptions, FakeOauth2IntrospectionHandler>(JwtBearerDefaults.AuthenticationScheme, configureOptions);
         }
     }
 }

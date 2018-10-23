@@ -57,5 +57,6 @@ namespace SimpleIdServer.Core.Parameters
         public string InitiateLoginUri { get; set; }
         public List<string> RequestUris { get; set; }
         public bool ScimProfile { get; set; }
+        public bool RequirePkce { get; set; }
     }
 }

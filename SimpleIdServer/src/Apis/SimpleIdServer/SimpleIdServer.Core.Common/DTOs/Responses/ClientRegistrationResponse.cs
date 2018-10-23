@@ -41,6 +41,8 @@ namespace SimpleIdServer.Core.Common.DTOs.Responses
         public int ClientSecretExpiresAt { get; set; }
         [DataMember(Name = ClientNames.RedirectUris)]
         public string[] RedirectUris { get; set; }
+        [DataMember(Name = ClientNames.PostLogoutRedirectUris)]
+        public string[] PostLogoutRedirectUris { get; set; }
         [DataMember(Name = ClientNames.ResponseTypes)]
         public string[] ResponseTypes { get; set; }
         [DataMember(Name = ClientNames.GrantTypes)]
@@ -104,5 +106,7 @@ namespace SimpleIdServer.Core.Common.DTOs.Responses
         public IEnumerable<string> RequestUris { get; set; }
         [DataMember(Name = ClientNames.ScimProfile)]
         public bool ScimProfile { get; set; }
+        [DataMember(Name = ClientNames.RequirePkce)]
+        public bool RequirePkce { get; set; }
     }
 }

@@ -113,9 +113,11 @@ namespace SimpleIdServer.Core.Api.Registration.Actions
                     client.ResponseTypes.Select(r => Enum.GetName(typeof(ResponseType), r)).ToArray(),
                 RequestUris = GetDefaultValues(client.RequestUris).ToList(),
                 RedirectUris = GetDefaultValues(client.RedirectionUrls).ToArray(),
+                PostLogoutRedirectUris = GetDefaultValues(client.PostLogoutRedirectUris).ToArray(),
                 TokenEndpointAuthSigningAlg = GetDefaultValue(client.TokenEndPointAuthSigningAlg),
                 TokenEndpointAuthMethod = Enum.GetName(typeof(TokenEndPointAuthenticationMethods), client.TokenEndPointAuthMethod),
-                ScimProfile = client.ScimProfile
+                ScimProfile = client.ScimProfile,
+                RequirePkce = client.RequirePkce
             };
 
             if (client.TokenEndPointAuthMethod != TokenEndPointAuthenticationMethods.private_key_jwt)

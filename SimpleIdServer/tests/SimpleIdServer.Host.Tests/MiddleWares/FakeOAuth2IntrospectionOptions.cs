@@ -10,8 +10,6 @@ namespace SimpleIdServer.Host.Tests.MiddleWares
             IdentityServerClientFactory = new IdentityServerClientFactory();
         }
 
-        public const string AuthenticationScheme = "OAuth2Introspection";
-
         public string WellKnownConfigurationUrl { get; set; }
         public string ClientId { get; set; }
         public string ClientSecret { get; set; }

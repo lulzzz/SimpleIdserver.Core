@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SimpleIdServer.Client;
@@ -77,12 +78,12 @@ namespace SimpleIdServer.Host.Tests.MiddleWares
                     }
                 }
 
-                var claimsIdentity = new ClaimsIdentity(claims, FakeOAuth2IntrospectionOptions.AuthenticationScheme);
+                var claimsIdentity = new ClaimsIdentity(claims, JwtBearerDefaults.AuthenticationScheme);
                 var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
                 var authenticationTicket = new AuthenticationTicket(
                                                  claimsPrincipal,
                                                  new AuthenticationProperties(),
-                                                 FakeOAuth2IntrospectionOptions.AuthenticationScheme);
+                                                 JwtBearerDefaults.AuthenticationScheme);
                 return AuthenticateResult.Success(authenticationTicket);
             }
             catch (Exception)

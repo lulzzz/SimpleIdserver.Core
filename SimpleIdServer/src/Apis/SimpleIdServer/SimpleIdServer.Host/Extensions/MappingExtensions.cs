@@ -312,6 +312,7 @@ namespace SimpleIdServer.Host.Extensions
 
             return new RegistrationParameter
             {
+                RequirePkce = clientRequest.RequirePkce,
                 ApplicationType = applicationType,
                 ClientName = clientRequest.ClientName,
                 ClientUri = clientRequest.ClientUri,
@@ -327,6 +328,7 @@ namespace SimpleIdServer.Host.Extensions
                 JwksUri = clientRequest.JwksUri,
                 LogoUri = clientRequest.LogoUri,
                 PolicyUri = clientRequest.PolicyUri,
+                PostLogoutRedirectUris = clientRequest.PostLogoutRedirectUris == null ? new List<string>() : clientRequest.PostLogoutRedirectUris.ToList(),
                 RedirectUris = clientRequest.RedirectUris == null ? new List<string>() : clientRequest.RedirectUris.ToList(),
                 RequestObjectEncryptionAlg = clientRequest.RequestObjectEncryptionAlg,
                 RequestObjectEncryptionEnc = clientRequest.RequestObjectEncryptionEnc,
