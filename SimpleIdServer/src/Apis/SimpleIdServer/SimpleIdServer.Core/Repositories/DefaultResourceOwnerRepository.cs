@@ -8,16 +8,31 @@ using SimpleIdServer.Core.Common.Parameters;
 using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.Core.Common.Results;
 using SimpleIdServer.Core.Extensions;
+using SimpleIdServer.Core.Helpers;
 
 namespace SimpleIdServer.Core.Repositories
 {
     internal sealed class DefaultResourceOwnerRepository : IResourceOwnerRepository
     {
+        private List<ResourceOwner> DEFAULT_USERS = new List<ResourceOwner>
+        {
+            new ResourceOwner
+            {
+                Id = "administrator",
+                CreateDateTime = DateTime.UtcNow,
+                UpdateDateTime =  DateTime.UtcNow,
+                Password = PasswordHelper.ComputeHash("password"),
+                Claims = new List<Claim>
+                {
+                    new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject, "administrator")
+                }
+            }
+        };
         public ICollection<ResourceOwner> _users;
 
         public DefaultResourceOwnerRepository(ICollection<ResourceOwner> users)
         {
-            _users = users == null ? new List<ResourceOwner>() : users;
+            _users = users == null ? DEFAULT_USERS : users;
         }
 
         public Task<bool> DeleteAsync(string subject)
