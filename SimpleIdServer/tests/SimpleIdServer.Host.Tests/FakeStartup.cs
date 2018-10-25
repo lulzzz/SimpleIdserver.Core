@@ -59,7 +59,7 @@ namespace SimpleIdServer.Host.Tests
     public class FakeStartup : IStartup
     {
         public const string ScimEndPoint = "http://localhost:5555/";
-        public const string DefaultSchema = "Cookies";
+        public const string DefaultSchema = Host.Constants.CookieNames.CookieName;
         private IdentityServerOptions _options;
         private IJsonWebKeyEnricher _jsonWebKeyEnricher;
         private SharedContext _context;

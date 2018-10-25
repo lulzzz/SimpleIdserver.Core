@@ -157,6 +157,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleIdServer.Protected.Ap
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleIdServer.Logging", "src\Apis\Common\SimpleIdServer.Logging\SimpleIdServer.Logging.csproj", "{FF5B56F0-022D-4D6D-9A32-D06424543F1A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleIdServer.Store.Tests", "tests\SimpleIdServer.Store.Tests\SimpleIdServer.Store.Tests.csproj", "{B814018C-4DD7-4090-9EAC-214DC78CA9BA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -482,6 +484,12 @@ Global
 		{FF5B56F0-022D-4D6D-9A32-D06424543F1A}.Fake|Any CPU.Build.0 = Debug|Any CPU
 		{FF5B56F0-022D-4D6D-9A32-D06424543F1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FF5B56F0-022D-4D6D-9A32-D06424543F1A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B814018C-4DD7-4090-9EAC-214DC78CA9BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B814018C-4DD7-4090-9EAC-214DC78CA9BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B814018C-4DD7-4090-9EAC-214DC78CA9BA}.Fake|Any CPU.ActiveCfg = Debug|Any CPU
+		{B814018C-4DD7-4090-9EAC-214DC78CA9BA}.Fake|Any CPU.Build.0 = Debug|Any CPU
+		{B814018C-4DD7-4090-9EAC-214DC78CA9BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B814018C-4DD7-4090-9EAC-214DC78CA9BA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -558,6 +566,7 @@ Global
 		{75C26BE7-28AC-4B71-A820-51C897DEB099} = {6A288784-7BCF-465D-8DB6-EC3AC3751576}
 		{03590DAC-3C32-4F6A-B478-698832F38FCC} = {6A288784-7BCF-465D-8DB6-EC3AC3751576}
 		{FF5B56F0-022D-4D6D-9A32-D06424543F1A} = {8575AD65-68C8-432A-BB2B-3E4DF1E9E7D3}
+		{B814018C-4DD7-4090-9EAC-214DC78CA9BA} = {CAE43B3B-7250-43E3-B4FE-DC28D81805D0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9BEEBF69-C26F-4148-BDA9-941BFEC401A7}

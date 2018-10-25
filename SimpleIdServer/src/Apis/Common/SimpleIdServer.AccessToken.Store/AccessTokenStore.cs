@@ -1,10 +1,10 @@
-﻿using System;
+﻿using SimpleIdServer.Client;
+using SimpleIdServer.Core.Common.DTOs.Responses;
+using SimpleIdServer.Storage;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using SimpleIdServer.Client;
-using SimpleIdServer.Core.Common.DTOs.Responses;
-using SimpleIdServer.Storage;
 
 namespace SimpleIdServer.AccessToken.Store
 {

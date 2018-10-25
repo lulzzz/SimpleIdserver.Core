@@ -24,10 +24,10 @@ namespace SimpleIdServer.Host
     {
         public static class CookieNames
         {
-            public const string CookieName = CookieAuthenticationDefaults.AuthenticationScheme;
-            public const string ExternalCookieName = "SimpleIdServer-OpenId-External";
+            public const string CookieName = "SimpleIdServer";
+            public const string ExternalCookieName = "SimpleIdServer-External";
             public const string PasswordLessCookieName = "SimpleIdServer-PasswordLess";
-            public const string TwoFactorCookieName = "SimpleIdentityServer-TwoFactorAuth";
+            public const string TwoFactorCookieName = "SimpleIdServer-TwoFactorAuth";
         }
 
         public static Dictionary<IdentityServerEndPoints, string> MappingIdentityServerEndPointToPartialUrl = new Dictionary<IdentityServerEndPoints, string>

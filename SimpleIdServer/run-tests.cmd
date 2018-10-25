@@ -6,6 +6,7 @@ dotnet test tests\SimpleIdServer.AccessToken.Store.Tests
 dotnet test tests\SimpleIdServer.Storage.Tests
 dotnet test tests\SimpleIdServer.AccountFilter.Basic.Tests
 dotnet test tests\SimpleIdServer.Authenticate.SMS.Tests
+dotnet test tests\SimpleIdServer.Store.Tests
 
 REM UMA
 dotnet test tests\SimpleIdServer.Uma.Core.UnitTests

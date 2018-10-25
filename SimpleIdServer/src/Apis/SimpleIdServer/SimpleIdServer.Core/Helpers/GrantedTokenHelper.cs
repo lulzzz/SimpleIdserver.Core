@@ -14,12 +14,12 @@
 // limitations under the License.
 #endregion
 
-using System;
-using System.Threading.Tasks;
 using SimpleIdServer.Core.Common;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Validators;
 using SimpleIdServer.Store;
+using System;
+using System.Threading.Tasks;
 
 namespace SimpleIdServer.Core.Helpers
 {

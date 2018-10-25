@@ -13,10 +13,15 @@ namespace SimpleIdServer.Store
         private static string GRANTED_TOKENS = "granted_tokens";
         private static string REFRESH_TOKEN = "refresh_token_{0}";
         private static string ACCESS_TOKEN = "access_token_{0}";
+        private readonly List<string> _userClaims;
         private readonly IStorage _storage;
 
         public DefaultTokenStore(IStorage storage)
         {
+            _userClaims = new List<string>();
+            _userClaims.AddRange(Core.Jwt.Constants.AllStandardResourceOwnerClaimNames);
+            _userClaims.Add(StandardClaimNames.Issuer);
+            _userClaims.Add(StandardClaimNames.Nonce);
             _storage = storage;
         }
 
@@ -171,11 +176,11 @@ namespace SimpleIdServer.Store
             return true;
         }
 
-        private static bool CompareJwsPayload(JwsPayload firstJwsPayload, JwsPayload secondJwsPayload)
+        private bool CompareJwsPayload(JwsPayload firstJwsPayload, JwsPayload secondJwsPayload)
         {
             foreach (var record in firstJwsPayload)
             {
-                if (!Core.Jwt.Constants.AllStandardResourceOwnerClaimNames.Contains(record.Key))
+                if (!_userClaims.Contains(record.Key))
                 {
                     continue;
                 }
@@ -185,10 +190,7 @@ namespace SimpleIdServer.Store
                     return false;
                 }
 
-                if (!string.Equals(
-                    record.Value.ToString(),
-                    secondJwsPayload[record.Key].ToString(),
-                    StringComparison.CurrentCultureIgnoreCase))
+                if (!string.Equals(record.Value.ToString(), secondJwsPayload[record.Key].ToString(), StringComparison.CurrentCultureIgnoreCase))
                 {
                     return false;
                 }

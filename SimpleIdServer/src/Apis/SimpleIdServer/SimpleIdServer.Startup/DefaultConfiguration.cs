@@ -61,6 +61,53 @@ namespace SimpleIdServer.Startup
             };
         }
 
+        public static List<Core.Common.Models.Client> GetClients()
+        {
+            return new List<Core.Common.Models.Client>
+            {
+                new Core.Common.Models.Client
+                {
+                    ClientId = "a2195dd9-d9e0-4e1b-bf29-41226d3af072",
+                    Secrets = new List<ClientSecret>
+                    {
+                        new ClientSecret
+                        {
+                            Type = ClientSecretTypes.SharedSecret,
+                            Value = "80932880-6170-47c8-9345-b204a4172577"
+                        }
+                    },
+                    AllowedScopes = new List<Scope>
+                    {
+                        new Scope
+                        {
+                            Name = "openid"
+                        },
+                        new Scope
+                        {
+                            Name = "profile"
+                        }
+                    },
+                    TokenEndPointAuthMethod = TokenEndPointAuthenticationMethods.client_secret_post,
+                    ApplicationType = ApplicationTypes.web,
+                    RedirectionUrls = new List<string>
+                    {
+                        "http://localhost:4200/Home/Callback"
+                    },
+                    GrantTypes = new List<GrantType>
+                    {
+                        GrantType.authorization_code,
+                        GrantType.password
+                    },
+                    ResponseTypes = new List<ResponseType>
+                    {
+                        ResponseType.code,
+                        ResponseType.id_token,
+                        ResponseType.token
+                    }
+                }
+            };
+        }
+
         public static List<ResourceOwner> GetUsers()
         {
             return new List<ResourceOwner>

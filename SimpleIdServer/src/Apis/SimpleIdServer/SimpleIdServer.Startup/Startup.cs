@@ -57,7 +57,8 @@ namespace SimpleIdServer.Startup
                 Configuration = new OpenIdServerConfiguration
                 {
                     Users = DefaultConfiguration.GetUsers(),
-                    JsonWebKeys = DefaultConfiguration.GetJsonWebKeys()
+                    JsonWebKeys = DefaultConfiguration.GetJsonWebKeys(),
+                    Clients = DefaultConfiguration.GetClients()
                 }
             };
             _env = env;
