@@ -1,4 +1,4 @@
-﻿using SimpleIdServer.Core.Common.DTOs.Responses;
+﻿using SimpleIdServer.Dtos.Responses;
 
 namespace SimpleIdServer.Client.Results
 {

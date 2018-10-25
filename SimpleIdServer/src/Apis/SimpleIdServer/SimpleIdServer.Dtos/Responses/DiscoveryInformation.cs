@@ -16,7 +16,7 @@
 
 using System.Runtime.Serialization;
 
-namespace SimpleIdServer.Core.Common.DTOs.Responses
+namespace SimpleIdServer.Dtos.Responses
 {
     [DataContract]
     public class DiscoveryInformation
@@ -24,9 +24,9 @@ namespace SimpleIdServer.Core.Common.DTOs.Responses
         /// <summary>
         /// Gets or sets the authorization end point.
         /// </summary>
-        [DataMember(Name = DiscoveryInformationNames.AuthorizationEndPoint)]
+        [DataMember(Name = Constants.DiscoveryInformationNames.AuthorizationEndPoint)]
         public string AuthorizationEndPoint { get; set; }
-        [DataMember(Name = DiscoveryInformationNames.CheckSessionEndPoint)]
+        [DataMember(Name = Constants.DiscoveryInformationNames.CheckSessionEndPoint)]
         public string CheckSessionEndPoint { get; set; }
 
         /// <summary>
@@ -37,103 +37,103 @@ namespace SimpleIdServer.Core.Common.DTOs.Responses
         /// <summary>
         /// Gets or sets boolean specifying whether the OP supports use of the claims parameter.
         /// </summary>
-        [DataMember(Name = DiscoveryInformationNames.ClaimsParameterSupported)]
+        [DataMember(Name = Constants.DiscoveryInformationNames.ClaimsParameterSupported)]
         public bool ClaimsParameterSupported { get; set; }
         /// <summary>
         /// Gets or sets a list of the Claim Names of the Claims.
         /// </summary>
-        [DataMember(Name = DiscoveryInformationNames.ClaimsSupported)]
+        [DataMember(Name = Constants.DiscoveryInformationNames.ClaimsSupported)]
         public string[] ClaimsSupported { get; set; }
-        [DataMember(Name = DiscoveryInformationNames.EndSessionEndPoint)]
+        [DataMember(Name = Constants.DiscoveryInformationNames.EndSessionEndPoint)]
         public string EndSessionEndPoint { get; set; }
         /// <summary>
         /// Gets or sets the grant-types supported : authorization_code, implicit
         /// </summary>
-        [DataMember(Name = DiscoveryInformationNames.GrantTypesSupported)]
+        [DataMember(Name = Constants.DiscoveryInformationNames.GrantTypesSupported)]
         public string[] GrantTypesSupported { get; set; }
         /// <summary>
         /// Gets or sets the list of the JWS signing algorithms (alg values) supported.
         /// </summary>
-        [DataMember(Name = DiscoveryInformationNames.IdTokenSigningAlgValuesSupported)]
+        [DataMember(Name = Constants.DiscoveryInformationNames.IdTokenSigningAlgValuesSupported)]
         public string[] IdTokenSigningAlgValuesSupported { get; set; }
         /// <summary>
         /// Gets or sets the issuer. 
         /// </summary>
-        [DataMember(Name = DiscoveryInformationNames.Issuer)]
+        [DataMember(Name = Constants.DiscoveryInformationNames.Issuer)]
         public string Issuer { get; set; }
         /// <summary>
         /// Gets or sets the JSON Web Key Set document.
         /// </summary>
-        [DataMember(Name = DiscoveryInformationNames.JwksUri)]
+        [DataMember(Name = Constants.DiscoveryInformationNames.JwksUri)]
         public string JwksUri { get; set; }
         /// <summary>
         /// Gets or sets boolean specifying whether the OP supports use of the request parameter.
         /// </summary>
-        [DataMember(Name = DiscoveryInformationNames.RequestParameterSupported)]
+        [DataMember(Name = Constants.DiscoveryInformationNames.RequestParameterSupported)]
         public bool RequestParameterSupported { get; set; }
         /// <summary>
         /// Gets or sets boolean specifying whether the OP supports use of the request request_uri
         /// </summary>
-        [DataMember(Name = DiscoveryInformationNames.RequestUriParameterSupported)]
+        [DataMember(Name = Constants.DiscoveryInformationNames.RequestUriParameterSupported)]
         public bool RequestUriParameterSupported { get; set; }
         /// <summary>
         /// Gets or sets boolean specifying whether the OP requires any request_uri values.
         /// </summary>
-        [DataMember(Name = DiscoveryInformationNames.RequireRequestUriRegistration)]
+        [DataMember(Name = Constants.DiscoveryInformationNames.RequireRequestUriRegistration)]
         public bool RequireRequestUriRegistration { get; set; }
         /// <summary>
         /// Gets or sets the response modes supported : query, fragment
         /// </summary>
-        [DataMember(Name = DiscoveryInformationNames.ResponseModesSupported)]
+        [DataMember(Name = Constants.DiscoveryInformationNames.ResponseModesSupported)]
         public string[] ResponseModesSupported { get; set; }
         /// <summary>
         /// Gets or sets the response types supported : code, id_token & token id_token
         /// </summary>
-        [DataMember(Name = DiscoveryInformationNames.ResponseTypesSupported)]
+        [DataMember(Name = Constants.DiscoveryInformationNames.ResponseTypesSupported)]
         public string[] ResponseTypesSupported { get; set; }
-        [DataMember(Name = DiscoveryInformationNames.RevocationEndPoint)]
+        [DataMember(Name = Constants.DiscoveryInformationNames.RevocationEndPoint)]
         public string RevocationEndPoint { get; set; }
-        [DataMember(Name = DiscoveryInformationNames.IntrospectionEndPoint)]
+        [DataMember(Name = Constants.DiscoveryInformationNames.IntrospectionEndPoint)]
         public string IntrospectionEndPoint { get; set; }
         /// <summary>
         /// Gets or sets the list of scupported scopes.
         /// </summary>
-        [DataMember(Name = DiscoveryInformationNames.ScopesSupported)]
+        [DataMember(Name = Constants.DiscoveryInformationNames.ScopesSupported)]
         public string[] ScopesSupported { get; set; }
         /// <summary>
         /// Gets or sets the subject types supported : pairwise & public.
         /// </summary>
-        [DataMember(Name = DiscoveryInformationNames.SubjectTypesSupported)]
+        [DataMember(Name = Constants.DiscoveryInformationNames.SubjectTypesSupported)]
         public string[] SubjectTypesSupported { get; set; }
         /// <summary>
         /// Gets or sets the token endpoint.
         /// </summary>
-        [DataMember(Name = DiscoveryInformationNames.TokenEndPoint)]
+        [DataMember(Name = Constants.DiscoveryInformationNames.TokenEndPoint)]
         public string TokenEndPoint { get; set; }
         /// <summary>
         /// Gets or sets the list of Client Authentication methods supported by the TokenEndpoint : client_secret_post, client_secret_basic etc ...
         /// </summary>
-        [DataMember(Name = DiscoveryInformationNames.TokenEndpointAuthMethodSupported)]
+        [DataMember(Name = Constants.DiscoveryInformationNames.TokenEndpointAuthMethodSupported)]
         public string[] TokenEndpointAuthMethodSupported { get; set; }
         /// <summary>
         /// Gets or sets the user-info endpoint.
         /// </summary>
-        [DataMember(Name = DiscoveryInformationNames.UserInfoEndPoint)]
+        [DataMember(Name = Constants.DiscoveryInformationNames.UserInfoEndPoint)]
         public string UserInfoEndPoint { get; set; }
         /// <summary>
         /// Gets or sets the version of the discovery document
         /// </summary>
-        [DataMember(Name = DiscoveryInformationNames.Version)]
+        [DataMember(Name = Constants.DiscoveryInformationNames.Version)]
         public string Version { get; set; }
         /// <summary>
         /// Gets or sets the Registration End Point.
         /// </summary>
-        [DataMember(Name = DiscoveryInformationNames.RegistrationEndPoint)]
+        [DataMember(Name = Constants.DiscoveryInformationNames.RegistrationEndPoint)]
         public string RegistrationEndPoint { get; set; }
         /// <summary>
         /// Gets or sets the base URI of the OP's designated SCIM service provider.
         /// </summary>
-        [DataMember(Name = DiscoveryInformationNames.ScimEndpoint)]
+        [DataMember(Name = Constants.DiscoveryInformationNames.ScimEndpoint)]
         public string ScimEndpoint { get; set; }
         /// <summary>
         /// Gets or sets the acr values supported.

@@ -2,7 +2,7 @@
 using System.Security.Cryptography;
 using System.Xml;
 
-namespace SimpleIdServer.Core.Common.Extensions
+namespace SimpleIdServer.Lib
 {
     public static class RSAOpenSslExtensions
     {

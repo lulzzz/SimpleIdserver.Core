@@ -17,8 +17,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Lib;
 using SimpleIdServer.Core.Common.Models;
+using Newtonsoft.Json;
 
 namespace SimpleIdServer.Core.Parameters
 {
@@ -148,7 +149,7 @@ namespace SimpleIdServer.Core.Parameters
 
         public override string ToString()
         {
-            return this.SerializeWithJavascript();
+            return JsonConvert.SerializeObject(this);
         }
     }
 

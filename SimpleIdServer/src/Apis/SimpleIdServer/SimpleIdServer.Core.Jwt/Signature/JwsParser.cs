@@ -18,9 +18,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SimpleIdServer.Core.Common;
-using SimpleIdServer.Core.Common.DTOs.Requests;
-using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Dtos.Requests;
+using SimpleIdServer.Lib;
 using SimpleIdServer.Core.Jwt.Converter;
+using Newtonsoft.Json;
 
 namespace SimpleIdServer.Core.Jwt.Signature
 {
@@ -74,7 +75,7 @@ namespace SimpleIdServer.Core.Jwt.Signature
             var serializedProtectedHeader = base64EncodedProtectedHeader.Base64Decode();
             var serializedPayload = base64EncodedSerialized.Base64Decode();
             var signature = parts[2].Base64DecodeBytes();            
-            var protectedHeader = serializedProtectedHeader.DeserializeWithJavascript<JwsProtectedHeader>();            
+            var protectedHeader = JsonConvert.DeserializeObject<JwsProtectedHeader>(serializedProtectedHeader);            
             JwsAlg jwsAlg;
             if (!Enum.TryParse(protectedHeader.Alg, out jwsAlg))
             {
@@ -107,7 +108,7 @@ namespace SimpleIdServer.Core.Jwt.Signature
                 return null;
             }
             
-            return serializedPayload.DeserializeWithJavascript<JwsPayload>();
+            return JsonConvert.DeserializeObject<JwsPayload>(serializedPayload);
         }
 
         /// <summary>
@@ -159,7 +160,7 @@ namespace SimpleIdServer.Core.Jwt.Signature
 
             var base64EncodedProtectedHeader = parts[0];
             var serializedProtectedHeader = base64EncodedProtectedHeader.Base64Decode();
-            return serializedProtectedHeader.DeserializeWithJavascript<JwsProtectedHeader>();
+            return JsonConvert.DeserializeObject<JwsProtectedHeader>(serializedProtectedHeader);
         }
         
         public JwsPayload GetPayload(string jws)
@@ -177,7 +178,7 @@ namespace SimpleIdServer.Core.Jwt.Signature
 
             var base64EncodedSerialized = parts[1];
             var serializedPayload = base64EncodedSerialized.Base64Decode();
-            return serializedPayload.DeserializeWithJavascript<JwsPayload>();
+            return JsonConvert.DeserializeObject<JwsPayload>(serializedPayload);
         }
 
         /// <summary>

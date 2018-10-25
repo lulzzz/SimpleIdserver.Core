@@ -24,11 +24,11 @@ namespace SimpleIdServer.Client
 {
     public interface IRegistrationClient
     {
-        GetRegisterClientResult Execute(Core.Common.DTOs.Requests.ClientRequest client, string jwksUrl, string accessToken);
-        GetRegisterClientResult Execute(Core.Common.DTOs.Requests.ClientRequest client, Uri jwksUri, string accessToken);
-        Task<GetRegisterClientResult> ExecuteAsync(Core.Common.DTOs.Requests.ClientRequest client, string registrationUrl, string accessToken);
-        Task<GetRegisterClientResult> ExecuteAsync(Core.Common.DTOs.Requests.ClientRequest client, Uri registrationUri, string accessToken);
-        Task<GetRegisterClientResult> ResolveAsync(Core.Common.DTOs.Requests.ClientRequest client, string configurationUrl, string accessToken);
+        GetRegisterClientResult Execute(SimpleIdServer.Dtos.Requests.ClientRequest client, string jwksUrl, string accessToken);
+        GetRegisterClientResult Execute(SimpleIdServer.Dtos.Requests.ClientRequest client, Uri jwksUri, string accessToken);
+        Task<GetRegisterClientResult> ExecuteAsync(SimpleIdServer.Dtos.Requests.ClientRequest client, string registrationUrl, string accessToken);
+        Task<GetRegisterClientResult> ExecuteAsync(SimpleIdServer.Dtos.Requests.ClientRequest client, Uri registrationUri, string accessToken);
+        Task<GetRegisterClientResult> ResolveAsync(SimpleIdServer.Dtos.Requests.ClientRequest client, string configurationUrl, string accessToken);
     }
 
     internal class RegistrationClient : IRegistrationClient
@@ -42,17 +42,17 @@ namespace SimpleIdServer.Client
             _getDiscoveryOperation = getDiscoveryOperation;
         }
 
-        public GetRegisterClientResult Execute(Core.Common.DTOs.Requests.ClientRequest client, Uri registrationUri, string accessToken)
+        public GetRegisterClientResult Execute(SimpleIdServer.Dtos.Requests.ClientRequest client, Uri registrationUri, string accessToken)
         {
             return ExecuteAsync(client, registrationUri, accessToken).Result;
         }
 
-        public GetRegisterClientResult Execute(Core.Common.DTOs.Requests.ClientRequest client, string registrationUrl, string accessToken)
+        public GetRegisterClientResult Execute(SimpleIdServer.Dtos.Requests.ClientRequest client, string registrationUrl, string accessToken)
         {
             return ExecuteAsync(client, registrationUrl, accessToken).Result;
         }
 
-        public Task<GetRegisterClientResult> ExecuteAsync(Core.Common.DTOs.Requests.ClientRequest client, Uri registrationUri, string accessToken)
+        public Task<GetRegisterClientResult> ExecuteAsync(SimpleIdServer.Dtos.Requests.ClientRequest client, Uri registrationUri, string accessToken)
         {
             if (client == null)
             {
@@ -67,7 +67,7 @@ namespace SimpleIdServer.Client
             return _registerClientOperation.ExecuteAsync(client, registrationUri, accessToken);
         }
 
-        public Task<GetRegisterClientResult> ExecuteAsync(Core.Common.DTOs.Requests.ClientRequest client, string registrationUrl, string accessToken)
+        public Task<GetRegisterClientResult> ExecuteAsync(SimpleIdServer.Dtos.Requests.ClientRequest client, string registrationUrl, string accessToken)
         {
             if (client == null)
             {
@@ -88,7 +88,7 @@ namespace SimpleIdServer.Client
             return ExecuteAsync(client, uri, accessToken);
         }
 
-        public async Task<GetRegisterClientResult> ResolveAsync(Core.Common.DTOs.Requests.ClientRequest client, string configurationUrl, string accessToken)
+        public async Task<GetRegisterClientResult> ResolveAsync(SimpleIdServer.Dtos.Requests.ClientRequest client, string configurationUrl, string accessToken)
         {
             if (string.IsNullOrWhiteSpace(configurationUrl))
             {

@@ -22,8 +22,8 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Xml.Serialization;
 using SimpleIdServer.Core.Common;
-using SimpleIdServer.Core.Common.DTOs.Requests;
-using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Dtos.Requests;
+using SimpleIdServer.Lib;
 using SimpleIdServer.Core.Jwt.Exceptions;
 using SimpleIdServer.Core.Jwt.Serializer;
 

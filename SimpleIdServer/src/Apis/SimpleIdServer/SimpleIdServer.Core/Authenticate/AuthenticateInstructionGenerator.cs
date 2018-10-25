@@ -16,7 +16,7 @@
 
 using System.Linq;
 using System.Net.Http.Headers;
-using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Lib;
 
 namespace SimpleIdServer.Core.Authenticate
 {

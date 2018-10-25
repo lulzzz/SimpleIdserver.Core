@@ -20,7 +20,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using SimpleIdServer.Core.Authenticate;
 using SimpleIdServer.Core.Common;
-using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Lib;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Errors;
 using SimpleIdServer.Core.Exceptions;

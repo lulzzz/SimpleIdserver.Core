@@ -37,7 +37,7 @@ using SimpleIdServer.Common.Client.Factories;
 using SimpleIdServer.Core;
 using SimpleIdServer.Core.Api.Jwks.Actions;
 using SimpleIdServer.Core.Common;
-using SimpleIdServer.Core.Common.DTOs.Requests;
+using SimpleIdServer.Dtos.Requests;
 using SimpleIdServer.Core.Extensions;
 using SimpleIdServer.Core.Jwt;
 using SimpleIdServer.Core.Services;

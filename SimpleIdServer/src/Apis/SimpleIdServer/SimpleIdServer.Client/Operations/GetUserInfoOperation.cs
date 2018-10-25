@@ -22,8 +22,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SimpleIdServer.Client.Results;
 using SimpleIdServer.Common.Client.Factories;
-using SimpleIdServer.Core.Common;
-using SimpleIdServer.Core.Common.DTOs.Responses;
+using SimpleIdServer.Dtos.Responses;
 
 namespace SimpleIdServer.Client.Operations
 {
@@ -66,7 +65,7 @@ namespace SimpleIdServer.Client.Operations
                 request.Content = new FormUrlEncodedContent(new Dictionary<string, string>
                 {
                     {
-                        GrantedTokenNames.AccessToken, accessToken
+                        Dtos.Constants.GrantedTokenNames.AccessToken, accessToken
                     }
                 });
             }

@@ -19,9 +19,9 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using SimpleIdServer.Client.Results;
 using SimpleIdServer.Common.Client.Factories;
-using SimpleIdServer.Core.Common.DTOs.Requests;
-using SimpleIdServer.Core.Common.DTOs.Responses;
-using SimpleIdServer.Core.Common.Serializers;
+using SimpleIdServer.Dtos.Requests;
+using SimpleIdServer.Dtos.Responses;
+using SimpleIdServer.Lib;
 
 namespace SimpleIdServer.Client.Operations
 {

@@ -1,4 +1,4 @@
-﻿using SimpleIdServer.Core.Common.DTOs.Requests;
+﻿using SimpleIdServer.Dtos.Requests;
 using System.Collections.Generic;
 
 namespace SimpleIdServer.Uma.Host.DTOs.Responses

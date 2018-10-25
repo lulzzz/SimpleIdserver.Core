@@ -15,7 +15,7 @@
 #endregion
 
 using System.Collections.Generic;
-using SimpleIdServer.Core.Common.DTOs.Requests;
+using SimpleIdServer.Dtos.Requests;
 using SimpleIdServer.Core.Common.Models;
 
 namespace SimpleIdServer.Core.Parameters

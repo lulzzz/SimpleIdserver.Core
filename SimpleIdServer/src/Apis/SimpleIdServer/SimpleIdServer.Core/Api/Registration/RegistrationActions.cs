@@ -18,7 +18,7 @@ using System;
 using System.Threading.Tasks;
 using SimpleIdServer.Bus;
 using SimpleIdServer.Core.Api.Registration.Actions;
-using SimpleIdServer.Core.Common.DTOs.Responses;
+using SimpleIdServer.Dtos.Responses;
 using SimpleIdServer.Core.Exceptions;
 using SimpleIdServer.Core.Parameters;
 using SimpleIdServer.OAuth.Events;

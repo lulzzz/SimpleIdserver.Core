@@ -17,8 +17,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SimpleIdServer.Core.Common.DTOs.Requests;
-using SimpleIdServer.Core.Common.DTOs.Responses;
+using SimpleIdServer.Dtos.Requests;
+using SimpleIdServer.Dtos.Responses;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Parameters;
 using SimpleIdServer.Core.Results;
@@ -419,9 +419,9 @@ namespace SimpleIdServer.Uma.Host.Extensions
         }
 
 
-        public static SimpleIdServer.Core.Common.DTOs.Responses.IntrospectionResponse ToDto(this IntrospectionResult introspectionResult)
+        public static SimpleIdServer.Dtos.Responses.IntrospectionResponse ToDto(this IntrospectionResult introspectionResult)
         {
-            return new SimpleIdServer.Core.Common.DTOs.Responses.IntrospectionResponse
+            return new SimpleIdServer.Dtos.Responses.IntrospectionResponse
             {
                 Active = introspectionResult.Active,
                 Audience = introspectionResult.Audience,

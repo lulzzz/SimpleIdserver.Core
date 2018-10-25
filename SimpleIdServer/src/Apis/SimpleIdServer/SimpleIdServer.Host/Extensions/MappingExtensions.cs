@@ -14,17 +14,17 @@
 // limitations under the License.
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SimpleIdServer.Core.Common;
-using SimpleIdServer.Core.Common.DTOs.Requests;
-using SimpleIdServer.Core.Common.DTOs.Responses;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Parameters;
 using SimpleIdServer.Core.Results;
+using SimpleIdServer.Dtos.Requests;
+using SimpleIdServer.Dtos.Responses;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SimpleIdServer.Host.Extensions
 {

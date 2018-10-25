@@ -26,10 +26,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using SimpleIdServer.Common.Dtos.Responses;
 using SimpleIdServer.Core.Api.Token;
-using SimpleIdServer.Core.Common;
-using SimpleIdServer.Core.Common.DTOs.Requests;
+using SimpleIdServer.Dtos.Requests;
 using SimpleIdServer.Core.Common.Models;
-using SimpleIdServer.Core.Common.Serializers;
+using SimpleIdServer.Lib;
 using SimpleIdServer.Core.Errors;
 using SimpleIdServer.Host.Extensions;
 
@@ -66,7 +65,7 @@ namespace SimpleIdServer.Host.Controllers.Api
             var tokenRequest = serializer.Deserialize<TokenRequest>(Request.Form);
             if (tokenRequest.GrantType == null)
             {
-                return BuildError(ErrorCodes.InvalidRequestCode, string.Format(ErrorDescriptions.MissingParameter, RequestTokenNames.GrantType), HttpStatusCode.BadRequest);
+                return BuildError(ErrorCodes.InvalidRequestCode, string.Format(ErrorDescriptions.MissingParameter, Dtos.Constants.RequestTokenNames.GrantType), HttpStatusCode.BadRequest);
             }
 
             GrantedToken result = null;
@@ -87,19 +86,19 @@ namespace SimpleIdServer.Host.Controllers.Api
             var issuerName = Request.GetAbsoluteUriWithVirtualPath();
             switch (tokenRequest.GrantType)
             {
-                case Core.Common.DTOs.Requests.GrantTypes.password:
+                case Dtos.Requests.GrantTypes.password:
                     var resourceOwnerParameter = tokenRequest.ToResourceOwnerGrantTypeParameter();
                     result = await _tokenActions.GetTokenByResourceOwnerCredentialsGrantType(resourceOwnerParameter, authenticationHeaderValue, certificate, issuerName);
                     break;
-                case Core.Common.DTOs.Requests.GrantTypes.authorization_code:
+                case Dtos.Requests.GrantTypes.authorization_code:
                     var authCodeParameter = tokenRequest.ToAuthorizationCodeGrantTypeParameter();
                     result = await _tokenActions.GetTokenByAuthorizationCodeGrantType(authCodeParameter,authenticationHeaderValue, certificate, issuerName);
                     break;
-                case Core.Common.DTOs.Requests.GrantTypes.refresh_token:
+                case Dtos.Requests.GrantTypes.refresh_token:
                     var refreshTokenParameter = tokenRequest.ToRefreshTokenGrantTypeParameter();
                     result = await _tokenActions.GetTokenByRefreshTokenGrantType(refreshTokenParameter, authenticationHeaderValue, certificate, issuerName);
                     break;
-                case Core.Common.DTOs.Requests.GrantTypes.client_credentials:
+                case Dtos.Requests.GrantTypes.client_credentials:
                     var clientCredentialsParameter = tokenRequest.ToClientCredentialsGrantTypeParameter();
                     result = await _tokenActions.GetTokenByClientCredentialsGrantType(clientCredentialsParameter, authenticationHeaderValue, certificate, issuerName);
                     break;

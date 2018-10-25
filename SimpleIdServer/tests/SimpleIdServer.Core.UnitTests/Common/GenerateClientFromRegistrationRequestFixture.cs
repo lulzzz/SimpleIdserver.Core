@@ -19,7 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SimpleIdServer.Core.Common;
-using SimpleIdServer.Core.Common.DTOs.Requests;
+using SimpleIdServer.Dtos.Requests;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Jwt;
 using SimpleIdServer.Core.Jwt.Converter;

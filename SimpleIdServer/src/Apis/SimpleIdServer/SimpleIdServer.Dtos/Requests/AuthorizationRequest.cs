@@ -14,57 +14,57 @@
 // limitations under the License.
 #endregion
 
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 
-namespace SimpleIdServer.Core.Common.DTOs.Requests
+namespace SimpleIdServer.Dtos.Requests
 {
     [JsonConverter(typeof(StringEnumConverter))]
     public enum ResponseModes
     {
-        [EnumMember(Value = ResponseModeNames.None)]
+        [EnumMember(Value = Constants.ResponseModeNames.None)]
         None,
-        [EnumMember(Value = ResponseModeNames.Query)]
+        [EnumMember(Value = Constants.ResponseModeNames.Query)]
         Query,
-        [EnumMember(Value = ResponseModeNames.Fragment)]
+        [EnumMember(Value = Constants.ResponseModeNames.Fragment)]
         Fragment,
-        [EnumMember(Value = ResponseModeNames.FormPost)]
+        [EnumMember(Value = Constants.ResponseModeNames.FormPost)]
         FormPost
     }
 
     [JsonConverter(typeof(StringEnumConverter))]
     public enum ResponseTypes
     {
-        [EnumMember(Value = ResponseTypeNames.Code)]
+        [EnumMember(Value = Constants.ResponseTypeNames.Code)]
         Code,
-        [EnumMember(Value = ResponseTypeNames.Token)]
+        [EnumMember(Value = Constants.ResponseTypeNames.Token)]
         Token,
-        [EnumMember(Value = ResponseTypeNames.IdToken)]
+        [EnumMember(Value = Constants.ResponseTypeNames.IdToken)]
         IdToken
     }
 
     [JsonConverter(typeof(StringEnumConverter))]
     public enum DisplayModes
     {
-        [EnumMember(Value = PageNames.Page)]
+        [EnumMember(Value = Constants.PageNames.Page)]
         Page,
-        [EnumMember(Value = PageNames.Popup)]
+        [EnumMember(Value = Constants.PageNames.Popup)]
         Popup,
-        [EnumMember(Value = PageNames.Touch)]
+        [EnumMember(Value = Constants.PageNames.Touch)]
         Touch,
-        [EnumMember(Value = PageNames.Wap)]
+        [EnumMember(Value = Constants.PageNames.Wap)]
         Wap
     }
 
     [JsonConverter(typeof(StringEnumConverter))]
     public enum CodeChallengeMethods
     {
-        [EnumMember(Value = CodeChallenges.Plain)]
+        [EnumMember(Value = Constants.CodeChallenges.Plain)]
         Plain,
-        [EnumMember(Value = CodeChallenges.S256)]
+        [EnumMember(Value = Constants.CodeChallenges.S256)]
         S256
     }
 
@@ -73,9 +73,9 @@ namespace SimpleIdServer.Core.Common.DTOs.Requests
     {
         private Dictionary<ResponseTypes, string> _mappingResponseTypesToNames = new Dictionary<ResponseTypes, string>
         {
-            { ResponseTypes.Code, ResponseTypeNames.Code },
-            { ResponseTypes.Token, ResponseTypeNames.Token },
-            { ResponseTypes.IdToken, ResponseTypeNames.IdToken }
+            { ResponseTypes.Code, Constants.ResponseTypeNames.Code },
+            { ResponseTypes.Token, Constants.ResponseTypeNames.Token },
+            { ResponseTypes.IdToken, Constants.ResponseTypeNames.IdToken }
         };
 
         public AuthorizationRequest() { }
@@ -89,80 +89,80 @@ namespace SimpleIdServer.Core.Common.DTOs.Requests
             State = state;
         }
 
-        [DataMember(Name = RequestAuthorizationCodeNames.Scope)]
+        [DataMember(Name = Constants.RequestAuthorizationCodeNames.Scope)]
         public string Scope { get; set; }
-        [DataMember(Name = RequestAuthorizationCodeNames.ResponseType)]
+        [DataMember(Name = Constants.RequestAuthorizationCodeNames.ResponseType)]
         public string ResponseType { get; set; }
-        [DataMember(Name = RequestAuthorizationCodeNames.RedirectUri)]
+        [DataMember(Name = Constants.RequestAuthorizationCodeNames.RedirectUri)]
         public string RedirectUri { get; set; }
-        [DataMember(Name = RequestAuthorizationCodeNames.State)]
+        [DataMember(Name = Constants.RequestAuthorizationCodeNames.State)]
         public string State { get; set; }
-        [DataMember(Name = RequestAuthorizationCodeNames.ResponseMode)]
+        [DataMember(Name = Constants.RequestAuthorizationCodeNames.ResponseMode)]
         public ResponseModes? ResponseMode { get; set; }
-        [DataMember(Name = RequestAuthorizationCodeNames.Nonce)]
+        [DataMember(Name = Constants.RequestAuthorizationCodeNames.Nonce)]
         public string Nonce { get; set; }
-        [DataMember(Name = RequestAuthorizationCodeNames.Display)]
+        [DataMember(Name = Constants.RequestAuthorizationCodeNames.Display)]
         public DisplayModes? Display { get; set; }
         /// <summary>
         /// The possible values are : none, login, consent, select_account
         /// </summary>
-        [DataMember(Name = RequestAuthorizationCodeNames.Prompt)]
+        [DataMember(Name = Constants.RequestAuthorizationCodeNames.Prompt)]
         public string Prompt { get; set; }
         /// <summary>
         /// Maximum authentication age.
         /// Specifies allowable elapsed time in seconds since the last time the end-user
         ///  was actively authenticated by the OP.
         /// </summary>
-        [DataMember(Name = RequestAuthorizationCodeNames.MaxAge)]
+        [DataMember(Name = Constants.RequestAuthorizationCodeNames.MaxAge)]
         public double MaxAge { get; set; }
         /// <summary>
         /// End-User's preferred languages
         /// </summary>
-        [DataMember(Name = RequestAuthorizationCodeNames.UiLocales)]
+        [DataMember(Name = Constants.RequestAuthorizationCodeNames.UiLocales)]
         public string UiLocales { get; set; }
         /// <summary>
         /// Token previousely issued by the Authorization Server.
         /// </summary>
-        [DataMember(Name = RequestAuthorizationCodeNames.IdTokenHint)]
+        [DataMember(Name = Constants.RequestAuthorizationCodeNames.IdTokenHint)]
         public string IdTokenHint { get; set; }
         /// <summary>
         /// Hint to the authorization server about the login identifier the end-user might use to log in.
         /// </summary>
-        [DataMember(Name = RequestAuthorizationCodeNames.LoginHint)]
+        [DataMember(Name = Constants.RequestAuthorizationCodeNames.LoginHint)]
         public string LoginHint { get; set; }
         /// <summary>
         /// Request that specific Claims be returned from the UserInfo endpoint and/or in the id token.
         /// </summary>
-        [DataMember(Name = RequestAuthorizationCodeNames.Claims)]
+        [DataMember(Name = Constants.RequestAuthorizationCodeNames.Claims)]
         public string Claims { get; set; }
         /// <summary>
         /// Requested Authentication Context Class References values.
         /// </summary>
-        [DataMember(Name = RequestAuthorizationCodeNames.AcrValues)]
+        [DataMember(Name = Constants.RequestAuthorizationCodeNames.AcrValues)]
         public string AcrValues { get; set; }
         /// <summary>
         /// Self-contained parameter and can be optionally be signed and / or encrypted
         /// </summary>
-        [DataMember(Name = RequestAuthorizationCodeNames.Request)]
+        [DataMember(Name = Constants.RequestAuthorizationCodeNames.Request)]
         public string Request { get; set; }
         /// <summary>
         /// Enables OpenID connect requests to be passed by reference rather than by value.
         /// </summary>
-        [DataMember(Name = RequestAuthorizationCodeNames.RequestUri)]
+        [DataMember(Name = Constants.RequestAuthorizationCodeNames.RequestUri)]
         public string RequestUri { get; set; }
         /// <summary>
         /// Code challenge.
         /// </summary>
-        [DataMember(Name = RequestAuthorizationCodeNames.CodeChallenge)]
+        [DataMember(Name = Constants.RequestAuthorizationCodeNames.CodeChallenge)]
         public string CodeChallenge { get; set; }
         /// <summary>
         /// Code challenge method.
         /// </summary>
-        [DataMember(Name = RequestAuthorizationCodeNames.CodeChallengeMethod)]
+        [DataMember(Name = Constants.RequestAuthorizationCodeNames.CodeChallengeMethod)]
         public CodeChallengeMethods? CodeChallengeMethod { get; set; }
-        [DataMember(Name = ClientAuthNames.ClientId)]
+        [DataMember(Name = Constants.ClientAuthNames.ClientId)]
         public string ClientId { get; set; }
-        [DataMember(Name = EventResponseNames.AggregateId)]
+        [DataMember(Name = Constants.EventResponseNames.AggregateId)]
         public string ProcessId { get; set; }
         [DataMember(Name = "origin_url")]
         public string OriginUrl { get; set; }

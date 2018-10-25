@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
-using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Lib;
 using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.Store;
 

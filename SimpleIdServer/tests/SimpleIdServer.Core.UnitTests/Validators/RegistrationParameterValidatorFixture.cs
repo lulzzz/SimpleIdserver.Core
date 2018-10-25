@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using SimpleIdServer.Core.Common;
-using SimpleIdServer.Core.Common.DTOs.Requests;
-using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Dtos.Requests;
+using SimpleIdServer.Lib;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Errors;
 using SimpleIdServer.Core.Exceptions;
@@ -15,6 +15,7 @@ using SimpleIdServer.Core.Parameters;
 using SimpleIdServer.Core.Validators;
 using Xunit;
 using SimpleIdServer.Common.Client.Factories;
+using Newtonsoft.Json;
 
 namespace SimpleIdentityServer.Core.UnitTests.Validators
 {
@@ -46,7 +47,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Validators
             // ACT & ASSERTS
             var ex = Assert.Throws<IdentityServerException>(() => _registrationParameterValidator.Validate(parameter));
             Assert.True(ex.Code == ErrorCodes.InvalidRedirectUri);
-            Assert.True(ex.Message == string.Format(ErrorDescriptions.MissingParameter, ClientNames.RequestUris));
+            Assert.True(ex.Message == string.Format(ErrorDescriptions.MissingParameter, SimpleIdServer.Dtos.Constants.ClientNames.RequestUris));
         }
 
         [Fact]
@@ -169,7 +170,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Validators
             // ACT & ASSERTS
             var ex = Assert.Throws<IdentityServerException>(() => _registrationParameterValidator.Validate(parameter));
             Assert.True(ex.Code == ErrorCodes.InvalidClientMetaData);
-            Assert.True(ex.Message == string.Format(ErrorDescriptions.ParameterIsNotCorrect, ClientNames.LogoUri));
+            Assert.True(ex.Message == string.Format(ErrorDescriptions.ParameterIsNotCorrect, SimpleIdServer.Dtos.Constants.ClientNames.LogoUri));
         }
 
         [Fact]
@@ -189,7 +190,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Validators
             // ACT & ASSERTS
             var ex = Assert.Throws<IdentityServerException>(() => _registrationParameterValidator.Validate(parameter));
             Assert.True(ex.Code == ErrorCodes.InvalidClientMetaData);
-            Assert.True(ex.Message == string.Format(ErrorDescriptions.ParameterIsNotCorrect, ClientNames.ClientUri));
+            Assert.True(ex.Message == string.Format(ErrorDescriptions.ParameterIsNotCorrect, SimpleIdServer.Dtos.Constants.ClientNames.ClientUri));
         }
 
         [Fact]
@@ -209,7 +210,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Validators
             // ACT & ASSERTS
             var ex = Assert.Throws<IdentityServerException>(() => _registrationParameterValidator.Validate(parameter));
             Assert.True(ex.Code == ErrorCodes.InvalidClientMetaData);
-            Assert.True(ex.Message == string.Format(ErrorDescriptions.ParameterIsNotCorrect, ClientNames.TosUri));
+            Assert.True(ex.Message == string.Format(ErrorDescriptions.ParameterIsNotCorrect, SimpleIdServer.Dtos.Constants.ClientNames.TosUri));
         }
 
         [Fact]
@@ -229,7 +230,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Validators
             // ACT & ASSERTS
             var ex = Assert.Throws<IdentityServerException>(() => _registrationParameterValidator.Validate(parameter));
             Assert.True(ex.Code == ErrorCodes.InvalidClientMetaData);
-            Assert.True(ex.Message == string.Format(ErrorDescriptions.ParameterIsNotCorrect, ClientNames.JwksUri));
+            Assert.True(ex.Message == string.Format(ErrorDescriptions.ParameterIsNotCorrect, SimpleIdServer.Dtos.Constants.ClientNames.JwksUri));
         }
 
         [Fact]
@@ -270,7 +271,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Validators
             // ACT & ASSERTS
             var ex = Assert.Throws<IdentityServerException>(() => _registrationParameterValidator.Validate(parameter));
             Assert.True(ex.Code == ErrorCodes.InvalidClientMetaData);
-            Assert.True(ex.Message == string.Format(ErrorDescriptions.ParameterIsNotCorrect, ClientNames.SectorIdentifierUri));
+            Assert.True(ex.Message == string.Format(ErrorDescriptions.ParameterIsNotCorrect, SimpleIdServer.Dtos.Constants.ClientNames.SectorIdentifierUri));
         }
 
         [Fact]
@@ -290,7 +291,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Validators
             // ACT & ASSERTS
             var ex = Assert.Throws<IdentityServerException>(() => _registrationParameterValidator.Validate(parameter));
             Assert.True(ex.Code == ErrorCodes.InvalidClientMetaData);
-            Assert.True(ex.Message == string.Format(ErrorDescriptions.ParameterIsNotCorrect, ClientNames.SectorIdentifierUri));
+            Assert.True(ex.Message == string.Format(ErrorDescriptions.ParameterIsNotCorrect, SimpleIdServer.Dtos.Constants.ClientNames.SectorIdentifierUri));
         }
 
         [Fact]
@@ -338,7 +339,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Validators
             {
                 "https://localhost/sector_identifier"
             };
-            var json = sectorIdentifierUris.SerializeWithJavascript();
+            var json = JsonConvert.SerializeObject(sectorIdentifierUris);
             var httpResponseMessage = new HttpResponseMessage(HttpStatusCode.Accepted)
             {
                 Content = new StringContent(json)
@@ -495,7 +496,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Validators
             // ACT & ASSERTS
             var ex = Assert.Throws<IdentityServerException>(() => _registrationParameterValidator.Validate(parameter));
             Assert.True(ex.Code == ErrorCodes.InvalidClientMetaData);
-            Assert.True(ex.Message == string.Format(ErrorDescriptions.ParameterIsNotCorrect, ClientNames.InitiateLoginUri));
+            Assert.True(ex.Message == string.Format(ErrorDescriptions.ParameterIsNotCorrect, SimpleIdServer.Dtos.Constants.ClientNames.InitiateLoginUri));
         }
 
         [Fact]
@@ -515,7 +516,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Validators
             // ACT & ASSERTS
             var ex = Assert.Throws<IdentityServerException>(() => _registrationParameterValidator.Validate(parameter));
             Assert.True(ex.Code == ErrorCodes.InvalidClientMetaData);
-            Assert.True(ex.Message == string.Format(ErrorDescriptions.ParameterIsNotCorrect, ClientNames.InitiateLoginUri));
+            Assert.True(ex.Message == string.Format(ErrorDescriptions.ParameterIsNotCorrect, SimpleIdServer.Dtos.Constants.ClientNames.InitiateLoginUri));
         }
 
         [Fact]
@@ -571,7 +572,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Validators
             {
                 "http://localhost"
             };
-            var json = sectorIdentifierUris.SerializeWithJavascript();
+            var json = JsonConvert.SerializeObject(sectorIdentifierUris);
             var httpResponseMessage = new HttpResponseMessage(HttpStatusCode.Accepted)
             {
                 Content = new StringContent(json)

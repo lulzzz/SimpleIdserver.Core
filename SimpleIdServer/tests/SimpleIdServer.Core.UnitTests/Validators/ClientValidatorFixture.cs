@@ -19,7 +19,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Lib;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Validators;
 using Xunit;

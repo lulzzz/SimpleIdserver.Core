@@ -14,16 +14,16 @@
 // limitations under the License.
 #endregion
 
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
+using SimpleIdServer.Core.Results;
+using SimpleIdServer.Dtos.Requests;
+using SimpleIdServer.Host.Parsers;
 using System;
 using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
-using SimpleIdServer.Core.Common.DTOs.Requests;
-using SimpleIdServer.Core.Results;
-using SimpleIdServer.Host.Parsers;
 using ActionResult = Microsoft.AspNetCore.Mvc.ActionResult;
 using ResponseMode = SimpleIdServer.Core.Parameters.ResponseMode;
 

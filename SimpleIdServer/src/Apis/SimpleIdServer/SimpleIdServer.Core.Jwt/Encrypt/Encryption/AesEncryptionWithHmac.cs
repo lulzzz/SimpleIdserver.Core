@@ -18,7 +18,7 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 using SimpleIdServer.Core.Common;
-using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Lib;
 
 namespace SimpleIdServer.Core.Jwt.Encrypt.Encryption
 {

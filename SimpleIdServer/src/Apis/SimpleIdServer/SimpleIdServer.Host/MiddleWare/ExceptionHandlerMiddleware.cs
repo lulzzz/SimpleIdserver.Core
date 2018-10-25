@@ -15,11 +15,12 @@
 #endregion
 
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
 using SimpleIdServer.Common.Dtos.Responses;
-using SimpleIdServer.Core.Common.DTOs.Responses;
-using SimpleIdServer.Core.Common.Extensions;
 using SimpleIdServer.Core.Errors;
 using SimpleIdServer.Core.Exceptions;
+using SimpleIdServer.Dtos.Responses;
+using SimpleIdServer.Lib;
 using System;
 using System.Net;
 using System.Threading.Tasks;
@@ -101,7 +102,7 @@ namespace SimpleIdServer.Host.MiddleWare
                     PopulateError(error, identityServerException);
                     context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
                     context.Response.ContentType = "application/json";
-                    var serializedError = ObjectExtensions.SerializeWithDataContract(error);
+                    var serializedError = JsonConvert.SerializeObject(error);
                     await context.Response.WriteAsync(serializedError);
                 }
             }

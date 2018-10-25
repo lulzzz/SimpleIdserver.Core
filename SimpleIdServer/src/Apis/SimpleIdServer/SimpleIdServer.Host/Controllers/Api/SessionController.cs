@@ -1,14 +1,14 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using SimpleIdServer.Core.Common;
-using SimpleIdServer.Core.Common.DTOs.Requests;
 using SimpleIdServer.Core.Common.Repositories;
-using SimpleIdServer.Core.Common.Serializers;
 using SimpleIdServer.Core.JwtToken;
+using SimpleIdServer.Dtos.Requests;
 using SimpleIdServer.Host.Extensions;
+using SimpleIdServer.Lib;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SimpleIdServer.Host.Controllers.Api
 {

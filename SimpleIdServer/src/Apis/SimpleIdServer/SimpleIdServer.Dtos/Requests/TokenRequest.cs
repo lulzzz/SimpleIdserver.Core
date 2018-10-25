@@ -16,7 +16,7 @@
 
 using System.Runtime.Serialization;
 
-namespace SimpleIdServer.Core.Common.DTOs.Requests
+namespace SimpleIdServer.Dtos.Requests
 {
     public enum GrantTypes
     {
@@ -31,41 +31,41 @@ namespace SimpleIdServer.Core.Common.DTOs.Requests
     [DataContract]
     public class TokenRequest
     {
-        [DataMember(Name = RequestTokenNames.GrantType)]
+        [DataMember(Name = Constants.RequestTokenNames.GrantType)]
         public GrantTypes? GrantType { get; set; }
-        [DataMember(Name = RequestTokenNames.Username)]
+        [DataMember(Name = Constants.RequestTokenNames.Username)]
         public string Username { get; set; }
-        [DataMember(Name = RequestTokenNames.Password)]
+        [DataMember(Name = Constants.RequestTokenNames.Password)]
         public string Password { get; set; }
-        [DataMember(Name = RequestTokenNames.Scope)]
+        [DataMember(Name = Constants.RequestTokenNames.Scope)]
         public string Scope { get; set; }
-        [DataMember(Name = RequestTokenNames.Code)]
+        [DataMember(Name = Constants.RequestTokenNames.Code)]
         public string Code { get; set; }
-        [DataMember(Name = RequestTokenNames.RedirectUri)]
+        [DataMember(Name = Constants.RequestTokenNames.RedirectUri)]
         public string RedirectUri { get; set; }
-        [DataMember(Name = RequestTokenNames.RefreshToken)]
+        [DataMember(Name = Constants.RequestTokenNames.RefreshToken)]
         public string RefreshToken { get; set; }
-        [DataMember(Name = RequestTokenNames.CodeVerifier)]
+        [DataMember(Name = Constants.RequestTokenNames.CodeVerifier)]
         public string CodeVerifier { get; set; }
-        [DataMember(Name = RequestTokenNames.AmrValues)]
+        [DataMember(Name = Constants.RequestTokenNames.AmrValues)]
         public string AmrValues { get; set; }
-        [DataMember(Name = ClientAuthNames.ClientId)]
+        [DataMember(Name = Constants.ClientAuthNames.ClientId)]
         public string ClientId { get; set; }
-        [DataMember(Name = ClientAuthNames.ClientSecret)]
+        [DataMember(Name = Constants.ClientAuthNames.ClientSecret)]
         public string ClientSecret { get; set; }
-        [DataMember(Name = ClientAuthNames.ClientAssertionType)]
+        [DataMember(Name = Constants.ClientAuthNames.ClientAssertionType)]
         public string ClientAssertionType { get; set; }
-        [DataMember(Name = ClientAuthNames.ClientAssertion)]
+        [DataMember(Name = Constants.ClientAuthNames.ClientAssertion)]
         public string ClientAssertion { get; set; }
-        [DataMember(Name = RequestTokenUma.Ticket)]
+        [DataMember(Name = Constants.RequestTokenUma.Ticket)]
         public string Ticket { get; set; }
-        [DataMember(Name = RequestTokenUma.ClaimToken)]
+        [DataMember(Name = Constants.RequestTokenUma.ClaimToken)]
         public string ClaimToken { get; set; }
-        [DataMember(Name = RequestTokenUma.ClaimTokenFormat)]
+        [DataMember(Name = Constants.RequestTokenUma.ClaimTokenFormat)]
         public string ClaimTokenFormat { get; set; }
-        [DataMember(Name = RequestTokenUma.Pct)]
+        [DataMember(Name = Constants.RequestTokenUma.Pct)]
         public string Pct { get; set; }
-        [DataMember(Name = RequestTokenUma.Rpt)]
+        [DataMember(Name = Constants.RequestTokenUma.Rpt)]
         public string Rpt { get; set; }
     }
 }

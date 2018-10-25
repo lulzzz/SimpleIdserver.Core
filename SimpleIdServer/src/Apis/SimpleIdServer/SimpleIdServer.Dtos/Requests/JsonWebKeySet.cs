@@ -14,22 +14,18 @@
 // limitations under the License.
 #endregion
 
-using System;
-using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Generic;
+using System.Runtime.Serialization;
 
-namespace SimpleIdServer.Client
+namespace SimpleIdServer.Dtos.Requests
 {
-    public static class ServiceCollectionExtensions
+    [DataContract]
+    public class JsonWebKeySet
     {
-        public static IServiceCollection AddIdServerClient(this IServiceCollection services)
-        {
-            if (services == null)
-            {
-                throw new ArgumentNullException(nameof(services));
-            }
-
-            services.AddTransient<IIdentityServerClientFactory, IdentityServerClientFactory>();
-            return services;
-        }
+        /// <summary>
+        /// Gets or sets the array of JWK values.
+        /// </summary>
+        [DataMember(Name = "keys")]
+        public List<Dictionary<string, object>> Keys { get; set; }
     }
 }

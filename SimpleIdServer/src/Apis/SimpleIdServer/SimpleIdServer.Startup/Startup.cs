@@ -23,7 +23,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using SimpleIdServer.Authenticate.Basic;
 using SimpleIdServer.Authenticate.LoginPassword;
-using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Lib;
 using SimpleIdServer.Host.Extensions;
 using SimpleIdServer.OAuth2Introspection;
 using SimpleIdServer.Shell;

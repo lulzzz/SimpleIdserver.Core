@@ -22,7 +22,7 @@ using System.Threading.Tasks;
 using SimpleIdServer.Core;
 using SimpleIdServer.Core.Api.Authorization;
 using SimpleIdServer.Core.Api.Authorization.Actions;
-using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Lib;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Errors;
 using SimpleIdServer.Core.Exceptions;
@@ -32,6 +32,7 @@ using SimpleIdServer.Core.Results;
 using SimpleIdServer.Core.Validators;
 using SimpleIdServer.OAuth.Logging;
 using Xunit;
+using Newtonsoft.Json;
 
 namespace SimpleIdentityServer.Core.UnitTests.Api.Authorization
 {
@@ -122,7 +123,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Authorization
                 Scope = scope,
                 Claims = null
             };
-            var serializedParameter = actionResult.RedirectInstruction.Parameters.SerializeWithJavascript();
+            var serializedParameter = JsonConvert.SerializeObject(actionResult.RedirectInstruction.Parameters);
 
             // ACT
             _authorizationActions.GetAuthorization(authorizationParameter, null, null);
@@ -175,7 +176,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Authorization
                 Scope = scope,
                 Claims = null
             };
-            var serializedParameter = actionResult.RedirectInstruction.Parameters.SerializeWithJavascript();
+            var serializedParameter = JsonConvert.SerializeObject(actionResult.RedirectInstruction.Parameters);
 
             // ACT
             _authorizationActions.GetAuthorization(authorizationParameter, null, null);
@@ -228,7 +229,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Authorization
                 Scope = scope,
                 Claims = null
             };
-            var serializedParameter = actionResult.RedirectInstruction.Parameters.SerializeWithJavascript();
+            var serializedParameter = JsonConvert.SerializeObject(actionResult.RedirectInstruction.Parameters);
 
             // ACT
             _authorizationActions.GetAuthorization(authorizationParameter, null, null);

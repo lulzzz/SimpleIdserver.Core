@@ -17,10 +17,11 @@
 using System;
 using Moq;
 using SimpleIdServer.Core.Common;
-using SimpleIdServer.Core.Common.DTOs.Requests;
-using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Dtos.Requests;
+using SimpleIdServer.Lib;
 using SimpleIdServer.Core.Jwt.Signature;
 using Xunit;
+using Newtonsoft.Json;
 
 namespace SimpleIdServer.Core.Jwt.UnitTests.Signature
 {
@@ -69,7 +70,7 @@ namespace SimpleIdServer.Core.Jwt.UnitTests.Signature
                 .Returns(signature);
             var serializedJwsProtectedHeader = jwsProtectedHeader.SerializeWithDataContract();
             var base64SerializedJwsProtectedHeader = serializedJwsProtectedHeader.Base64Encode();
-            var serializedJwsPayload = jwsPayload.SerializeWithJavascript();
+            var serializedJwsPayload = JsonConvert.SerializeObject(jwsPayload);
             var base64SerializedJwsPayload = serializedJwsPayload.Base64Encode();
             var combined = string.Format("{0}.{1}",
                 base64SerializedJwsProtectedHeader,
@@ -116,7 +117,7 @@ namespace SimpleIdServer.Core.Jwt.UnitTests.Signature
                 .Returns(signature);
             var serializedJwsProtectedHeader = jwsProtectedHeader.SerializeWithDataContract();
             var base64SerializedJwsProtectedHeader = serializedJwsProtectedHeader.Base64Encode();
-            var serializedJwsPayload = jwsPayload.SerializeWithJavascript();
+            var serializedJwsPayload = JsonConvert.SerializeObject(jwsPayload);
             var base64SerializedJwsPayload = serializedJwsPayload.Base64Encode();
             var combined = string.Format("{0}.{1}",
                 base64SerializedJwsProtectedHeader,
@@ -162,7 +163,7 @@ namespace SimpleIdServer.Core.Jwt.UnitTests.Signature
                 .Returns(signature);
             var serializedJwsProtectedHeader = jwsProtectedHeader.SerializeWithDataContract();
             var base64SerializedJwsProtectedHeader = serializedJwsProtectedHeader.Base64Encode();
-            var serializedJwsPayload = jwsPayload.SerializeWithJavascript();
+            var serializedJwsPayload = JsonConvert.SerializeObject(jwsPayload);
             var base64SerializedJwsPayload = serializedJwsPayload.Base64Encode();
             var combined = string.Format("{0}.{1}",
                 base64SerializedJwsProtectedHeader,

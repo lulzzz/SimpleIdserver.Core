@@ -5,7 +5,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using SimpleIdServer.Core.Common;
-using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Lib;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Helpers;
 using SimpleIdServer.Core.Jwt;

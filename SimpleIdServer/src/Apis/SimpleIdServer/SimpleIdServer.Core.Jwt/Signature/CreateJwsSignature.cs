@@ -21,7 +21,7 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using SimpleIdServer.Core.Common;
-using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Lib;
 using SimpleIdServer.Core.Jwt.Serializer;
 
 namespace SimpleIdServer.Core.Jwt.Signature

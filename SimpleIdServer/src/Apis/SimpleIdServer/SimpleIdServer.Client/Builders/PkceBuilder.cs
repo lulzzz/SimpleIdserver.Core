@@ -17,8 +17,8 @@
 using System;
 using System.Security.Cryptography;
 using System.Text;
-using SimpleIdServer.Core.Common.DTOs.Requests;
-using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Dtos.Requests;
+using SimpleIdServer.Lib;
 
 namespace SimpleIdServer.Client.Builders
 {

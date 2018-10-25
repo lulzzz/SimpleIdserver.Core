@@ -1,5 +1,5 @@
 ﻿#region copyright
-// Copyright 2016 Habart Thierry
+// Copyright 2015 Habart Thierry
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,22 +16,22 @@
 
 using System.Runtime.Serialization;
 
-namespace SimpleIdServer.Core.Common.DTOs.Requests
+namespace SimpleIdServer.Dtos.Requests
 {
     [DataContract]
-    public class IntrospectionRequest
+    public class RevocationRequest
     {
-        [DataMember(Name = IntrospectionRequestNames.Token)]
+        [DataMember(Name = Constants.RevocationRequestNames.Token)]
         public string Token { get; set; }
-        [DataMember(Name = IntrospectionRequestNames.TokenTypeHint)]
+        [DataMember(Name = Constants.RevocationRequestNames.TokenTypeHint)]
         public string TokenTypeHint { get; set; }
-        [DataMember(Name = ClientAuthNames.ClientId)]
+        [DataMember(Name = Constants.ClientAuthNames.ClientId)]
         public string ClientId { get; set; }
-        [DataMember(Name = ClientAuthNames.ClientSecret)]
+        [DataMember(Name = Constants.ClientAuthNames.ClientSecret)]
         public string ClientSecret { get; set; }
-        [DataMember(Name = ClientAuthNames.ClientAssertion)]
-        public string ClientAssertion { get; set; }
-        [DataMember(Name = ClientAuthNames.ClientAssertionType)]
+        [DataMember(Name = Constants.ClientAuthNames.ClientAssertionType)]
         public string ClientAssertionType { get; set; }
+        [DataMember(Name = Constants.ClientAuthNames.ClientAssertion)]
+        public string ClientAssertion { get; set; }
     }
 }

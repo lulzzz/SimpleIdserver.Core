@@ -14,9 +14,6 @@
 // limitations under the License.
 #endregion
 
-using System;
-using Microsoft.Extensions.DependencyInjection;
-using SimpleIdServer.Common.Client;
 using SimpleIdServer.Common.Client.Factories;
 using SimpleIdServer.Uma.Client.Configuration;
 using SimpleIdServer.Uma.Client.Permission;
@@ -34,73 +31,36 @@ namespace SimpleIdServer.Uma.Client
 
     public class IdentityServerUmaClientFactory : IIdentityServerUmaClientFactory
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IHttpClientFactory _httpClientFactory;
 
         public IdentityServerUmaClientFactory()
         {
-            var services = new ServiceCollection();
-            RegisterDependencies(services);
-            _serviceProvider = services.BuildServiceProvider();
+            _httpClientFactory = new HttpClientFactory();
         }
 
         public IdentityServerUmaClientFactory(IHttpClientFactory httpClientFactory)
         {
-            var services = new ServiceCollection();
-            RegisterDependencies(services, httpClientFactory);
-            _serviceProvider = services.BuildServiceProvider();
+            _httpClientFactory = httpClientFactory;
         }
 
         public IPermissionClient GetPermissionClient()
         {
-            var permissionClient = (IPermissionClient)_serviceProvider.GetService(typeof(IPermissionClient));
-            return permissionClient;
+            return new PermissionClient(new AddPermissionsOperation(_httpClientFactory), new GetConfigurationOperation(_httpClientFactory));
         }
 
         public IResourceSetClient GetResourceSetClient()
         {
-            var resourceSetClient = (IResourceSetClient)_serviceProvider.GetService(typeof(IResourceSetClient));
-            return resourceSetClient;
+            return new ResourceSetClient(new AddResourceSetOperation(_httpClientFactory), new DeleteResourceSetOperation(_httpClientFactory),
+                new GetResourcesOperation(_httpClientFactory), new GetResourceOperation(_httpClientFactory), new UpdateResourceOperation(_httpClientFactory),
+                new GetConfigurationOperation(_httpClientFactory), new SearchResourcesOperation(_httpClientFactory));
         }
 
         public IPolicyClient GetPolicyClient()
         {
-            var policyClient = (IPolicyClient)_serviceProvider.GetService(typeof(IPolicyClient));
-            return policyClient;
-        }
-
-        private static void RegisterDependencies(IServiceCollection serviceCollection, IHttpClientFactory httpClientFactory = null)
-        {
-            if (httpClientFactory != null)
-            {
-                serviceCollection.AddSingleton(httpClientFactory);
-            }
-            else
-            {
-                serviceCollection.AddCommonClient();
-            }
-
-            // Register clients
-            serviceCollection.AddTransient<IResourceSetClient, ResourceSetClient>();
-            serviceCollection.AddTransient<IPermissionClient, PermissionClient>();
-            serviceCollection.AddTransient<IPolicyClient, PolicyClient>();
-
-            // Register operations
-            serviceCollection.AddTransient<IAddPermissionsOperation, AddPermissionsOperation>();
-            serviceCollection.AddTransient<IGetConfigurationOperation, GetConfigurationOperation>();
-            serviceCollection.AddTransient<IAddResourceSetOperation, AddResourceSetOperation>();
-            serviceCollection.AddTransient<IDeleteResourceSetOperation, DeleteResourceSetOperation>();
-            serviceCollection.AddTransient<IAddPolicyOperation, AddPolicyOperation>();
-            serviceCollection.AddTransient<IGetPolicyOperation, GetPolicyOperation>();
-            serviceCollection.AddTransient<IDeletePolicyOperation, DeletePolicyOperation>();
-            serviceCollection.AddTransient<IGetPoliciesOperation, GetPoliciesOperation>();
-            serviceCollection.AddTransient<IGetResourcesOperation, GetResourcesOperation>();
-            serviceCollection.AddTransient<IGetResourceOperation, GetResourceOperation>();
-            serviceCollection.AddTransient<IUpdateResourceOperation, UpdateResourceOperation>();
-            serviceCollection.AddTransient<IAddResourceToPolicyOperation, AddResourceToPolicyOperation>();
-            serviceCollection.AddTransient<IDeleteResourceFromPolicyOperation, DeleteResourceFromPolicyOperation>();
-            serviceCollection.AddTransient<IUpdatePolicyOperation, UpdatePolicyOperation>();
-            serviceCollection.AddTransient<ISearchPoliciesOperation, SearchPoliciesOperation>();
-            serviceCollection.AddTransient<ISearchResourcesOperation, SearchResourcesOperation>();
+            return new PolicyClient(new AddPolicyOperation(_httpClientFactory), new GetPolicyOperation(_httpClientFactory),
+                new DeletePolicyOperation(_httpClientFactory), new GetPoliciesOperation(_httpClientFactory), new AddResourceToPolicyOperation(_httpClientFactory),
+                new DeleteResourceFromPolicyOperation(_httpClientFactory), new UpdatePolicyOperation(_httpClientFactory), new GetConfigurationOperation(_httpClientFactory),
+                new SearchPoliciesOperation(_httpClientFactory));
         }
     }
 }

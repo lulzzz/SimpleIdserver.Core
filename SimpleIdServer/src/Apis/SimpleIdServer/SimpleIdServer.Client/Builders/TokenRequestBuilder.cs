@@ -16,7 +16,6 @@
 
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
-using SimpleIdServer.Core.Common;
 
 namespace SimpleIdServer.Client.Builders
 {
@@ -34,22 +33,22 @@ namespace SimpleIdServer.Client.Builders
 
         public RequestBuilder SetClientCredentials(string clientId, string clientSecret)
         {
-            Content.Add(ClientAuthNames.ClientId, clientId);
-            Content.Add(ClientAuthNames.ClientSecret, clientSecret);
+            Content.Add(Dtos.Constants.ClientAuthNames.ClientId, clientId);
+            Content.Add(Dtos.Constants.ClientAuthNames.ClientSecret, clientSecret);
             return this;
         }
 
         public RequestBuilder SetClientAssertion(string clientId, string clientAssertion, string clientAssertionType)
         {
-            Content.Add(ClientAuthNames.ClientId, clientId);
-            Content.Add(ClientAuthNames.ClientAssertion, clientAssertion);
-            Content.Add(ClientAuthNames.ClientAssertionType, clientAssertionType);
+            Content.Add(Dtos.Constants.ClientAuthNames.ClientId, clientId);
+            Content.Add(Dtos.Constants.ClientAuthNames.ClientAssertion, clientAssertion);
+            Content.Add(Dtos.Constants.ClientAuthNames.ClientAssertionType, clientAssertionType);
             return this;
         }
 
         public RequestBuilder SetCertificate(string clientId, X509Certificate2 certificate)
         {
-            Content.Add(ClientAuthNames.ClientId, clientId);
+            Content.Add(Dtos.Constants.ClientAuthNames.ClientId, clientId);
             Certificate = certificate;
             return this;
         }

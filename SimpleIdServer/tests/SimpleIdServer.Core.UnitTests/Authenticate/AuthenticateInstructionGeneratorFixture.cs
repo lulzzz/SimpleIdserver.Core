@@ -16,7 +16,7 @@
 
 using System.Net.Http.Headers;
 using SimpleIdServer.Core.Authenticate;
-using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Lib;
 using Xunit;
 
 namespace SimpleIdentityServer.Core.UnitTests.Authenticate

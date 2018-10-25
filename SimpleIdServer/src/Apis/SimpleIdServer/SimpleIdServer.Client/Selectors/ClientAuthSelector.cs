@@ -17,8 +17,7 @@
 using System;
 using System.Security.Cryptography.X509Certificates;
 using SimpleIdServer.Client.Builders;
-using SimpleIdServer.Core.Common;
-using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Lib;
 
 namespace SimpleIdServer.Client.Selectors
 {
@@ -121,7 +120,7 @@ namespace SimpleIdServer.Client.Selectors
             }
 
             var requestBuilder = new RequestBuilder();
-            requestBuilder.SetClientAssertion(clientId, jwt, ClientAssertionTypes.JwtBearer);
+            requestBuilder.SetClientAssertion(clientId, jwt, Dtos.Constants.ClientAssertionTypes.JwtBearer);
             return GetTokenGrantTypeSelector(requestBuilder);
         }
 
@@ -138,7 +137,7 @@ namespace SimpleIdServer.Client.Selectors
             }
 
             var requestBuilder = new RequestBuilder();
-            requestBuilder.SetClientAssertion(clientId, jwt, ClientAssertionTypes.JwtBearer);
+            requestBuilder.SetClientAssertion(clientId, jwt, Dtos.Constants.ClientAssertionTypes.JwtBearer);
             return GetTokenGrantTypeSelector(requestBuilder);
         }
 

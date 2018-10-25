@@ -1,5 +1,5 @@
 ﻿using SimpleIdServer.Client;
-using SimpleIdServer.Core.Common.DTOs.Responses;
+using SimpleIdServer.Dtos.Responses;
 using SimpleIdServer.Storage;
 using System;
 using System.Collections.Generic;

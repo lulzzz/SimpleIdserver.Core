@@ -25,7 +25,7 @@ using SimpleIdServer.Client;
 using SimpleIdServer.Client.Operations;
 using SimpleIdServer.Client.Selectors;
 using SimpleIdServer.Common.Client.Factories;
-using SimpleIdServer.Core.Common.DTOs.Responses;
+using SimpleIdServer.Dtos.Responses;
 using Xunit;
 
 namespace SimpleIdServer.Host.Tests.Apis
@@ -298,7 +298,7 @@ namespace SimpleIdServer.Host.Tests.Apis
                 .ResolveAsync($"{baseUrl}/.well-known/openid-configuration").ConfigureAwait(false);
 
             // ACT
-            var client = await _registrationClient.ResolveAsync(new Core.Common.DTOs.Requests.ClientRequest
+            var client = await _registrationClient.ResolveAsync(new SimpleIdServer.Dtos.Requests.ClientRequest
             {
                 RedirectUris = new []
                 {

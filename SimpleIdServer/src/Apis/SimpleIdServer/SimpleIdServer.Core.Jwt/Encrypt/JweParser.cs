@@ -16,8 +16,7 @@
 
 using System.Linq;
 using SimpleIdServer.Core.Common;
-using SimpleIdServer.Core.Common.Extensions;
-
+using SimpleIdServer.Lib;
 namespace SimpleIdServer.Core.Jwt.Encrypt
 {
     public interface IJweParser

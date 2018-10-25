@@ -20,12 +20,13 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Xml.Serialization;
-using SimpleIdServer.Core.Common.DTOs.Requests;
-using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Dtos.Requests;
+using SimpleIdServer.Lib;
 using SimpleIdServer.Core.Jwt.Converter;
 using SimpleIdServer.Core.Jwt.Exceptions;
 using SimpleIdServer.Core.Jwt.Serializer;
 using Xunit;
+using Newtonsoft.Json;
 
 namespace SimpleIdServer.Core.Jwt.UnitTests.Converter
 {
@@ -126,7 +127,7 @@ namespace SimpleIdServer.Core.Jwt.UnitTests.Converter
                 }
             };
 
-            var json = jsonWebKeySet.SerializeWithJavascript();
+            var json = JsonConvert.SerializeObject(jsonWebKeySet);
 
             // ACT & ASSERTS
             var ex = Assert.Throws<InvalidOperationException>(() => _jsonWebKeyConverter.ExtractSerializedKeys(jsonWebKeySet));
@@ -160,7 +161,7 @@ namespace SimpleIdServer.Core.Jwt.UnitTests.Converter
                     jsonWebKey
                 }
             };
-            var json = jsonWebKeySet.SerializeWithJavascript();
+            var json = JsonConvert.SerializeObject(jsonWebKeySet);
 
             // ACT & ASSERTS
             var ex = Assert.Throws<InvalidOperationException>(() => _jsonWebKeyConverter.ExtractSerializedKeys(jsonWebKeySet));
@@ -194,7 +195,7 @@ namespace SimpleIdServer.Core.Jwt.UnitTests.Converter
                     jsonWebKey
                 }
             };
-            var json = jsonWebKeySet.SerializeWithJavascript();
+            var json = JsonConvert.SerializeObject(jsonWebKeySet);
 
             // ACT & ASSERTS
             var ex = Assert.Throws<InvalidOperationException>(() => _jsonWebKeyConverter.ExtractSerializedKeys(jsonWebKeySet));
@@ -236,7 +237,7 @@ namespace SimpleIdServer.Core.Jwt.UnitTests.Converter
                     jsonWebKey
                 }
             };
-            var json = jsonWebKeySet.SerializeWithJavascript();
+            var json = JsonConvert.SerializeObject(jsonWebKeySet);
 
             // ACT & ASSERTS
             var ex = Assert.Throws<InvalidOperationException>(() => _jsonWebKeyConverter.ExtractSerializedKeys(jsonWebKeySet));

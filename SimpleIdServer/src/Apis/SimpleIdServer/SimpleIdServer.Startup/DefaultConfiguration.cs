@@ -1,5 +1,5 @@
 ﻿using SimpleIdServer.Core.Common;
-using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Lib;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Helpers;
 using System.Collections.Generic;
@@ -104,6 +104,44 @@ namespace SimpleIdServer.Startup
                         ResponseType.id_token,
                         ResponseType.token
                     }
+                },
+                new Core.Common.Models.Client
+                {
+                    ClientId = "clientId",
+                    Secrets = new List<ClientSecret>
+                    {
+                        new ClientSecret
+                        {
+                            Type = ClientSecretTypes.SharedSecret,
+                            Value = "pwd"
+                        }
+                    },
+                    AllowedScopes = new List<Scope>
+                    {
+                        new Scope
+                        {
+                            Name = "openid"
+                        },
+                        new Scope
+                        {
+                            Name = "profile"
+                        }
+                    },
+                    TokenEndPointAuthMethod = TokenEndPointAuthenticationMethods.client_secret_post,
+                    ApplicationType = ApplicationTypes.native,
+                    RedirectionUrls = new List<string>
+                    {
+                        "com.sidxamarin.apps:/oauth2redirect"
+                    },
+                    GrantTypes = new List<GrantType>
+                    {
+                        GrantType.authorization_code
+                    },
+                    ResponseTypes = new List<ResponseType>
+                    {
+                        ResponseType.code
+                    },
+                    RequirePkce = true
                 }
             };
         }

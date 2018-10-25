@@ -34,7 +34,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Common\SimpleIdServer.Lib\SimpleIdServer.Lib.csproj" />
     <ProjectReference Include="..\SimpleIdServer.Core.Common\SimpleIdServer.Core.Common.csproj" />
+    <ProjectReference Include="..\SimpleIdServer.Dtos\SimpleIdServer.Dtos.csproj" />
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">

@@ -130,7 +130,7 @@ namespace SimpleIdServer.Uma.Host.Tests.Fakes
             services.AddSimpleIdServerUmaCore(null, UmaStores.GetResources())
                 .AddSimpleIdentityServerCore(clients: OAuthStores.GetClients(), jsonWebKeys: OAuthStores.GetJsonWebKeys(_context), scopes: OAuthStores.GetScopes())
                 .AddSimpleIdentityServerJwt()
-                .AddIdServerClient()
+                .AddTransient<IIdentityServerClientFactory, IdentityServerClientFactory>()
                 .AddDefaultSimpleBus()
                 .AddDefaultConcurrency()
                 .AddDefaultTokenStore();

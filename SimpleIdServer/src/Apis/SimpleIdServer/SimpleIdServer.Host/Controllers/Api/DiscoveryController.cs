@@ -14,11 +14,11 @@
 // limitations under the License.
 #endregion
 
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using SimpleIdServer.Core.Api.Discovery;
-using SimpleIdServer.Core.Common.DTOs.Responses;
+using SimpleIdServer.Dtos.Responses;
 using SimpleIdServer.Host.Extensions;
+using System.Threading.Tasks;
 
 namespace SimpleIdServer.Host.Controllers.Api
 {

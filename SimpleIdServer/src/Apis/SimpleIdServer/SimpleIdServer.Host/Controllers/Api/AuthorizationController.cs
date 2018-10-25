@@ -14,25 +14,25 @@
 // limitations under the License.
 #endregion
 
-using System;
-using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
 using SimpleIdServer.Common.Dtos.Responses;
 using SimpleIdServer.Core.Api.Authorization;
-using SimpleIdServer.Core.Common.DTOs.Requests;
-using SimpleIdServer.Core.Common.Serializers;
 using SimpleIdServer.Core.Errors;
 using SimpleIdServer.Core.Exceptions;
 using SimpleIdServer.Core.JwtToken;
 using SimpleIdServer.Core.Parameters;
 using SimpleIdServer.Core.Protector;
 using SimpleIdServer.Core.Results;
+using SimpleIdServer.Dtos.Requests;
 using SimpleIdServer.Host.Extensions;
 using SimpleIdServer.Host.Parsers;
+using SimpleIdServer.Lib;
+using System;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace SimpleIdServer.Host.Controllers.Api
 {

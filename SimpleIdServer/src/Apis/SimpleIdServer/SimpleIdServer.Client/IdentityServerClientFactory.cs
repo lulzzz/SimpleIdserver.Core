@@ -14,11 +14,8 @@
 // limitations under the License.
 #endregion
 
-using System;
-using Microsoft.Extensions.DependencyInjection;
 using SimpleIdServer.Client.Operations;
 using SimpleIdServer.Client.Selectors;
-using SimpleIdServer.Common.Client;
 using SimpleIdServer.Common.Client.Factories;
 
 namespace SimpleIdServer.Client
@@ -36,30 +33,25 @@ namespace SimpleIdServer.Client
 
     public class IdentityServerClientFactory : IIdentityServerClientFactory
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IHttpClientFactory _httpClientFactory;
 
         #region Constructor
 
         public IdentityServerClientFactory()
         {
-            var services = new ServiceCollection();
-            RegisterDependencies(services);
-            _serviceProvider = services.BuildServiceProvider();
+            _httpClientFactory = new HttpClientFactory();
         }
 
         public IdentityServerClientFactory(IHttpClientFactory httpClientFactory)
         {
-            var services = new ServiceCollection();
-            RegisterDependencies(services, httpClientFactory);
-            _serviceProvider = services.BuildServiceProvider();
+            _httpClientFactory = httpClientFactory;
         }
 
         #endregion
 
         public IIntrospectClient CreateIntrospectionClient()
         {
-            var result = (IIntrospectClient)_serviceProvider.GetService(typeof(IIntrospectClient));
-            return result;
+            return new IntrospectClient(new Builders.RequestBuilder(), new IntrospectOperation(_httpClientFactory), new GetDiscoveryOperation(_httpClientFactory));
         }
 
         /// <summary>
@@ -68,8 +60,7 @@ namespace SimpleIdServer.Client
         /// <returns>Discovery client</returns>
         public IDiscoveryClient CreateDiscoveryClient()
         {
-            var result = (IDiscoveryClient)_serviceProvider.GetService(typeof(IDiscoveryClient));
-            return result;
+            return new DiscoveryClient(new GetDiscoveryOperation(_httpClientFactory));
         }
 
         /// <summary>
@@ -78,8 +69,9 @@ namespace SimpleIdServer.Client
         /// <returns>Choose your client authentication method</returns>
         public IClientAuthSelector CreateAuthSelector()
         {
-            var result = (IClientAuthSelector)_serviceProvider.GetService(typeof(IClientAuthSelector));
-            return result;
+            return new ClientAuthSelector(new TokenClientFactory(new PostTokenOperation(_httpClientFactory), new GetDiscoveryOperation(_httpClientFactory)),
+                new IntrospectClientFactory(new IntrospectOperation(_httpClientFactory), new GetDiscoveryOperation(_httpClientFactory)),
+                new RevokeTokenClientFactory(new RevokeTokenOperation(_httpClientFactory), new GetDiscoveryOperation(_httpClientFactory)));
         }
 
         /// <summary>
@@ -88,8 +80,7 @@ namespace SimpleIdServer.Client
         /// <returns>Jwks client</returns>
         public IJwksClient CreateJwksClient()
         {
-            var result = (IJwksClient)_serviceProvider.GetService(typeof(IJwksClient));
-            return result;
+            return new JwksClient(new GetJsonWebKeysOperation(_httpClientFactory), new GetDiscoveryOperation(_httpClientFactory));
         }
 
         /// <summary>
@@ -98,8 +89,7 @@ namespace SimpleIdServer.Client
         /// <returns></returns>
         public IUserInfoClient CreateUserInfoClient()
         {
-            var result = (IUserInfoClient)_serviceProvider.GetService(typeof(IUserInfoClient));
-            return result;
+            return new UserInfoClient(new GetUserInfoOperation(_httpClientFactory), new GetDiscoveryOperation(_httpClientFactory));
         }
 
         /// <summary>
@@ -108,8 +98,7 @@ namespace SimpleIdServer.Client
         /// <returns></returns>
         public IRegistrationClient CreateRegistrationClient()
         {
-            var result = (IRegistrationClient)_serviceProvider.GetService(typeof(IRegistrationClient));
-            return result;
+            return new RegistrationClient(new RegisterClientOperation(_httpClientFactory), new GetDiscoveryOperation(_httpClientFactory));
         }
 
         /// <summary>
@@ -118,53 +107,7 @@ namespace SimpleIdServer.Client
         /// <returns></returns>
         public IAuthorizationClient CreateAuthorizationClient()
         {
-            var result = (IAuthorizationClient)_serviceProvider.GetService(typeof(IAuthorizationClient));
-            return result;
+            return new AuthorizationClient(new GetAuthorizationOperation(_httpClientFactory), new GetDiscoveryOperation(_httpClientFactory));
         }
-
-        #region Private static methods
-
-        private static void RegisterDependencies(IServiceCollection serviceCollection, IHttpClientFactory httpClientFactory = null)
-        {
-            if (httpClientFactory != null)
-            {
-                serviceCollection.AddSingleton(httpClientFactory);
-            }
-            else
-            {
-                serviceCollection.AddCommonClient();
-            }
-
-            // Register clients
-            serviceCollection.AddTransient<ITokenClient, TokenClient>();
-            serviceCollection.AddTransient<IDiscoveryClient, DiscoveryClient>();
-            serviceCollection.AddTransient<IJwksClient, JwksClient>();
-            serviceCollection.AddTransient<IUserInfoClient, UserInfoClient>();
-            serviceCollection.AddTransient<IRegistrationClient, RegistrationClient>();
-            serviceCollection.AddTransient<IIntrospectClient, IntrospectClient>();
-            serviceCollection.AddTransient<IRevokeTokenClient, RevokeTokenClient>();
-            serviceCollection.AddTransient<IAuthorizationClient, AuthorizationClient>();
-
-            // Register operations
-            serviceCollection.AddTransient<IGetDiscoveryOperation, GetDiscoveryOperation>();
-            serviceCollection.AddTransient<IPostTokenOperation, PostTokenOperation>();
-            serviceCollection.AddTransient<IGetJsonWebKeysOperation, GetJsonWebKeysOperation>();
-            serviceCollection.AddTransient<IRegisterClientOperation, RegisterClientOperation>();
-            serviceCollection.AddTransient<IGetUserInfoOperation, GetUserInfoOperation>();
-            serviceCollection.AddTransient<IIntrospectOperation, IntrospectOperation>();
-            serviceCollection.AddTransient<IRevokeTokenOperation, RevokeTokenOperation>();
-            serviceCollection.AddTransient<IGetAuthorizationOperation, GetAuthorizationOperation>();
-
-            // Register selectors
-            serviceCollection.AddTransient<IClientAuthSelector, ClientAuthSelector>();
-            serviceCollection.AddTransient<ITokenGrantTypeSelector, TokenGrantTypeSelector>();
-
-            // Register factories
-            serviceCollection.AddTransient<ITokenClientFactory, TokenClientFactory>();
-            serviceCollection.AddTransient<IIntrospectClientFactory, IntrospectClientFactory>();
-            serviceCollection.AddTransient<IRevokeTokenClientFactory, RevokeTokenClientFactory>();
-        }
-
-        #endregion
     }
 }

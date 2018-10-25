@@ -19,7 +19,7 @@ using System.Security.Cryptography;
 using System.Xml;
 using Moq;
 using SimpleIdServer.Core.Common;
-using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Lib;
 using SimpleIdServer.Core.Jwt.Serializer;
 using SimpleIdServer.Core.Jwt.Signature;
 using Xunit;

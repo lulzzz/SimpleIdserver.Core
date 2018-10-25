@@ -19,7 +19,7 @@ using System.Security.Principal;
 using System.Threading.Tasks;
 using SimpleIdServer.Bus;
 using SimpleIdServer.Core.Api.Authorization.Actions;
-using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Lib;
 using SimpleIdServer.Core.Errors;
 using SimpleIdServer.Core.Exceptions;
 using SimpleIdServer.Core.Helpers;
@@ -28,6 +28,7 @@ using SimpleIdServer.Core.Results;
 using SimpleIdServer.Core.Validators;
 using SimpleIdServer.OAuth.Events;
 using SimpleIdServer.OAuth.Logging;
+using Newtonsoft.Json;
 
 namespace SimpleIdServer.Core.Api.Authorization
 {
@@ -124,7 +125,7 @@ namespace SimpleIdServer.Core.Api.Authorization
                     }
 
                     var serializedParameters = actionResult.RedirectInstruction == null || actionResult.RedirectInstruction.Parameters == null ? String.Empty :
-                        actionResult.RedirectInstruction.Parameters.SerializeWithJavascript();
+                        JsonConvert.SerializeObject(actionResult.RedirectInstruction.Parameters);
                     _oauthEventSource.EndAuthorization(actionTypeName,
                         actionName,
                         serializedParameters);

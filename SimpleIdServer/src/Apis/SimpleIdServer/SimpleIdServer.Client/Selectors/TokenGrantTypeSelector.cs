@@ -14,11 +14,10 @@
 // limitations under the License.
 #endregion
 
+using SimpleIdServer.Client.Builders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SimpleIdServer.Client.Builders;
-using SimpleIdServer.Core.Common;
 
 namespace SimpleIdServer.Client.Selectors
 {
@@ -63,12 +62,12 @@ namespace SimpleIdServer.Client.Selectors
                 throw new ArgumentNullException(nameof(redirectUrl));
             }
 
-            _requestBuilder.Content.Add(RequestTokenNames.Code, code);
-            _requestBuilder.Content.Add(RequestTokenNames.GrantType, GrantTypes.AuthorizationCode);
-            _requestBuilder.Content.Add(RequestTokenNames.RedirectUri, redirectUrl);
+            _requestBuilder.Content.Add(Dtos.Constants.RequestTokenNames.Code, code);
+            _requestBuilder.Content.Add(Dtos.Constants.RequestTokenNames.GrantType, Dtos.Constants.GrantTypes.AuthorizationCode);
+            _requestBuilder.Content.Add(Dtos.Constants.RequestTokenNames.RedirectUri, redirectUrl);
             if (!string.IsNullOrWhiteSpace(codeVerifier))
             {
-                _requestBuilder.Content.Add(RequestTokenNames.CodeVerifier, codeVerifier);
+                _requestBuilder.Content.Add(Dtos.Constants.RequestTokenNames.CodeVerifier, codeVerifier);
             }
 
             return _tokenClient;
@@ -92,8 +91,8 @@ namespace SimpleIdServer.Client.Selectors
                 throw new ArgumentNullException(nameof(scopes));
             }
 
-            _requestBuilder.Content.Add(RequestTokenNames.Scope, ConcatScopes(scopes));
-            _requestBuilder.Content.Add(RequestTokenNames.GrantType, GrantTypes.ClientCredentials);
+            _requestBuilder.Content.Add(Dtos.Constants.RequestTokenNames.Scope, ConcatScopes(scopes));
+            _requestBuilder.Content.Add(Dtos.Constants.RequestTokenNames.GrantType, Dtos.Constants.GrantTypes.ClientCredentials);
             return _tokenClient;
         }
 
@@ -124,10 +123,10 @@ namespace SimpleIdServer.Client.Selectors
                 throw new ArgumentNullException(nameof(scopes));
             }
 
-            _requestBuilder.Content.Add(RequestTokenNames.Username, userName);
-            _requestBuilder.Content.Add(RequestTokenNames.Password, password);
-            _requestBuilder.Content.Add(RequestTokenNames.Scope, ConcatScopes(scopes));
-            _requestBuilder.Content.Add(RequestTokenNames.GrantType, GrantTypes.Password);
+            _requestBuilder.Content.Add(Dtos.Constants.RequestTokenNames.Username, userName);
+            _requestBuilder.Content.Add(Dtos.Constants.RequestTokenNames.Password, password);
+            _requestBuilder.Content.Add(Dtos.Constants.RequestTokenNames.Scope, ConcatScopes(scopes));
+            _requestBuilder.Content.Add(Dtos.Constants.RequestTokenNames.GrantType, Dtos.Constants.GrantTypes.Password);
             return _tokenClient;
         }
 
@@ -148,13 +147,13 @@ namespace SimpleIdServer.Client.Selectors
                 throw new ArgumentNullException(nameof(scopes));
             }
 
-            _requestBuilder.Content.Add(RequestTokenNames.Username, userName);
-            _requestBuilder.Content.Add(RequestTokenNames.Password, password);
-            _requestBuilder.Content.Add(RequestTokenNames.Scope, ConcatScopes(scopes));
-            _requestBuilder.Content.Add(RequestTokenNames.GrantType, GrantTypes.Password);
+            _requestBuilder.Content.Add(Dtos.Constants.RequestTokenNames.Username, userName);
+            _requestBuilder.Content.Add(Dtos.Constants.RequestTokenNames.Password, password);
+            _requestBuilder.Content.Add(Dtos.Constants.RequestTokenNames.Scope, ConcatScopes(scopes));
+            _requestBuilder.Content.Add(Dtos.Constants.RequestTokenNames.GrantType, Dtos.Constants.GrantTypes.Password);
             if (amrValues != null && amrValues.Any())
             {
-                _requestBuilder.Content.Add(RequestTokenNames.AmrValues, string.Join(" ", amrValues));
+                _requestBuilder.Content.Add(Dtos.Constants.RequestTokenNames.AmrValues, string.Join(" ", amrValues));
             }
 
             return _tokenClient;
@@ -167,8 +166,8 @@ namespace SimpleIdServer.Client.Selectors
                 throw new ArgumentNullException(nameof(refreshToken));
             }
 
-            _requestBuilder.Content.Add(RequestTokenNames.GrantType, GrantTypes.RefreshToken);
-            _requestBuilder.Content.Add(RequestTokenNames.RefreshToken, refreshToken);
+            _requestBuilder.Content.Add(Dtos.Constants.RequestTokenNames.GrantType, Dtos.Constants.GrantTypes.RefreshToken);
+            _requestBuilder.Content.Add(Dtos.Constants.RequestTokenNames.RefreshToken, refreshToken);
             return _tokenClient;
         }
 
@@ -179,14 +178,14 @@ namespace SimpleIdServer.Client.Selectors
                 throw new ArgumentNullException(nameof(ticketId));
             }
 
-            _requestBuilder.Content.Add(RequestTokenNames.GrantType, GrantTypes.UmaTicket);
-            _requestBuilder.Content.Add(RequestTokenUma.Ticket, ticketId);
+            _requestBuilder.Content.Add(Dtos.Constants.RequestTokenNames.GrantType, Dtos.Constants.GrantTypes.UmaTicket);
+            _requestBuilder.Content.Add(Dtos.Constants.RequestTokenUma.Ticket, ticketId);
             if (!string.IsNullOrWhiteSpace(claimToken))
             {
-                _requestBuilder.Content.Add(RequestTokenUma.ClaimToken, claimToken);
+                _requestBuilder.Content.Add(Dtos.Constants.RequestTokenUma.ClaimToken, claimToken);
             }
 
-            _requestBuilder.Content.Add(RequestTokenUma.ClaimTokenFormat, "http://openid.net/specs/openid-connect-core-1_0.html#IDToken");
+            _requestBuilder.Content.Add(Dtos.Constants.RequestTokenUma.ClaimTokenFormat, "http://openid.net/specs/openid-connect-core-1_0.html#IDToken");
             return _tokenClient;
         }
 
@@ -197,8 +196,8 @@ namespace SimpleIdServer.Client.Selectors
                 throw new ArgumentNullException(nameof(token));
             }
 
-            _requestBuilder.Content.Add(IntrospectionRequestNames.Token, token);
-            _requestBuilder.Content.Add(IntrospectionRequestNames.TokenTypeHint, tokenType == TokenType.RefreshToken ? TokenTypes.RefreshToken : TokenTypes.AccessToken);
+            _requestBuilder.Content.Add(Dtos.Constants.IntrospectionRequestNames.Token, token);
+            _requestBuilder.Content.Add(Dtos.Constants.IntrospectionRequestNames.TokenTypeHint, tokenType == TokenType.RefreshToken ? Dtos.Constants.TokenTypes.RefreshToken : Dtos.Constants.TokenTypes.AccessToken);
             return _introspectClient;
         }
 
@@ -209,8 +208,8 @@ namespace SimpleIdServer.Client.Selectors
                 throw new ArgumentNullException(nameof(token));
             }
 
-            _requestBuilder.Content.Add(IntrospectionRequestNames.Token, token);
-            _requestBuilder.Content.Add(IntrospectionRequestNames.TokenTypeHint, tokenType == TokenType.RefreshToken ? TokenTypes.RefreshToken : TokenTypes.AccessToken);
+            _requestBuilder.Content.Add(Dtos.Constants.IntrospectionRequestNames.Token, token);
+            _requestBuilder.Content.Add(Dtos.Constants.IntrospectionRequestNames.TokenTypeHint, tokenType == TokenType.RefreshToken ? Dtos.Constants.TokenTypes.RefreshToken : Dtos.Constants.TokenTypes.AccessToken);
             return _revokeTokenClient;
         }
 

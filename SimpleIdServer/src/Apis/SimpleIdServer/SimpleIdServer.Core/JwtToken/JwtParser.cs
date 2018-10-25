@@ -19,13 +19,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using SimpleIdServer.Common.Client.Factories;
 using SimpleIdServer.Core.Common;
-using SimpleIdServer.Core.Common.DTOs.Requests;
-using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Dtos.Requests;
+using SimpleIdServer.Lib;
 using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.Core.Errors;
 using SimpleIdServer.Core.Jwt.Converter;
 using SimpleIdServer.Core.Jwt.Encrypt;
 using SimpleIdServer.Core.Jwt.Signature;
+using Newtonsoft.Json;
 
 namespace SimpleIdServer.Core.JwtToken
 {
@@ -229,7 +230,7 @@ namespace SimpleIdServer.Core.JwtToken
                 {
                     request.EnsureSuccessStatusCode();
                     var json = await request.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    var jsonWebKeySet = ObjectExtensions.DeserializeWithJavascript<JsonWebKeySet>(json);
+                    var jsonWebKeySet = JsonConvert.DeserializeObject<JsonWebKeySet>(json);
                     var jsonWebKeys = _jsonWebKeyConverter.ExtractSerializedKeys(jsonWebKeySet);
                     return jsonWebKeys.FirstOrDefault(j => j.Kid == kid);
                 }

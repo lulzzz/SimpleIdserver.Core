@@ -22,7 +22,7 @@ using SimpleIdServer.Core;
 using SimpleIdServer.Core.Api.Introspection.Actions;
 using SimpleIdServer.Core.Authenticate;
 using SimpleIdServer.Core.Common;
-using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Lib;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Errors;
 using SimpleIdServer.Core.Exceptions;

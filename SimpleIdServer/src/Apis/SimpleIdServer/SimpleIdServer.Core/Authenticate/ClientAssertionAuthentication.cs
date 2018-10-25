@@ -60,7 +60,7 @@ namespace SimpleIdServer.Core.Authenticate
         /// <returns></returns>
         public string GetClientId(AuthenticateInstruction instruction)
         {
-            if (instruction.ClientAssertionType != Common.ClientAssertionTypes.JwtBearer || string.IsNullOrWhiteSpace(instruction.ClientAssertion))
+            if (instruction.ClientAssertionType != Dtos.Constants.ClientAssertionTypes.JwtBearer || string.IsNullOrWhiteSpace(instruction.ClientAssertion))
             {
                 return string.Empty;
             }

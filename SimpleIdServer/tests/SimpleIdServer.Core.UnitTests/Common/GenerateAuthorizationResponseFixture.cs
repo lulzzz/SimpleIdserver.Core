@@ -25,7 +25,7 @@ using System.Threading.Tasks;
 using SimpleIdServer.Core;
 using SimpleIdServer.Core.Api.Authorization;
 using SimpleIdServer.Core.Common;
-using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Lib;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Helpers;
 using SimpleIdServer.Core.JwtToken;
@@ -34,6 +34,7 @@ using SimpleIdServer.Core.Results;
 using SimpleIdServer.OAuth.Logging;
 using SimpleIdServer.Store;
 using Xunit;
+using Newtonsoft.Json;
 
 namespace SimpleIdentityServer.Core.UnitTests.Common
 {
@@ -383,7 +384,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Common
 
             // ASSERT
             _oauthEventSource.Verify(s => s.StartGeneratingAuthorizationResponseToClient(clientId, responseType));
-            _oauthEventSource.Verify(s => s.EndGeneratingAuthorizationResponseToClient(clientId, actionResult.RedirectInstruction.Parameters.SerializeWithJavascript()));
+            _oauthEventSource.Verify(s => s.EndGeneratingAuthorizationResponseToClient(clientId, JsonConvert.SerializeObject(actionResult.RedirectInstruction.Parameters)));
         }
 
         [Fact]

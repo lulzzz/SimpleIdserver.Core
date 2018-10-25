@@ -16,7 +16,7 @@
 
 using System.Threading.Tasks;
 using SimpleIdServer.Core.Api.Discovery.Actions;
-using SimpleIdServer.Core.Common.DTOs.Responses;
+using SimpleIdServer.Dtos.Responses;
 
 namespace SimpleIdServer.Core.Api.Discovery
 {

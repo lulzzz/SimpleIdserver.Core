@@ -15,9 +15,10 @@
 #endregion
 
 using System;
+using Newtonsoft.Json;
 using SimpleIdServer.Core.Common;
-using SimpleIdServer.Core.Common.DTOs.Requests;
-using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Dtos.Requests;
+using SimpleIdServer.Lib;
 
 namespace SimpleIdServer.Core.Jwt.Signature
 {
@@ -63,7 +64,7 @@ namespace SimpleIdServer.Core.Jwt.Signature
 
             var serializedProtectedHeader = protectedHeader.SerializeWithDataContract();
             var base64EncodedSerializedProtectedHeader = serializedProtectedHeader.Base64Encode();
-            var serializedPayload = jwsPayload.SerializeWithJavascript();
+            var serializedPayload = JsonConvert.SerializeObject(jwsPayload);
             var base64EncodedSerializedPayload = serializedPayload.Base64Encode();
             var combinedProtectedHeaderAndPayLoad = string.Format(
                 "{0}.{1}", 

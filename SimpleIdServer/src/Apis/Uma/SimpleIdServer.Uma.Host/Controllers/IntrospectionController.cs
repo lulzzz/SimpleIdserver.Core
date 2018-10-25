@@ -23,8 +23,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using SimpleIdServer.Common.Dtos.Responses;
 using SimpleIdServer.Core.Api.Introspection;
-using SimpleIdServer.Core.Common.DTOs.Requests;
-using SimpleIdServer.Core.Common.Serializers;
+using SimpleIdServer.Dtos.Requests;
+using SimpleIdServer.Lib;
 using SimpleIdServer.Core.Errors;
 using SimpleIdServer.Uma.Host.Extensions;
 

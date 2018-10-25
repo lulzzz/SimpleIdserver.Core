@@ -18,7 +18,7 @@ using System.IO;
 using System.Runtime.Serialization.Json;
 using System.Text;
 
-namespace SimpleIdServer.Core.Common.Extensions
+namespace SimpleIdServer.Lib
 {
     public static class ObjectExtensions
     {
@@ -40,16 +40,6 @@ namespace SimpleIdServer.Core.Common.Extensions
             var ms = new MemoryStream(Encoding.Unicode.GetBytes(serialized));
             var obj = serializer.ReadObject(ms);
             return (T)obj;
-        }
-
-        public static string SerializeWithJavascript(this object parameter)
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(parameter);
-        }
-
-        public static T DeserializeWithJavascript<T>(this string parameter)
-        {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(parameter);
         }
     }
 }

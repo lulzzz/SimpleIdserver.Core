@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using SimpleIdServer.Core.Common.DTOs.Responses;
+using SimpleIdServer.Dtos.Responses;
 
 namespace SimpleIdServer.AccessToken.Store
 {

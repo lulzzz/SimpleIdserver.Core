@@ -19,7 +19,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using SimpleIdServer.Common.Dtos.Responses;
-using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Lib;
 using SimpleIdServer.Uma.Core.Exceptions;
 
 namespace SimpleIdServer.Uma.Host.Middlewares

@@ -21,7 +21,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using SimpleIdServer.Core.Api.Authorization;
-using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Lib;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Extensions;
 using SimpleIdServer.Core.Helpers;
@@ -30,6 +30,7 @@ using SimpleIdServer.Core.Parameters;
 using SimpleIdServer.Core.Results;
 using SimpleIdServer.OAuth.Logging;
 using SimpleIdServer.Store;
+using Newtonsoft.Json;
 
 namespace SimpleIdServer.Core.Common
 {
@@ -220,7 +221,7 @@ namespace SimpleIdServer.Core.Common
             }
 
             _oauthEventSource.EndGeneratingAuthorizationResponseToClient(authorizationParameter.ClientId,
-               actionResult.RedirectInstruction.Parameters.SerializeWithJavascript());
+               JsonConvert.SerializeObject(actionResult.RedirectInstruction.Parameters));
         }
 
         private string GetSessionState(string clientId, string originUrl, string sessionId)

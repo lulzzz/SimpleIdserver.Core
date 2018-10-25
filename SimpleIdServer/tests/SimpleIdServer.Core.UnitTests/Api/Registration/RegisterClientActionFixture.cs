@@ -15,18 +15,18 @@
 #endregion
 
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using SimpleIdServer.Core.Api.Registration.Actions;
 using SimpleIdServer.Core.Common;
-using SimpleIdServer.Core.Common.DTOs.Requests;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.Core.Jwt;
 using SimpleIdServer.Core.Parameters;
 using SimpleIdServer.Core.Services;
+using SimpleIdServer.Dtos.Requests;
 using SimpleIdServer.OAuth.Logging;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace SimpleIdentityServer.Core.UnitTests.Api.Registration

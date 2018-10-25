@@ -19,7 +19,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Lib;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Errors;
 using SimpleIdServer.Core.Exceptions;
@@ -32,6 +32,7 @@ using SimpleIdServer.Core.Results;
 using SimpleIdServer.Core.Services;
 using SimpleIdServer.Core.Validators;
 using SimpleIdServer.OAuth.Logging;
+using Newtonsoft.Json;
 
 namespace SimpleIdServer.Core.Api.Authorization.Common
 {
@@ -90,7 +91,7 @@ namespace SimpleIdServer.Core.Api.Authorization.Common
                 confirmedConsent = await GetResourceOwnerConsent(claimsPrincipal, authorizationParameter);
             }
 
-            var serializedAuthorizationParameter = authorizationParameter.SerializeWithJavascript();
+            var serializedAuthorizationParameter = JsonConvert.SerializeObject(authorizationParameter);
             _oauthEventSource.StartProcessingAuthorizationRequest(serializedAuthorizationParameter);
             ActionResult result = null;
             var prompts = _parameterParserHelper.ParsePrompts(authorizationParameter.Prompt);

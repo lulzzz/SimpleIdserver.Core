@@ -24,7 +24,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
 using SimpleIdServer.Bus;
 using SimpleIdServer.Core;
-using SimpleIdServer.Core.Common.DTOs.Requests;
+using SimpleIdServer.Dtos.Requests;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Translation;
 using SimpleIdServer.Core.WebSite.Consent;

@@ -18,7 +18,7 @@ using System;
 using System.Threading.Tasks;
 using SimpleIdServer.Client.Errors;
 using SimpleIdServer.Client.Operations;
-using SimpleIdServer.Core.Common.DTOs.Requests;
+using SimpleIdServer.Dtos.Requests;
 
 namespace SimpleIdServer.Client
 {

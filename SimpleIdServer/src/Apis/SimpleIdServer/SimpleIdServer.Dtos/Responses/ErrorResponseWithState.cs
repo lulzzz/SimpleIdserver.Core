@@ -1,12 +1,12 @@
 ﻿using SimpleIdServer.Common.Dtos.Responses;
 using System.Runtime.Serialization;
 
-namespace SimpleIdServer.Core.Common.DTOs.Responses
+namespace SimpleIdServer.Dtos.Responses
 {
     [DataContract]
     public class ErrorResponseWithState : ErrorResponse
     {
-        [DataMember(Name = ErrorResponseWithStateNames.State)]
+        [DataMember(Name = Constants.ErrorResponseWithStateNames.State)]
         public string State { get; set; }
     }
 }

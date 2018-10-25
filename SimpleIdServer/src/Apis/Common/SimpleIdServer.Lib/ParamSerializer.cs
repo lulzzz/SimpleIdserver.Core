@@ -1,19 +1,4 @@
-﻿#region copyright
-// Copyright 2016 Habart Thierry
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-#endregion
-
+﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Specialized;
 using System.Globalization;
@@ -21,10 +6,8 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json.Linq;
 
-namespace SimpleIdServer.Core.Common.Serializers
+namespace SimpleIdServer.Lib
 {
     public interface IParamSerializer
     {
@@ -51,16 +34,6 @@ namespace SimpleIdServer.Core.Common.Serializers
         public T Deserialize<T>(NameValueCollection input)
         {
             return Deserialize<T>(this.ConvertNameValueCollection(input));
-        }
-
-        public T Deserialize<T>(IFormCollection form)
-        {
-            return Deserialize<T>(ConvertNameValueCollection(form));
-        }
-
-        public T Deserialize<T>(IQueryCollection query)
-        {
-            return Deserialize<T>(ConvertNameValueCollection(query));
         }
 
         public object Deserialize(string input)
@@ -244,36 +217,6 @@ namespace SimpleIdServer.Core.Common.Serializers
             foreach (var key in input.AllKeys)
             {
                 var values = input.GetValues(key) ?? new string[] { };
-                foreach (var value in values)
-                {
-                    output.AppendFormat("{0}={1}&", WebUtility.UrlEncode(key), WebUtility.UrlEncode(value));
-                }
-            }
-
-            return output.ToString().TrimEnd(new[] { '&' });
-        }
-		
-        private string ConvertNameValueCollection(IFormCollection form)
-        {
-            var output = new StringBuilder();
-            foreach (var key in form.Keys)
-            {
-                var values = form[key];
-                foreach (var value in values)
-                {
-                    output.AppendFormat("{0}={1}&", WebUtility.UrlEncode(key), WebUtility.UrlEncode(value));
-                }
-            }
-
-            return output.ToString().TrimEnd(new[] { '&' });
-        }
-
-        private string ConvertNameValueCollection(IQueryCollection query)
-        {
-            var output = new StringBuilder();
-            foreach (var key in query.Keys)
-            {
-                var values = query[key];
                 foreach (var value in values)
                 {
                     output.AppendFormat("{0}={1}&", WebUtility.UrlEncode(key), WebUtility.UrlEncode(value));

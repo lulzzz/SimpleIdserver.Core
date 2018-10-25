@@ -38,7 +38,7 @@ namespace SimpleIdServer.AccessToken.Store.Tests
             tokenClient.Setup(t => t.ResolveAsync(It.IsAny<string>()))
                 .Returns(Task.FromResult(new GetTokenResult
                 {
-                    Content = new Core.Common.DTOs.Responses.GrantedTokenResponse
+                    Content = new Dtos.Responses.GrantedTokenResponse
                     {
                         ExpiresIn = 3600
                     }
@@ -74,7 +74,7 @@ namespace SimpleIdServer.AccessToken.Store.Tests
                         "scope"
                     },
                     ExpirationDateTime = DateTime.UtcNow.AddSeconds(300),
-                    GrantedToken = new Core.Common.DTOs.Responses.GrantedTokenResponse()
+                    GrantedToken = new Dtos.Responses.GrantedTokenResponse()
                 }
             }));
 

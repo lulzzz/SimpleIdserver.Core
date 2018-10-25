@@ -19,7 +19,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using SimpleIdServer.Core.Api.Authorization;
-using SimpleIdServer.Core.Common.DTOs.Responses;
+using SimpleIdServer.Dtos.Responses;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Common.Repositories;
 

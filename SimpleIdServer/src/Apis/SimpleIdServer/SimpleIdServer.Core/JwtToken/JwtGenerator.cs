@@ -23,7 +23,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using SimpleIdServer.Core.Common;
-using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Lib;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.Core.Errors;

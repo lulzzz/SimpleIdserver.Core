@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 using SimpleIdServer.AccountFilter;
 using SimpleIdServer.Common.Client;
+using SimpleIdServer.Common.Client.Factories;
 using SimpleIdServer.Core.Api.Authorization;
 using SimpleIdServer.Core.Api.Authorization.Actions;
 using SimpleIdServer.Core.Api.Authorization.Common;
@@ -124,7 +125,7 @@ namespace SimpleIdServer.Core
             serviceCollection.AddTransient<IRefreshTokenGrantTypeParameterValidator, RefreshTokenGrantTypeParameterValidator>();
             serviceCollection.AddTransient<ITranslationManager, TranslationManager>();
             serviceCollection.AddTransient<IGrantedTokenHelper, GrantedTokenHelper>();
-            serviceCollection.AddCommonClient();
+            serviceCollection.AddTransient<IHttpClientFactory, HttpClientFactory>();
             serviceCollection.AddTransient<IIntrospectionActions, IntrospectionActions>();
             serviceCollection.AddTransient<IPostIntrospectionAction, PostIntrospectionAction>();
             serviceCollection.AddTransient<IIntrospectionParameterValidator, IntrospectionParameterValidator>();

@@ -1,7 +1,4 @@
-﻿using System;
-using Microsoft.Extensions.DependencyInjection;
-using SimpleIdServer.AccountFilter.Basic.Client.Operations;
-using SimpleIdServer.Common.Client;
+﻿using SimpleIdServer.AccountFilter.Basic.Client.Operations;
 using SimpleIdServer.Common.Client.Factories;
 
 namespace SimpleIdServer.AccountFilter.Basic.Client
@@ -13,45 +10,22 @@ namespace SimpleIdServer.AccountFilter.Basic.Client
 
     public class FilterClientFactory : IFilterClientFactory
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IHttpClientFactory _httpClientFactory;
 
         public FilterClientFactory()
         {
-            var services = new ServiceCollection();
-            RegisterDependencies(services);
-            _serviceProvider = services.BuildServiceProvider();
+            _httpClientFactory = new HttpClientFactory();
         }
 
         public FilterClientFactory(IHttpClientFactory httpClientFactory)
         {
-            var services = new ServiceCollection();
-            RegisterDependencies(services, httpClientFactory);
-            _serviceProvider = services.BuildServiceProvider();
+            _httpClientFactory = httpClientFactory;
         }
 
         public IFilterClient GetFilterClient()
         {
-            var result = (IFilterClient)_serviceProvider.GetService(typeof(IFilterClient));
-            return result;
-        }
-
-        private static void RegisterDependencies(IServiceCollection serviceCollection, IHttpClientFactory httpClientFactory = null)
-        {
-            if (httpClientFactory != null)
-            {
-                serviceCollection.AddSingleton(httpClientFactory);
-            }
-            else
-            {
-                serviceCollection.AddCommonClient();
-            }
-
-            serviceCollection.AddTransient<IAddFilterOperation, AddFilterOperation>();
-            serviceCollection.AddTransient<IDeleteFilterOperation, DeleteFilterOperation>();
-            serviceCollection.AddTransient<IGetAllFiltersOperation, GetAllFiltersOperation>();
-            serviceCollection.AddTransient<IGetFilterOperation, GetFilterOperation>();
-            serviceCollection.AddTransient<IUpdateFilterOperation, UpdateFilterOperation>();
-            serviceCollection.AddTransient<IFilterClient, FilterClient>();
+            return new FilterClient(new AddFilterOperation(_httpClientFactory), new DeleteFilterOperation(_httpClientFactory), new GetAllFiltersOperation(_httpClientFactory), new UpdateFilterOperation(_httpClientFactory),
+                new GetFilterOperation(_httpClientFactory));
         }
     }
 }

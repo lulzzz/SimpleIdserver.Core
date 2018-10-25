@@ -17,7 +17,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using SimpleIdServer.Core.Api.Jwks.Actions;
-using SimpleIdServer.Core.Common.DTOs.Requests;
+using SimpleIdServer.Dtos.Requests;
 
 namespace SimpleIdServer.Core.Api.Jwks
 {

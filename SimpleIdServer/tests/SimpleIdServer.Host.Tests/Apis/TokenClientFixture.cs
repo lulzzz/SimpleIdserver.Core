@@ -31,7 +31,7 @@ using SimpleIdServer.Client.Operations;
 using SimpleIdServer.Client.Selectors;
 using SimpleIdServer.Common.Client.Factories;
 using SimpleIdServer.Core.Common;
-using SimpleIdServer.Core.Common.DTOs.Responses;
+using SimpleIdServer.Dtos.Responses;
 using SimpleIdServer.Core.Extensions;
 using SimpleIdServer.Core.Jwt;
 using SimpleIdServer.Core.Jwt.Encrypt;

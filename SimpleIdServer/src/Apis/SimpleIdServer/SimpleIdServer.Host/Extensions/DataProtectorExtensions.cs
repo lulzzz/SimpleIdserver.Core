@@ -14,10 +14,10 @@
 // limitations under the License.
 #endregion
 
+using Microsoft.AspNetCore.DataProtection;
+using SimpleIdServer.Lib;
 using System;
 using System.Text;
-using Microsoft.AspNetCore.DataProtection;
-using SimpleIdServer.Core.Common.Extensions;
 
 namespace SimpleIdServer.Host.Extensions
 {

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using SimpleIdServer.Core.Api.Authorization.Actions;
 using SimpleIdServer.Core.Api.Authorization.Common;
 using SimpleIdServer.Core.Common;
-using SimpleIdServer.Core.Common.Extensions;
+using SimpleIdServer.Lib;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Errors;
 using SimpleIdServer.Core.Exceptions;
@@ -14,6 +14,7 @@ using SimpleIdServer.Core.Results;
 using SimpleIdServer.Core.Validators;
 using SimpleIdServer.OAuth.Logging;
 using Xunit;
+using Newtonsoft.Json;
 
 namespace SimpleIdentityServer.Core.UnitTests.Api.Authorization
 {
@@ -112,7 +113,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Authorization
                 Scope = scope,
                 Claims = null
             };
-            var jsonAuthorizationParameter = authorizationParameter.SerializeWithJavascript();
+            var jsonAuthorizationParameter = JsonConvert.SerializeObject(authorizationParameter);
             _processAuthorizationRequestFake.Setup(p => p.ProcessAsync(
                 It.IsAny<AuthorizationParameter>(),
                 It.IsAny<ClaimsPrincipal>(), It.IsAny<Client>(), null)).Returns(Task.FromResult(actionResult));

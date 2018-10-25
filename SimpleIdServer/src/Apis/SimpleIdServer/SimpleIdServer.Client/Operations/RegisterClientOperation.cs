@@ -21,13 +21,13 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using SimpleIdServer.Client.Results;
 using SimpleIdServer.Common.Client.Factories;
-using SimpleIdServer.Core.Common.DTOs.Responses;
+using SimpleIdServer.Dtos.Responses;
 
 namespace SimpleIdServer.Client.Operations
 {
     public interface IRegisterClientOperation
     {
-        Task<GetRegisterClientResult> ExecuteAsync(Core.Common.DTOs.Requests.ClientRequest client, Uri requestUri, string authorizationValue);
+        Task<GetRegisterClientResult> ExecuteAsync(SimpleIdServer.Dtos.Requests.ClientRequest client, Uri requestUri, string authorizationValue);
     }
 
     internal class RegisterClientOperation : IRegisterClientOperation
@@ -39,7 +39,7 @@ namespace SimpleIdServer.Client.Operations
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<GetRegisterClientResult> ExecuteAsync(Core.Common.DTOs.Requests.ClientRequest client, Uri requestUri, string authorizationValue)
+        public async Task<GetRegisterClientResult> ExecuteAsync(SimpleIdServer.Dtos.Requests.ClientRequest client, Uri requestUri, string authorizationValue)
         {
             if (client == null)
             {

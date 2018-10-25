@@ -14,9 +14,6 @@
 // limitations under the License.
 #endregion
 
-using System;
-using Microsoft.Extensions.DependencyInjection;
-using SimpleIdServer.Common.Client;
 using SimpleIdServer.Common.Client.Factories;
 
 namespace SimpleIdServer.Scim.Client
@@ -30,54 +27,31 @@ namespace SimpleIdServer.Scim.Client
 
     public class ScimClientFactory : IScimClientFactory
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IHttpClientFactory _httpClientFactory;
 
         public ScimClientFactory()
         {
-            var services = new ServiceCollection();
-            RegisterDependencies(services);
-            _serviceProvider = services.BuildServiceProvider();
+            _httpClientFactory = new HttpClientFactory();
         }
 
         public ScimClientFactory(IHttpClientFactory httpClientFactory)
         {
-            var services = new ServiceCollection();
-            RegisterDependencies(services, httpClientFactory);
-            _serviceProvider = services.BuildServiceProvider();
+            _httpClientFactory = httpClientFactory;
         }
 
         public IGroupsClient GetGroupClient()
         {
-            var groupsClient = (IGroupsClient)_serviceProvider.GetService(typeof(IGroupsClient));
-            return groupsClient;
+            return new GroupsClient(_httpClientFactory);
         }
 
         public IUsersClient GetUserClient()
         {
-            var userClient = (IUsersClient)_serviceProvider.GetService(typeof(IUsersClient));
-            return userClient;
+            return new UsersClient(_httpClientFactory);
         }
 
         public IConfigurationClient GetConfigurationClient()
         {
-            var configurationClient = (IConfigurationClient)_serviceProvider.GetService(typeof(IConfigurationClient));
-            return configurationClient;
-        }
-
-        private static void RegisterDependencies(IServiceCollection services, IHttpClientFactory httpClientFactory = null)
-        {
-            if (httpClientFactory != null)
-            {
-                services.AddSingleton(httpClientFactory);
-            }
-            else
-            {
-                services.AddCommonClient();
-            }
-
-            services.AddTransient<IGroupsClient, GroupsClient>();
-            services.AddTransient<IUsersClient, UsersClient>();
-            services.AddTransient<IConfigurationClient, ConfigurationClient>();
+            return new ConfigurationClient(_httpClientFactory);
         }
     }
 }

@@ -20,7 +20,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using SimpleIdServer.Core.Common;
-using SimpleIdServer.Core.Common.DTOs.Responses;
+using SimpleIdServer.Dtos.Responses;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.Core.Extensions;
