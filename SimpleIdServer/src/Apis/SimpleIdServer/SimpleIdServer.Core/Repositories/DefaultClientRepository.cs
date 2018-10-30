@@ -46,20 +46,6 @@ namespace SimpleIdServer.Core.Repositories
                 {
                     Common.Models.ResponseType.token
                 }
-            },
-            new Common.Models.Client
-            {
-                ClientId = "openidServer",
-                Secrets = new List<Common.Models.ClientSecret>
-                {
-                    new Common.Models.ClientSecret
-                    {
-                        Type = Common.Models.ClientSecretTypes.SharedSecret,
-                        Value = "clientSecret"
-                    }
-                },
-                ClientName = "Openid server",
-                TokenEndPointAuthMethod = Common.Models.TokenEndPointAuthenticationMethods.client_secret_post
             }
         };
 

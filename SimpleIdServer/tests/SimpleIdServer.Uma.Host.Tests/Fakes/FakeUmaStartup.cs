@@ -14,6 +14,7 @@
 // limitations under the License.
 #endregion
 
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -21,6 +22,7 @@ using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.Extensions.DependencyInjection;
 using SimpleIdServer.Bus;
 using SimpleIdServer.Client;
+using SimpleIdServer.Concurrency;
 using SimpleIdServer.Core;
 using SimpleIdServer.Core.Jwt;
 using SimpleIdServer.Logging;
@@ -38,14 +40,13 @@ using SimpleIdServer.Uma.Logging;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using SimpleIdServer.Concurrency;
 using System.Security.Claims;
 
 namespace SimpleIdServer.Uma.Host.Tests.Fakes
 {
     public class FakeUmaStartup : IStartup
     {
-        public const string DefaultSchema = "OAuth2Introspection";
+        public const string DefaultSchema = JwtBearerDefaults.AuthenticationScheme;
         private SharedContext _context;
 
         public FakeUmaStartup(SharedContext context)
@@ -72,6 +73,11 @@ namespace SimpleIdServer.Uma.Host.Tests.Fakes
             services.AddAuthorization(opts =>
             {
                 opts.AddPolicy("UmaProtection", policy =>
+                {
+                    policy.AddAuthenticationSchemes(DefaultSchema);
+                    policy.RequireAssertion(p => true);
+                });
+                opts.AddPolicy("registration", policy =>
                 {
                     policy.AddAuthenticationSchemes(DefaultSchema);
                     policy.RequireAssertion(p => true);

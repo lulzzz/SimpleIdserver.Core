@@ -14,16 +14,21 @@
 // limitations under the License.
 #endregion
 
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using SimpleIdServer.OAuth2Introspection;
+using Microsoft.IdentityModel.Tokens;
+using SimpleIdServer.Lib;
+using SimpleIdServer.Uma.Host;
 using SimpleIdServer.Uma.Host.Extensions;
 using SimpleIdServer.Uma.Host.Middlewares;
 using SimpleIdServer.Uma.Logging;
-using SimpleIdServer.UserInfoIntrospection;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 
 namespace SimpleIdServer.Uma.Startup
 {
@@ -37,24 +42,52 @@ namespace SimpleIdServer.Uma.Startup
 
             builder.AddEnvironmentVariables();
             Configuration = builder.Build();
+            _options = new AuthorizationServerOptions
+            {
+                Configuration = new AuthorizationServerConfiguration
+                {
+                    JsonWebKeys = DefaultConfiguration.GetJsonWebKeys()
+                }
+            };
         }
+
+        private AuthorizationServerOptions _options;
 
         public IConfigurationRoot Configuration { get; set; }
         
         public void ConfigureServices(IServiceCollection services)
         {
-            // OPENID
-            services.AddAuthentication(OAuth2IntrospectionOptions.AuthenticationScheme)
-                .AddOAuth2Introspection(opts =>
+            var xml = _options.Configuration.JsonWebKeys.First().SerializedKey;
+            RsaSecurityKey rsa = null;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                var provider = new RSACryptoServiceProvider();
+                provider.FromXmlStringNetCore(xml);
+                rsa = new RsaSecurityKey(provider);
+            }
+            else
+            {
+                var r = new RSAOpenSsl();
+                r.FromXmlStringNetCore(xml);
+                rsa = new RsaSecurityKey(r);
+            }
+
+            services.AddAuthentication(cfg =>
+            {
+                cfg.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                cfg.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(cfg =>
+            {
+                cfg.TokenValidationParameters = new TokenValidationParameters()
                 {
-                    opts.ClientId = "uma";
-                    opts.ClientSecret = "uma";
-                    opts.WellKnownConfigurationUrl = "http://localhost:60004/.well-known/uma2-configuration";
-                })
-		        .AddUserInfoIntrospection(opts =>
-                {
-                    opts.WellKnownConfigurationUrl = "http://localhost:60000/.well-known/openid-configuration";
-                });
+                    ValidateIssuer = true,
+                    ValidIssuer = "http://localhost:60004",
+                    ValidateAudience = false,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = rsa
+                };
+            });
             services.AddAuthorization(opts =>
             {
                 opts.AddUmaSecurityPolicy();
@@ -63,12 +96,14 @@ namespace SimpleIdServer.Uma.Startup
             services.AddCors(options => options.AddPolicy("AllowAll", p => p.AllowAnyOrigin()
                 .AllowAnyMethod()
                 .AllowAnyHeader()));
-            services.AddUmaHost(new Host.AuthorizationServerOptions());
+            services.AddUmaHost(_options);
 	        services.AddMvc();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
+            loggerFactory.AddConsole();
+            loggerFactory.AddDebug();
             app.UseAuthentication();
             app.UseCors("AllowAll");
             app.UseUmaExceptionHandler(new ExceptionHandlerMiddlewareOptions

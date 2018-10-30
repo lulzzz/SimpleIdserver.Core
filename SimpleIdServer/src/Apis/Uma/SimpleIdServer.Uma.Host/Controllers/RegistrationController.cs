@@ -1,15 +1,17 @@
-﻿using System.Net;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SimpleIdServer.Common.Dtos.Responses;
 using SimpleIdServer.Core.Api.Registration;
 using SimpleIdServer.Core.Errors;
 using SimpleIdServer.Uma.Host.DTOs.Responses;
 using SimpleIdServer.Uma.Host.Extensions;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace SimpleIdServer.Uma.Host.Controllers
 {
     [Route(Constants.RouteValues.Registration)]
+    [Authorize("registration")]
     public class RegistrationController : Controller
     {
         private readonly IRegistrationActions _registerActions;

@@ -14,9 +14,7 @@
 // limitations under the License.
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,6 +30,9 @@ using SimpleIdServer.Uma.Core;
 using SimpleIdServer.Uma.Core.Providers;
 using SimpleIdServer.Uma.Host.Configuration;
 using SimpleIdServer.Uma.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SimpleIdServer.Uma.Host.Extensions
 {
@@ -70,9 +71,14 @@ namespace SimpleIdServer.Uma.Host.Extensions
                 throw new ArgumentNullException(nameof(authorizationOptions));
             }
 
+            authorizationOptions.AddPolicy("registration", policy => // Access token with scope = register_client
+            {
+                policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
+                policy.RequireClaim("scope", "register_client");
+            });
             authorizationOptions.AddPolicy("UmaProtection", policy =>
-            {				
-				policy.AddAuthenticationSchemes("UserInfoIntrospection", "OAuth2Introspection");
+            {
+                policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
                 policy.RequireAssertion(p =>
                 {
                     if (p.User == null || p.User.Identity == null || !p.User.Identity.IsAuthenticated)
@@ -80,14 +86,14 @@ namespace SimpleIdServer.Uma.Host.Extensions
                         return false;
                     }
 
-                    var claimRole = p.User.Claims.FirstOrDefault(c => c.Type == "role");
+                    var claimRoles = p.User.Claims.Where(c => c.Type == "role");
                     var claimScopes = p.User.Claims.Where(c => c.Type == "scope");
-                    if (claimRole == null && !claimScopes.Any())
+                    if (!claimRoles.Any() && !claimScopes.Any())
                     {
                         return false;
                     }
 
-                    return claimRole != null && claimRole.Value == "administrator" || claimScopes.Any(s => s.Value == "uma_protection");
+                    return claimRoles.Any(s => s.Value == "administrator") || claimScopes.Any(s => s.Value == "uma_protection");
                 });
             });
             return authorizationOptions;
@@ -101,6 +107,7 @@ namespace SimpleIdServer.Uma.Host.Extensions
                 .AddSimpleIdentityServerCore(authorizationServerOptions.OAuthConfigurationOptions,  
                     clients: authorizationServerOptions.Configuration == null ? null : authorizationServerOptions.Configuration.Clients,
                     scopes: authorizationServerOptions.Configuration == null ? DEFAULT_SCOPES : authorizationServerOptions.Configuration.Scopes,
+                    jsonWebKeys: authorizationServerOptions.Configuration == null ? null : authorizationServerOptions.Configuration.JsonWebKeys,
                     claims: new List<ClaimAggregate>())
                 .AddSimpleIdentityServerJwt()
                 .AddDefaultTokenStore()

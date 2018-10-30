@@ -8,7 +8,7 @@ namespace SimpleIdServer.Core.Services
 
         public DefaultConfigurationService(OAuthConfigurationOptions options)
         {
-            _options = options == null ? new OAuthConfigurationOptions() : _options;
+            _options = options == null ? new OAuthConfigurationOptions() : options;
         }
 
         public Task<string> DefaultLanguageAsync()
