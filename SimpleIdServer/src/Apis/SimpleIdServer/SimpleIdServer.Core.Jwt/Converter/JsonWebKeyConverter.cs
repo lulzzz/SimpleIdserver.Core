@@ -54,8 +54,7 @@ namespace SimpleIdServer.Core.Jwt.Converter
             {
                 var keyType = jsonWebKey.FirstOrDefault(j => j.Key == Constants.JsonWebKeyParameterNames.KeyTypeName);
                 var use = jsonWebKey.FirstOrDefault(j => j.Key == Constants.JsonWebKeyParameterNames.UseName);
-                var kid =
-                    jsonWebKey.FirstOrDefault(j => j.Key == Constants.JsonWebKeyParameterNames.KeyIdentifierName);
+                var kid = jsonWebKey.FirstOrDefault(j => j.Key == Constants.JsonWebKeyParameterNames.KeyIdentifierName);
                 if (keyType.Equals(default(KeyValuePair<string, object>)) ||
                     use.Equals(default(KeyValuePair<string, object>)) ||
                     kid.Equals(default(KeyValuePair<string, object>)) ||
@@ -77,8 +76,6 @@ namespace SimpleIdServer.Core.Jwt.Converter
                     Kty = keyTypeEnum
                 };
                 jsonWebKeyInformation.Use = useEnum;
-
-
                 var serializedKey = string.Empty;
                 switch (keyType.Value.ToString())
                 {

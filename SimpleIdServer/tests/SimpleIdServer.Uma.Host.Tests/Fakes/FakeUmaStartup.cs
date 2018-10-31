@@ -29,8 +29,6 @@ using SimpleIdServer.Logging;
 using SimpleIdServer.OAuth.Logging;
 using SimpleIdServer.Store;
 using SimpleIdServer.Uma.Core;
-using SimpleIdServer.Uma.Core.Providers;
-using SimpleIdServer.Uma.Host.Configuration;
 using SimpleIdServer.Uma.Host.Controllers;
 using SimpleIdServer.Uma.Host.Middlewares;
 using SimpleIdServer.Uma.Host.Tests.MiddleWares;
@@ -72,12 +70,12 @@ namespace SimpleIdServer.Uma.Host.Tests.Fakes
             .AddFakeCustomAuth(o => { });
             services.AddAuthorization(opts =>
             {
-                opts.AddPolicy("UmaProtection", policy =>
+                opts.AddPolicy("uma_protection", policy =>
                 {
                     policy.AddAuthenticationSchemes(DefaultSchema);
                     policy.RequireAssertion(p => true);
                 });
-                opts.AddPolicy("registration", policy =>
+                opts.AddPolicy("register_client", policy =>
                 {
                     policy.AddAuthenticationSchemes(DefaultSchema);
                     policy.RequireAssertion(p => true);
@@ -149,7 +147,6 @@ namespace SimpleIdServer.Uma.Host.Tests.Fakes
             // 4. Register the services.
             services.AddTransient<SimpleIdServer.Core.Services.IConfigurationService, DefaultConfigurationService>();
             // 5. Register other classes.
-            services.AddTransient<IHostingProvider, HostingProvider>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddTransient<IUmaServerEventSource, UmaServerEventSource>();
             services.AddTransient<IIdentityServerClientFactory, FakeIdentityServerClientFactory>();

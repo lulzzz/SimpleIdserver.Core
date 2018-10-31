@@ -13,45 +13,9 @@ namespace SimpleIdServer.Core.Repositories
     {
         public ICollection<Common.Models.Client> _clients;
 
-        private List<Common.Models.Client> DEFAULT_CLIENTS = new List<Common.Models.Client>
-        {
-            new Common.Models.Client
-            {
-                ClientId = "clientAdministrator",
-                Secrets = new List<Common.Models.ClientSecret>
-                {
-                    new Common.Models.ClientSecret
-                    {
-                        Type = Common.Models.ClientSecretTypes.SharedSecret,
-                        Value = "clientSecret"
-                    }
-                },
-                ClientName = "Client administrator",
-                TokenEndPointAuthMethod = Common.Models.TokenEndPointAuthenticationMethods.client_secret_post,
-                ApplicationType = Common.Models.ApplicationTypes.native,
-                UpdateDateTime = DateTime.UtcNow,
-                CreateDateTime = DateTime.UtcNow,
-                AllowedScopes = new List<Common.Models.Scope>
-                {
-                    new Common.Models.Scope
-                    {
-                        Name = "register_client"
-                    }
-                },
-                GrantTypes = new List<Common.Models.GrantType>
-                {
-                    Common.Models.GrantType.client_credentials
-                },
-                ResponseTypes = new List<Common.Models.ResponseType>
-                {
-                    Common.Models.ResponseType.token
-                }
-            }
-        };
-
         public DefaultClientRepository(ICollection<Common.Models.Client> clients)
         {
-            _clients = clients == null ? DEFAULT_CLIENTS : clients;
+            _clients = clients == null ? new List<Common.Models.Client>() : clients;
         }
 
         public Task<bool> DeleteAsync(Common.Models.Client newClient)

@@ -44,9 +44,7 @@ namespace SimpleIdServer.Core.Api.Discovery.Actions
         public async Task<DiscoveryInformation> Execute()
         {
             var result = new DiscoveryInformation();
-
-            // Returns only the exposed scopes
-            var scopes = await _scopeRepository.GetAllAsync();
+            var scopes = await _scopeRepository.GetAllAsync().ConfigureAwait(false);
             var scopeSupportedNames = new string[0];
             if (scopes != null ||
                 scopes.Any())
@@ -71,7 +69,6 @@ namespace SimpleIdServer.Core.Api.Discovery.Actions
             result.SubjectTypesSupported = Constants.Supported.SupportedSubjectTypes.ToArray();
             result.TokenEndpointAuthMethodSupported = tokenAuthMethodSupported;
             result.IdTokenSigningAlgValuesSupported = Constants.Supported.SupportedJwsAlgs.ToArray();
-
             return result;
         }
 

@@ -14,10 +14,7 @@
 // limitations under the License.
 #endregion
 
-using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
-using SimpleIdServer.Uma.Core.Api.ConfigurationController;
-using SimpleIdServer.Uma.Core.Api.ConfigurationController.Actions;
 using SimpleIdServer.Uma.Core.Api.PermissionController;
 using SimpleIdServer.Uma.Core.Api.PermissionController.Actions;
 using SimpleIdServer.Uma.Core.Api.PolicyController;
@@ -34,6 +31,7 @@ using SimpleIdServer.Uma.Core.Repositories;
 using SimpleIdServer.Uma.Core.Services;
 using SimpleIdServer.Uma.Core.Stores;
 using SimpleIdServer.Uma.Core.Validators;
+using System.Collections.Generic;
 
 namespace SimpleIdServer.Uma.Core
 {
@@ -66,8 +64,6 @@ namespace SimpleIdServer.Uma.Core
             serviceCollection.AddTransient<IDeleteAuthorizationPolicyAction, DeleteAuthorizationPolicyAction>();
             serviceCollection.AddTransient<IGetAuthorizationPoliciesAction, GetAuthorizationPoliciesAction>();
             serviceCollection.AddTransient<IUpdatePolicyAction, UpdatePolicyAction>();
-            serviceCollection.AddTransient<IConfigurationActions, ConfigurationActions>();
-            serviceCollection.AddTransient<IGetConfigurationAction, GetConfigurationAction>();
             serviceCollection.AddTransient<IJwtTokenParser, JwtTokenParser>();
             serviceCollection.AddTransient<IAddResourceSetToPolicyAction, AddResourceSetToPolicyAction>();
             serviceCollection.AddTransient<IDeleteResourcePolicyAction, DeleteResourcePolicyAction>();

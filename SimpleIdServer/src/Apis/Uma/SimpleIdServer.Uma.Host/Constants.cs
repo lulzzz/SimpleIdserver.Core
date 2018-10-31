@@ -21,7 +21,7 @@ namespace SimpleIdServer.Uma.Host
         public static class RouteValues
         {
             public const string Configuration = ".well-known/uma2-configuration";
-            public const string ResourceSet = "rs/resource_set";
+            public const string ResourceSet = "/rs/resource_set";
             public const string Permission = "/perm";
             public const string Policies = "/policies";
             public const string Introspection = "/introspect";

@@ -3,11 +3,15 @@ using Xunit;
 using System.Collections.Generic;
 using SimpleIdServer.Core.Authenticate;
 using SimpleIdServer.Core.Common.Models;
+using SimpleIdServer.Core.Services;
+using Moq;
+using System.Threading.Tasks;
 
 namespace SimpleIdentityServer.Core.UnitTests.Authenticate
 {
     public sealed class ClientSecretPostAuthenticationFixture
     {
+        private Mock<IClientPasswordService> _clientPasswordServiceStub;
         private IClientSecretPostAuthentication _clientSecretPostAuthentication;
 
         [Fact]
@@ -45,6 +49,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Authenticate
                     }
                 }
             };
+            _clientPasswordServiceStub.Setup(c => c.Encrypt(It.IsAny<string>())).Returns(string.Empty);
 
             // ACTS & ASSERTS
             Assert.Null(_clientSecretPostAuthentication.AuthenticateClient(authenticateInstruction, firstClient));
@@ -71,6 +76,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Authenticate
                     }
                 }
             };
+            _clientPasswordServiceStub.Setup(c => c.Encrypt(It.IsAny<string>())).Returns("notCorrectClientSecret");
 
             // ACT
             var result = _clientSecretPostAuthentication.AuthenticateClient(authenticateInstruction, client);
@@ -100,6 +106,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Authenticate
                     }
                 }
             };
+            _clientPasswordServiceStub.Setup(c => c.Encrypt(It.IsAny<string>())).Returns(clientSecret);
 
             // ACT
             var result = _clientSecretPostAuthentication.AuthenticateClient(authenticateInstruction, client);
@@ -139,7 +146,8 @@ namespace SimpleIdentityServer.Core.UnitTests.Authenticate
 
         private void InitializeFakeObjects()
         {
-            _clientSecretPostAuthentication = new ClientSecretPostAuthentication();   
+            _clientPasswordServiceStub = new Mock<IClientPasswordService>();
+            _clientSecretPostAuthentication = new ClientSecretPostAuthentication(_clientPasswordServiceStub.Object);   
         }
     }
 }

@@ -1,7 +1,7 @@
-﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using SimpleIdServer.Core.Api.Jwks;
 using SimpleIdServer.Dtos.Requests;
+using System.Threading.Tasks;
 
 namespace SimpleIdServer.Uma.Host.Controllers
 {

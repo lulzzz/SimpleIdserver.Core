@@ -147,10 +147,12 @@ namespace SimpleIdServer.Host.Extensions
             IdentityServerOptions options)
         {
             services.AddSimpleIdentityServerCore(options.OAuthConfigurationOptions, 
-                clients: options.Configuration == null ? null : options.Configuration.Clients,
-                resourceOwners: options.Configuration == null ? null : options.Configuration.Users,
-                translations:options.Configuration == null ? null : options.Configuration.Translations,
-                jsonWebKeys: options.Configuration == null ? null : options.Configuration.JsonWebKeys)
+                clients: options.Configuration == null ? DefaultConfiguration.DEFAULT_CLIENTS : options.Configuration.Clients,
+                resourceOwners: options.Configuration == null ? DefaultConfiguration.DEFAULT_USERS : options.Configuration.Users,
+                translations:options.Configuration == null ? DefaultConfiguration.DEFAULT_TRANSLATIONS : options.Configuration.Translations,
+                jsonWebKeys: options.Configuration == null ? null : options.Configuration.JsonWebKeys,
+                scopes: DefaultConfiguration.DEFAULT_SCOPES,
+                claims: DefaultConfiguration.DEFAULT_CLAIMS)
                 .AddSimpleIdentityServerJwt()
                 .AddHostIdentityServer(options)
                 .AddDefaultTokenStore()

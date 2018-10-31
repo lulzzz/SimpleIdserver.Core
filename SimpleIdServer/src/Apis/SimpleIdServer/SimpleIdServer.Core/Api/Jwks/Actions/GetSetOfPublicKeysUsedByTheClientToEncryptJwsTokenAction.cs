@@ -46,8 +46,7 @@ namespace SimpleIdServer.Core.Api.Jwks.Actions
             var result = new List<Dictionary<string, object>>();
             var jsonWebKeys = await _jsonWebKeyRepository.GetAllAsync();
             // Retrieve all the JWK used by the client to encrypt the JWS
-            var jsonWebKeysUsedForEncryption =
-                jsonWebKeys.Where(jwk => jwk.Use == Use.Enc && jwk.KeyOps.Contains(KeyOperations.Encrypt));
+            var jsonWebKeysUsedForEncryption = jsonWebKeys.Where(jwk => jwk.Use == Use.Enc && jwk.KeyOps.Contains(KeyOperations.Encrypt));
             foreach (var jsonWebKey in jsonWebKeysUsedForEncryption)
             {
                 var publicKeyInformation = _jsonWebKeyEnricher.GetPublicKeyInformation(jsonWebKey);

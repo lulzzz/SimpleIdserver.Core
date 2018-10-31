@@ -37,6 +37,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Registration
         private Mock<IClientRepository> _clientRepositoryFake;
         private Mock<IGenerateClientFromRegistrationRequest> _generateClientFromRegistrationRequest;
         private Mock<IClientPasswordService> _encryptedPasswordFactoryStub;
+        private Mock<IClientInfoService> _clientInfoServiceStub;
         private IRegisterClientAction _registerClientAction;
 
         #region Exceptions
@@ -160,6 +161,8 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Registration
             _clientRepositoryFake.Setup(c => c.InsertAsync(It.IsAny<Client>()))
                 .Callback<Client>(c => client = c)
                 .Returns(Task.FromResult(true));
+            _clientInfoServiceStub.Setup(c => c.GetClientId()).Returns(Task.FromResult(Guid.NewGuid().ToString()));
+            _clientInfoServiceStub.Setup(c => c.GetClientSecret()).Returns(Task.FromResult(Guid.NewGuid().ToString()));
 
             // ACT
             var result = await _registerClientAction.Execute(registrationParameter);
@@ -169,11 +172,6 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Registration
             _clientRepositoryFake.Verify(c => c.InsertAsync(It.IsAny<Client>()));
             _oauthEventSource.Verify(s => s.EndRegistration(It.IsAny<string>(), clientName));
             Assert.NotEmpty(result.ClientSecret);
-            Assert.True(client.AllowedScopes.Contains(SimpleIdServer.Core.Constants.StandardScopes.OpenId));
-            Assert.True(client.AllowedScopes.Contains(SimpleIdServer.Core.Constants.StandardScopes.Address));
-            Assert.True(client.AllowedScopes.Contains(SimpleIdServer.Core.Constants.StandardScopes.Email));
-            Assert.True(client.AllowedScopes.Contains(SimpleIdServer.Core.Constants.StandardScopes.Phone));
-            Assert.True(client.AllowedScopes.Contains(SimpleIdServer.Core.Constants.StandardScopes.ProfileScope));
         }
 
         #endregion
@@ -184,11 +182,13 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Registration
             _clientRepositoryFake = new Mock<IClientRepository>();
             _generateClientFromRegistrationRequest = new Mock<IGenerateClientFromRegistrationRequest>();
             _encryptedPasswordFactoryStub = new Mock<IClientPasswordService>();
+            _clientInfoServiceStub = new Mock<IClientInfoService>();
             _registerClientAction = new RegisterClientAction(
                 _oauthEventSource.Object,
                 _clientRepositoryFake.Object,
                 _generateClientFromRegistrationRequest.Object,
-                _encryptedPasswordFactoryStub.Object);
+                _encryptedPasswordFactoryStub.Object,
+                _clientInfoServiceStub.Object);
         }
     }
 }

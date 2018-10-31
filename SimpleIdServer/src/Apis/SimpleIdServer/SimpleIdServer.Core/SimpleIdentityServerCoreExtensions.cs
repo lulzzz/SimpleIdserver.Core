@@ -167,6 +167,7 @@ namespace SimpleIdServer.Core
             serviceCollection.AddSingleton<ISubjectBuilder>(new DefaultSubjectBuilder());
             serviceCollection.AddSingleton<IAccountFilter>(new DefaultAccountFilter());
             serviceCollection.AddSingleton<IUserClaimsEnricher>(new DefaultUserClaimsEnricher());
+            serviceCollection.AddSingleton<IClientInfoService>(new DefaultClientInfoService());
             return serviceCollection;
         }
     }

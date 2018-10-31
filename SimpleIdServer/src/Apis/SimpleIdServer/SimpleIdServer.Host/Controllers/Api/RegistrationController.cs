@@ -21,6 +21,7 @@ using SimpleIdServer.Core.Api.Registration;
 using SimpleIdServer.Core.Errors;
 using SimpleIdServer.Dtos.Requests;
 using SimpleIdServer.Host.Extensions;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -44,7 +45,16 @@ namespace SimpleIdServer.Host.Controllers.Api
             {
                 return BuildError(ErrorCodes.InvalidRequestCode, "no parameter in body request", HttpStatusCode.BadRequest);
             }
-            
+
+            var parameter = client.ToParameter();
+            parameter.Scopes = new List<Core.Common.Models.Scope>
+            {
+                Core.Constants.StandardScopes.OpenId,
+                Core.Constants.StandardScopes.ProfileScope,
+                Core.Constants.StandardScopes.Address,
+                Core.Constants.StandardScopes.Email,
+                Core.Constants.StandardScopes.Phone
+            };
             var result = await _registerActions.PostRegistration(client.ToParameter());
             return new OkObjectResult(result);
         }

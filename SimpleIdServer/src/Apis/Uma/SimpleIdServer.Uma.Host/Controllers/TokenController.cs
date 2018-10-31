@@ -1,20 +1,20 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
+using SimpleIdServer.Common.Dtos.Responses;
+using SimpleIdServer.Core.Api.Token;
+using SimpleIdServer.Core.Common.Models;
+using SimpleIdServer.Core.Errors;
+using SimpleIdServer.Dtos.Requests;
+using SimpleIdServer.Lib;
+using SimpleIdServer.Uma.Core.Api.Token;
+using SimpleIdServer.Uma.Host.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Primitives;
-using SimpleIdServer.Common.Dtos.Responses;
-using SimpleIdServer.Core.Api.Token;
-using SimpleIdServer.Dtos.Requests;
-using SimpleIdServer.Core.Common.Models;
-using SimpleIdServer.Lib;
-using SimpleIdServer.Core.Errors;
-using SimpleIdServer.Uma.Core.Api.Token;
-using SimpleIdServer.Uma.Host.Extensions;
 
 namespace SimpleIdServer.Uma.Host.Controllers
 {

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SimpleIdServer.Common.Dtos.Responses;
 using SimpleIdServer.Core.Api.Registration;
 using SimpleIdServer.Core.Errors;
-using SimpleIdServer.Uma.Host.DTOs.Responses;
+using SimpleIdServer.Dtos.Requests;
 using SimpleIdServer.Uma.Host.Extensions;
 using System.Net;
 using System.Threading.Tasks;
@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 namespace SimpleIdServer.Uma.Host.Controllers
 {
     [Route(Constants.RouteValues.Registration)]
-    [Authorize("registration")]
     public class RegistrationController : Controller
     {
         private readonly IRegistrationActions _registerActions;
@@ -22,14 +21,16 @@ namespace SimpleIdServer.Uma.Host.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] ClientResponse client)
+        [Authorize("register_client")]
+        public async Task<IActionResult> Post([FromBody] ClientRequest client)
         {
             if (client == null)
             {
                 return BuildError(ErrorCodes.InvalidRequestCode, "no parameter in body request", HttpStatusCode.BadRequest);
             }
 
-            var result = await _registerActions.PostRegistration(client.ToParameter());
+            var issuer = Request.GetAbsoluteUriWithVirtualPath();
+            var result = await _registerActions.PostRegistration(client.ToParameter()).ConfigureAwait(false);
             return new OkObjectResult(result);
         }
 

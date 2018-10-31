@@ -185,6 +185,7 @@ namespace SimpleIdServer.EF.Repositories
                     connectedClient.UserInfoEncryptedResponseEnc = client.UserInfoEncryptedResponseEnc;
                     connectedClient.UserInfoSignedResponseAlg = client.UserInfoSignedResponseAlg;
                     connectedClient.ScimProfile = client.ScimProfile;
+                    connectedClient.RequirePkce = client.RequirePkce;
                     connectedClient.UpdateDateTime = DateTime.UtcNow;
                     var scopesNotToBeDeleted = new List<string>();
                     if (client.AllowedScopes != null)
@@ -342,7 +343,8 @@ namespace SimpleIdServer.EF.Repositories
                         ScimProfile = client.ScimProfile,
                         ClientSecrets = clientSecrets,
                         CreateDateTime = DateTime.UtcNow,
-                        UpdateDateTime = DateTime.UtcNow
+                        UpdateDateTime = DateTime.UtcNow,
+                        RequirePkce = client.RequirePkce
                     };
 
                     _context.Clients.Add(newClient);

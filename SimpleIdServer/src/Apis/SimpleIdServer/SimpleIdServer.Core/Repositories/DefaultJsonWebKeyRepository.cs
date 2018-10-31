@@ -1,13 +1,13 @@
-﻿using System;
+﻿using SimpleIdServer.Core.Common;
+using SimpleIdServer.Core.Common.Repositories;
+using SimpleIdServer.Core.Extensions;
+using SimpleIdServer.Lib;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
-using SimpleIdServer.Core.Common;
-using SimpleIdServer.Lib;
-using SimpleIdServer.Core.Common.Repositories;
-using SimpleIdServer.Core.Extensions;
 
 namespace SimpleIdServer.Core.Repositories
 {

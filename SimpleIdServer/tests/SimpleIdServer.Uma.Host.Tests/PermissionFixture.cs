@@ -42,7 +42,6 @@ namespace SimpleIdServer.Uma.Host.Tests
             _server = server;
         }
 
-
         #region Errors
 
         [Fact]

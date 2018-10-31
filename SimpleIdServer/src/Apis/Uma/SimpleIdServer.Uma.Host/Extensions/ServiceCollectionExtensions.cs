@@ -27,8 +27,6 @@ using SimpleIdServer.Logging;
 using SimpleIdServer.OAuth.Logging;
 using SimpleIdServer.Store;
 using SimpleIdServer.Uma.Core;
-using SimpleIdServer.Uma.Core.Providers;
-using SimpleIdServer.Uma.Host.Configuration;
 using SimpleIdServer.Uma.Logging;
 using System;
 using System.Collections.Generic;
@@ -38,20 +36,6 @@ namespace SimpleIdServer.Uma.Host.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        private static List<Scope> DEFAULT_SCOPES = new List<Scope>
-        {
-            new Scope
-            {
-                Name = "uma_protection",
-                Description = "Access to UMA permission, resource set",
-                IsOpenIdScope = false,
-                IsDisplayedInConsent = false,
-                Type = ScopeType.ProtectedApi,
-                UpdateDateTime = DateTime.UtcNow,
-                CreateDateTime = DateTime.UtcNow
-            }
-        };
-
         public static IServiceCollection AddUmaHost(this IServiceCollection services, AuthorizationServerOptions authorizationServerOptions)
         {
             if (services == null)
@@ -71,12 +55,12 @@ namespace SimpleIdServer.Uma.Host.Extensions
                 throw new ArgumentNullException(nameof(authorizationOptions));
             }
 
-            authorizationOptions.AddPolicy("registration", policy => // Access token with scope = register_client
+            authorizationOptions.AddPolicy("register_client", policy =>
             {
                 policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
                 policy.RequireClaim("scope", "register_client");
             });
-            authorizationOptions.AddPolicy("UmaProtection", policy =>
+            authorizationOptions.AddPolicy("uma_protection", policy =>
             {
                 policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
                 policy.RequireAssertion(p =>
@@ -106,7 +90,7 @@ namespace SimpleIdServer.Uma.Host.Extensions
                 authorizationServerOptions.Configuration == null ? null : authorizationServerOptions.Configuration.Policies)
                 .AddSimpleIdentityServerCore(authorizationServerOptions.OAuthConfigurationOptions,  
                     clients: authorizationServerOptions.Configuration == null ? null : authorizationServerOptions.Configuration.Clients,
-                    scopes: authorizationServerOptions.Configuration == null ? DEFAULT_SCOPES : authorizationServerOptions.Configuration.Scopes,
+                    scopes: authorizationServerOptions.Configuration == null ? DefaultConfiguration.DEFAULT_SCOPES : authorizationServerOptions.Configuration.Scopes,
                     jsonWebKeys: authorizationServerOptions.Configuration == null ? null : authorizationServerOptions.Configuration.JsonWebKeys,
                     claims: new List<ClaimAggregate>())
                 .AddSimpleIdentityServerJwt()
@@ -116,7 +100,6 @@ namespace SimpleIdServer.Uma.Host.Extensions
             services.AddTechnicalLogging();
             services.AddOAuthLogging();
             services.AddUmaLogging();
-            services.AddTransient<IHostingProvider, HostingProvider>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddTransient<IUmaServerEventSource, UmaServerEventSource>();
         }

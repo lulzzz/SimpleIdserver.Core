@@ -1,32 +1,16 @@
-﻿#region copyright
-// Copyright 2015 Habart Thierry
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-#endregion
-
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
-using SimpleIdServer.Core.Common;
-using SimpleIdServer.Dtos.Responses;
+﻿using SimpleIdServer.Core.Common;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.Core.Extensions;
 using SimpleIdServer.Core.Parameters;
 using SimpleIdServer.Core.Services;
+using SimpleIdServer.Dtos.Responses;
 using SimpleIdServer.OAuth.Logging;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SimpleIdServer.Core.Api.Registration.Actions
 {
@@ -40,18 +24,17 @@ namespace SimpleIdServer.Core.Api.Registration.Actions
         private readonly IOAuthEventSource _oauthEventSource;
         private readonly IClientRepository _clientRepository;
         private readonly IGenerateClientFromRegistrationRequest _generateClientFromRegistrationRequest;
-        private readonly IClientPasswordService _encryptedPasswordFactory;
+        private readonly IClientPasswordService _clientPasswordService;
+        private readonly IClientInfoService _clientInfoService;
 
-        public RegisterClientAction(
-            IOAuthEventSource oauthEventSource,
-            IClientRepository clientRepository,
-            IGenerateClientFromRegistrationRequest generateClientFromRegistrationRequest,
-            IClientPasswordService encryptedPasswordFactory)
+        public RegisterClientAction(IOAuthEventSource oauthEventSource, IClientRepository clientRepository, IGenerateClientFromRegistrationRequest generateClientFromRegistrationRequest, 
+            IClientPasswordService clientPasswordService, IClientInfoService clientInfoService)
         {
             _oauthEventSource = oauthEventSource;
             _clientRepository = clientRepository;
             _generateClientFromRegistrationRequest = generateClientFromRegistrationRequest;
-            _encryptedPasswordFactory = encryptedPasswordFactory;
+            _clientPasswordService = clientPasswordService;
+            _clientInfoService = clientInfoService;
         }
 
         public async Task<ClientRegistrationResponse> Execute(RegistrationParameter registrationParameter)
@@ -62,21 +45,10 @@ namespace SimpleIdServer.Core.Api.Registration.Actions
             }
 
             _oauthEventSource.StartRegistration(registrationParameter.ClientName);
+            var clientId = await _clientInfoService.GetClientId().ConfigureAwait(false);
             var client = _generateClientFromRegistrationRequest.Execute(registrationParameter);
-            client.AllowedScopes = new List<Scope>
-            {
-                Constants.StandardScopes.OpenId,
-                Constants.StandardScopes.ProfileScope,
-                Constants.StandardScopes.Address,
-                Constants.StandardScopes.Email,
-                Constants.StandardScopes.Phone
-            };
-            var clientId = Guid.NewGuid().ToString();
-            if (string.IsNullOrWhiteSpace(client.ClientName))
-            {
-                client.ClientName = "Unknown " + clientId;
-            }
-
+            client.AllowedScopes = registrationParameter.Scopes;
+            client.ClientId = clientId;
             var result = new ClientRegistrationResponse
             {
                 ClientId = clientId,
@@ -87,9 +59,7 @@ namespace SimpleIdServer.Core.Api.Registration.Actions
                 ClientName = GetDefaultValue(client.ClientName),
                 Contacts = GetDefaultValues(client.Contacts).ToArray(),
                 DefaultAcrValues = GetDefaultValue(client.DefaultAcrValues),
-                GrantTypes = client.GrantTypes == null ?
-                    new string[0] : 
-                    client.GrantTypes.Select(g => Enum.GetName(typeof(GrantType), g)).ToArray(),
+                GrantTypes = client.GrantTypes == null ? new string[0] : client.GrantTypes.Select(g => Enum.GetName(typeof(GrantType), g)).ToArray(),
                 DefaultMaxAge = client.DefaultMaxAge,
                 IdTokenEncryptedResponseAlg = GetDefaultValue(client.IdTokenEncryptedResponseAlg),
                 IdTokenEncryptedResponseEnc = GetDefaultValue(client.IdTokenEncryptedResponseEnc),
@@ -109,8 +79,7 @@ namespace SimpleIdServer.Core.Api.Registration.Actions
                 TosUri = GetDefaultValue(client.TosUri),
                 SectorIdentifierUri = GetDefaultValue(client.SectorIdentifierUri),
                 SubjectType = GetDefaultValue(client.SubjectType),
-                ResponseTypes = client.ResponseTypes == null ? new string[0] :
-                    client.ResponseTypes.Select(r => Enum.GetName(typeof(ResponseType), r)).ToArray(),
+                ResponseTypes = client.ResponseTypes == null ? new string[0] : client.ResponseTypes.Select(r => Enum.GetName(typeof(ResponseType), r)).ToArray(),
                 RequestUris = GetDefaultValues(client.RequestUris).ToList(),
                 RedirectUris = GetDefaultValues(client.RedirectionUrls).ToArray(),
                 PostLogoutRedirectUris = GetDefaultValues(client.PostLogoutRedirectUris).ToArray(),
@@ -122,19 +91,18 @@ namespace SimpleIdServer.Core.Api.Registration.Actions
 
             if (client.TokenEndPointAuthMethod != TokenEndPointAuthenticationMethods.private_key_jwt)
             {
-                result.ClientSecret = Guid.NewGuid().ToString();
+                result.ClientSecret = await _clientInfoService.GetClientSecret().ConfigureAwait(false);
                 client.Secrets = new List<ClientSecret>
                 {
                     new ClientSecret
                     {
                         Type = ClientSecretTypes.SharedSecret,
-                        Value = _encryptedPasswordFactory.Encrypt(result.ClientSecret)
+                        Value = _clientPasswordService.Encrypt(result.ClientSecret)
                     }
                 };
             }
 
-            client.ClientId = result.ClientId;
-            await _clientRepository.InsertAsync(client);
+            await _clientRepository.InsertAsync(client).ConfigureAwait(false);
             _oauthEventSource.EndRegistration(result.ClientId, client.ClientName);
             return result;
         }

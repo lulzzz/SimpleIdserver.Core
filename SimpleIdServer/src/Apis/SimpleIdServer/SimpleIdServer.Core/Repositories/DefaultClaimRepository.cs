@@ -14,36 +14,9 @@ namespace SimpleIdServer.Core.Repositories
     {
         public ICollection<ClaimAggregate> _claims;
 
-        private List<ClaimAggregate> DEFAULT_CLAIMS = new List<ClaimAggregate>
-        {
-            new ClaimAggregate { Code = Jwt.Constants.StandardResourceOwnerClaimNames.Subject, IsIdentifier = true },
-            new ClaimAggregate { Code = Jwt.Constants.StandardResourceOwnerClaimNames.Name },
-            new ClaimAggregate { Code = Jwt.Constants.StandardResourceOwnerClaimNames.FamilyName },
-            new ClaimAggregate { Code = Jwt.Constants.StandardResourceOwnerClaimNames.GivenName },
-            new ClaimAggregate { Code = Jwt.Constants.StandardResourceOwnerClaimNames.MiddleName },
-            new ClaimAggregate { Code = Jwt.Constants.StandardResourceOwnerClaimNames.NickName },
-            new ClaimAggregate { Code = Jwt.Constants.StandardResourceOwnerClaimNames.PreferredUserName },
-            new ClaimAggregate { Code = Jwt.Constants.StandardResourceOwnerClaimNames.Profile },
-            new ClaimAggregate { Code = Jwt.Constants.StandardResourceOwnerClaimNames.Picture },
-            new ClaimAggregate { Code = Jwt.Constants.StandardResourceOwnerClaimNames.WebSite },
-            new ClaimAggregate { Code = Jwt.Constants.StandardResourceOwnerClaimNames.Gender },
-            new ClaimAggregate { Code = Jwt.Constants.StandardResourceOwnerClaimNames.BirthDate },
-            new ClaimAggregate { Code = Jwt.Constants.StandardResourceOwnerClaimNames.ZoneInfo },
-            new ClaimAggregate { Code = Jwt.Constants.StandardResourceOwnerClaimNames.Locale },
-            new ClaimAggregate { Code = Jwt.Constants.StandardResourceOwnerClaimNames.UpdatedAt },
-            new ClaimAggregate { Code = Jwt.Constants.StandardResourceOwnerClaimNames.Email },
-            new ClaimAggregate { Code = Jwt.Constants.StandardResourceOwnerClaimNames.EmailVerified },
-            new ClaimAggregate { Code = Jwt.Constants.StandardResourceOwnerClaimNames.Address },
-            new ClaimAggregate { Code = Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber },
-            new ClaimAggregate { Code = Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumberVerified },
-            new ClaimAggregate { Code = Jwt.Constants.StandardResourceOwnerClaimNames.Role },
-            new ClaimAggregate { Code = Jwt.Constants.StandardResourceOwnerClaimNames.ScimId },
-            new ClaimAggregate { Code = Jwt.Constants.StandardResourceOwnerClaimNames.ScimLocation }
-        };
-
         public DefaultClaimRepository(ICollection<ClaimAggregate> claims)
         {
-            _claims = claims == null ? DEFAULT_CLAIMS : claims;
+            _claims = claims == null ? new List<ClaimAggregate>() : claims;
         }
 
         public Task<bool> Delete(string code)

@@ -17,18 +17,26 @@
 using System;
 using System.Linq;
 using SimpleIdServer.Core.Common.Models;
+using SimpleIdServer.Core.Services;
 
 namespace SimpleIdServer.Core.Authenticate
 {
     public interface IClientSecretBasicAuthentication
     {
-        Core.Common.Models.Client AuthenticateClient(AuthenticateInstruction instruction, Core.Common.Models.Client client);
+        Client AuthenticateClient(AuthenticateInstruction instruction, Client client);
         string GetClientId(AuthenticateInstruction instruction);
     }
 
     public class ClientSecretBasicAuthentication : IClientSecretBasicAuthentication
     {
-        public Core.Common.Models.Client AuthenticateClient(AuthenticateInstruction instruction, Core.Common.Models.Client client)
+        private readonly IClientPasswordService _clientPasswordService;
+
+        public ClientSecretBasicAuthentication(IClientPasswordService clientPasswordService)
+        {
+            _clientPasswordService = clientPasswordService;
+        }
+
+        public Client AuthenticateClient(AuthenticateInstruction instruction, Client client)
         {
             if (client == null || instruction == null)
             {
@@ -46,9 +54,7 @@ namespace SimpleIdServer.Core.Authenticate
                 return null;
             }
 
-            var sameSecret = string.Compare(clientSecret.Value,
-                instruction.ClientSecretFromAuthorizationHeader,
-                StringComparison.CurrentCultureIgnoreCase) == 0;
+            var sameSecret = string.Compare(clientSecret.Value, _clientPasswordService.Encrypt(instruction.ClientSecretFromAuthorizationHeader), StringComparison.CurrentCultureIgnoreCase) == 0;
             return sameSecret ? client : null;
         }
 
