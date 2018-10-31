@@ -14,6 +14,7 @@
 // limitations under the License.
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -138,6 +139,164 @@ namespace SimpleIdServer.Host.Tests.Stores
             };
         }
 
+        public static List<Scope> Scopes()
+        {
+            return new List<Scope>
+            {
+                new Scope
+                {
+                    Name = "openid",
+                    IsExposed = true,
+                    IsOpenIdScope = true,
+                    IsDisplayedInConsent = true,
+                    Description = "access to the openid scope",
+                    Type = ScopeType.ProtectedApi,
+                    Claims = new List<string> { },
+                    CreateDateTime = DateTime.UtcNow,
+                    UpdateDateTime = DateTime.UtcNow
+                },
+                new Scope
+                {
+                    Name = "profile",
+                    IsExposed = true,
+                    IsOpenIdScope = true,
+                    Description = "Access to the profile",
+                    Claims = new List<string>
+                    {
+                        Core.Jwt.Constants.StandardResourceOwnerClaimNames.Name,
+                        Core.Jwt.Constants.StandardResourceOwnerClaimNames.FamilyName,
+                        Core.Jwt.Constants.StandardResourceOwnerClaimNames.GivenName,
+                        Core.Jwt.Constants.StandardResourceOwnerClaimNames.MiddleName,
+                        Core.Jwt.Constants.StandardResourceOwnerClaimNames.NickName,
+                        Core.Jwt.Constants.StandardResourceOwnerClaimNames.PreferredUserName,
+                        Core.Jwt.Constants.StandardResourceOwnerClaimNames.Profile,
+                        Core.Jwt.Constants.StandardResourceOwnerClaimNames.Picture,
+                        Core.Jwt.Constants.StandardResourceOwnerClaimNames.WebSite,
+                        Core.Jwt.Constants.StandardResourceOwnerClaimNames.Gender,
+                        Core.Jwt.Constants.StandardResourceOwnerClaimNames.BirthDate,
+                        Core.Jwt.Constants.StandardResourceOwnerClaimNames.ZoneInfo,
+                        Core.Jwt.Constants.StandardResourceOwnerClaimNames.Locale,
+                        Core.Jwt.Constants.StandardResourceOwnerClaimNames.UpdatedAt
+                    },
+                    Type = ScopeType.ResourceOwner,
+                    IsDisplayedInConsent = true,
+                    CreateDateTime = DateTime.UtcNow,
+                    UpdateDateTime = DateTime.UtcNow
+                },
+                new Scope
+                {
+                    Name = "scim",
+                    IsExposed = true,
+                    IsOpenIdScope = true,
+                    Description = "Access to the scim",
+                    Claims = new List<string>
+                    {
+                        Core.Jwt.Constants.StandardResourceOwnerClaimNames.ScimId,
+                        Core.Jwt.Constants.StandardResourceOwnerClaimNames.ScimLocation
+                    },
+                    Type = ScopeType.ResourceOwner,
+                    IsDisplayedInConsent = true,
+                    CreateDateTime = DateTime.UtcNow,
+                    UpdateDateTime = DateTime.UtcNow
+                },
+                new Scope
+                {
+                    Name = "email",
+                    IsExposed = true,
+                    IsOpenIdScope = true,
+                    IsDisplayedInConsent = true,
+                    Description = "Access to the email",
+                    Claims = new List<string>
+                    {
+                        Core.Jwt.Constants.StandardResourceOwnerClaimNames.Email,
+                        Core.Jwt.Constants.StandardResourceOwnerClaimNames.EmailVerified
+                    },
+                    Type = ScopeType.ResourceOwner,
+                    CreateDateTime = DateTime.UtcNow,
+                    UpdateDateTime = DateTime.UtcNow
+                },
+                new Scope
+                {
+                    Name = "address",
+                    IsExposed = true,
+                    IsOpenIdScope = true,
+                    IsDisplayedInConsent = true,
+                    Description = "Access to the address",
+                    Claims = new List<string>
+                    {
+                        Core.Jwt.Constants.StandardResourceOwnerClaimNames.Address
+                    },
+                    Type = ScopeType.ResourceOwner,
+                    CreateDateTime = DateTime.UtcNow,
+                    UpdateDateTime = DateTime.UtcNow
+                },
+                new Scope
+                {
+                    Name = "phone",
+                    IsExposed = true,
+                    IsOpenIdScope = true,
+                    IsDisplayedInConsent = true,
+                    Description = "Access to the phone",
+                    Claims = new List<string>
+                    {
+                        Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber,
+                        Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumberVerified
+                    },
+                    Type = ScopeType.ResourceOwner,
+                    CreateDateTime = DateTime.UtcNow,
+                    UpdateDateTime = DateTime.UtcNow
+                },
+                new Scope
+                {
+                    Name = "role",
+                    IsExposed = true,
+                    IsOpenIdScope = false,
+                    IsDisplayedInConsent = true,
+                    Description = "Access to your roles",
+                    Claims = new List<string>
+                    {
+                        Core.Jwt.Constants.StandardResourceOwnerClaimNames.Role
+                    },
+                    Type = ScopeType.ResourceOwner,
+                    CreateDateTime = DateTime.UtcNow,
+                    UpdateDateTime = DateTime.UtcNow
+                },
+                new Scope
+                {
+                    Name = "register_client",
+                    IsExposed = false,
+                    IsOpenIdScope = false,
+                    IsDisplayedInConsent = true,
+                    Description = "Register a client",
+                    Type = ScopeType.ProtectedApi,
+                    CreateDateTime = DateTime.UtcNow,
+                    UpdateDateTime = DateTime.UtcNow
+                },
+                new Scope
+                {
+                    Name = "manage_profile",
+                    IsExposed = false,
+                    IsOpenIdScope = false,
+                    IsDisplayedInConsent = true,
+                    Description = "Manage the user's profiles",
+                    Type = ScopeType.ProtectedApi,
+                    CreateDateTime = DateTime.UtcNow,
+                    UpdateDateTime = DateTime.UtcNow
+                },
+                new Scope
+                {
+                    Name = "manage_account_filtering",
+                    IsExposed = false,
+                    IsOpenIdScope = false,
+                    IsDisplayedInConsent = true,
+                    Description = "Manage the account filtering",
+                    Type = ScopeType.ProtectedApi,
+                    CreateDateTime = DateTime.UtcNow,
+                    UpdateDateTime = DateTime.UtcNow
+                }
+            };
+        }
+
         public static List<ResourceOwner> Users()
         {
             return new List<ResourceOwner>
@@ -150,6 +309,7 @@ namespace SimpleIdServer.Host.Tests.Stores
                         {
                             new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject, "administrator"),
                             new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Role, "administrator"),
+                            new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber, "phone"),
                             new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Address, "{ country : 'france' }")
                         },
                         Password = "password",
