@@ -177,6 +177,7 @@ namespace SimpleIdServer.Core.Repositories
             client.UserInfoEncryptedResponseAlg = newClient.UserInfoEncryptedResponseAlg;
             client.UserInfoEncryptedResponseEnc = newClient.UserInfoEncryptedResponseEnc;
             client.UserInfoSignedResponseAlg = newClient.UserInfoSignedResponseAlg;
+            client.AllowedScopes = newClient.AllowedScopes;
             return Task.FromResult(true);
         }
     }
