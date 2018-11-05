@@ -55,7 +55,7 @@ namespace SimpleIdServer.Host.Controllers.Api
                 Core.Constants.StandardScopes.Email,
                 Core.Constants.StandardScopes.Phone
             };
-            var result = await _registerActions.PostRegistration(client.ToParameter());
+            var result = await _registerActions.PostRegistration(parameter);
             return new OkObjectResult(result);
         }
 

@@ -28,6 +28,85 @@ namespace SimpleIdServer.Uma.Host
                 Type = ScopeType.ProtectedApi,
                 UpdateDateTime = DateTime.UtcNow,
                 CreateDateTime = DateTime.UtcNow
+            },
+            new Scope
+            {
+                Name = "adminapi",
+                IsExposed = false,
+                IsOpenIdScope = false,
+                IsDisplayedInConsent = true,
+                Description = "Access to the admin ui",
+                Type = ScopeType.ProtectedApi,
+                UpdateDateTime = DateTime.UtcNow,
+                CreateDateTime = DateTime.UtcNow
+            }
+        };
+
+        public static List<Client> DEFAULT_CLIENTS = new List<Client>
+        {
+            new Client
+            {
+                ClientId = "registrationClient",
+                Secrets = new List<ClientSecret>
+                {
+                    new ClientSecret
+                    {
+                        Type = ClientSecretTypes.SharedSecret,
+                        Value = "registrationPassword"
+                    }
+                },
+                ClientName = "Client administrator",
+                TokenEndPointAuthMethod = TokenEndPointAuthenticationMethods.client_secret_post,
+                ApplicationType = ApplicationTypes.native,
+                UpdateDateTime = DateTime.UtcNow,
+                CreateDateTime = DateTime.UtcNow,
+                AllowedScopes = new List<Scope>
+                {
+                    new Scope
+                    {
+                        Name = "register_client"
+                    }
+                },
+                GrantTypes = new List<GrantType>
+                {
+                    GrantType.client_credentials
+                },
+                ResponseTypes = new List<ResponseType>
+                {
+                    ResponseType.token
+                }
+            },
+            new Client
+            {
+                ClientId = "adminUiClient",
+                Secrets = new List<ClientSecret>
+                {
+                    new ClientSecret
+                    {
+                        Type = ClientSecretTypes.SharedSecret,
+                        Value = "adminUiPassword"
+                    }
+                },
+                ClientName = "Client administrator",
+                TokenEndPointAuthMethod = TokenEndPointAuthenticationMethods.client_secret_post,
+                ApplicationType = ApplicationTypes.native,
+                UpdateDateTime = DateTime.UtcNow,
+                CreateDateTime = DateTime.UtcNow,
+                AllowedScopes = new List<Scope>
+                {
+                    new Scope
+                    {
+                        Name = "adminapi"
+                    }
+                },
+                GrantTypes = new List<GrantType>
+                {
+                    GrantType.client_credentials
+                },
+                ResponseTypes = new List<ResponseType>
+                {
+                    ResponseType.token
+                }
             }
         };
     }

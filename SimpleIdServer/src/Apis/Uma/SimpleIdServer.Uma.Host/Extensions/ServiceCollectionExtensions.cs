@@ -86,12 +86,12 @@ namespace SimpleIdServer.Uma.Host.Extensions
         private static void RegisterServices(IServiceCollection services, AuthorizationServerOptions authorizationServerOptions)
         {
             services.AddSimpleIdServerUmaCore(authorizationServerOptions.UmaConfigurationOptions, 
-                authorizationServerOptions.Configuration == null ? null : authorizationServerOptions.Configuration.Resources,
-                authorizationServerOptions.Configuration == null ? null : authorizationServerOptions.Configuration.Policies)
+                authorizationServerOptions.Configuration.Resources == null ? null : authorizationServerOptions.Configuration.Resources,
+                authorizationServerOptions.Configuration.Policies == null ? null : authorizationServerOptions.Configuration.Policies)
                 .AddSimpleIdentityServerCore(authorizationServerOptions.OAuthConfigurationOptions,  
-                    clients: authorizationServerOptions.Configuration == null ? null : authorizationServerOptions.Configuration.Clients,
-                    scopes: authorizationServerOptions.Configuration == null ? DefaultConfiguration.DEFAULT_SCOPES : authorizationServerOptions.Configuration.Scopes,
-                    jsonWebKeys: authorizationServerOptions.Configuration == null ? null : authorizationServerOptions.Configuration.JsonWebKeys,
+                    clients: authorizationServerOptions.Configuration.Clients == null ? DefaultConfiguration.DEFAULT_CLIENTS : authorizationServerOptions.Configuration.Clients,
+                    scopes: authorizationServerOptions.Configuration.Scopes == null ? DefaultConfiguration.DEFAULT_SCOPES : authorizationServerOptions.Configuration.Scopes,
+                    jsonWebKeys: authorizationServerOptions.Configuration.JsonWebKeys == null ? null : authorizationServerOptions.Configuration.JsonWebKeys,
                     claims: new List<ClaimAggregate>())
                 .AddSimpleIdentityServerJwt()
                 .AddDefaultTokenStore()
