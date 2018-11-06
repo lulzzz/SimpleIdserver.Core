@@ -54,7 +54,8 @@ namespace SimpleIdServer.Host.Controllers.Api
                 Core.Constants.StandardScopes.Address,
                 Core.Constants.StandardScopes.Email,
                 Core.Constants.StandardScopes.Phone,
-                Core.Constants.StandardScopes.Role
+                Core.Constants.StandardScopes.Role,
+                Core.Constants.StandardScopes.Scim
             };
             var result = await _registerActions.PostRegistration(parameter);
             return new OkObjectResult(result);

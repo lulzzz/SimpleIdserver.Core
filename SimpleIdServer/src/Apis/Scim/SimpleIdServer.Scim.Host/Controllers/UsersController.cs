@@ -286,7 +286,11 @@ namespace SimpleIdServer.Scim.Host.Controllers
             var claim = claimsPrincipal.Claims.FirstOrDefault(c => c.Type == "sub");
             if (claim == null)
             {
-                return null;
+                claim = claimsPrincipal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+                if (claim == null)
+                {
+                    return null;
+                }
             }
 
             return claim.Value;

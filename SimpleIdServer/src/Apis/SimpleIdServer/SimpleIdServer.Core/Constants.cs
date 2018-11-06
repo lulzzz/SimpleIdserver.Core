@@ -158,6 +158,21 @@ namespace SimpleIdServer.Core
                 Type = ScopeType.ResourceOwner
             };
 
+            public static Scope Scim = new Scope
+            {
+                Name = "scim",
+                IsExposed = true,
+                IsOpenIdScope = true,
+                IsDisplayedInConsent = true,
+                Description = "Access to the scim",
+                Claims = new List<string>
+                {
+                    Jwt.Constants.StandardResourceOwnerClaimNames.ScimId,
+                    Jwt.Constants.StandardResourceOwnerClaimNames.ScimLocation
+                },
+                Type = ScopeType.ResourceOwner
+            };
+
             public static Scope OpenId = new Scope
             {
                 Name = "openid",
