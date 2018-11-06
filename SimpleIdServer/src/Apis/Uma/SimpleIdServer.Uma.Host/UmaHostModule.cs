@@ -25,11 +25,18 @@ namespace SimpleIdServer.Uma.Host
     {
         private const string STORE_LOCATION_NAME = "StoreLocation";
         private const string FIND_BY_SUBJECT_DISTINGUIDES_NAME = "FindBySubjectDistinguishedName";
+        public const string OPENID_STORE_LOCATION_NAME = "OpenIdStoreLocation";
+        public const string OPENID_FIND_BY_SUBJECT_DISTINGUISHED_NAME = "OpenIdFindBySubjectDistinguishedName";
+        public const string OAUTH_ISSUER = "OauthIssuer";
+        public const string OPENID_ISSUER = "OpenIdIssuer";
+        public const string DEFAULT_OPENID_ISSUER = "http://localhost:60000";
+        public const string DEFAULT_OAUTH_ISSUER = "http://localhost:60004";
         private static Dictionary<string, StoreLocation> _mappingStrToStoreLocation = new Dictionary<string, StoreLocation>
         {
             { "CurrentUser", StoreLocation.CurrentUser },
             { "LocalMachine", StoreLocation.LocalMachine }
         };
+        public const string OPENID_PUBLIC_KEY_FILE_NAME = "openid_puk.txt";
         private IDictionary<string, string> _properties;
         private AuthorizationServerOptions _options;
 
@@ -37,7 +44,7 @@ namespace SimpleIdServer.Uma.Host
 
         public void Init(IDictionary<string, string> properties)
         {
-            _properties = properties;
+            _properties = properties == null ? new Dictionary<string, string>() : properties;
             AspPipelineContext.Instance().ConfigureServiceContext.Initialized += HandleServiceContextInitialized;
             AspPipelineContext.Instance().ConfigureServiceContext.MvcAdded += HandleMvcAdded;
             AspPipelineContext.Instance().ConfigureServiceContext.AuthenticationAdded += HandleAuthenticationAdded;
@@ -58,22 +65,22 @@ namespace SimpleIdServer.Uma.Host
 
         private void HandleAuthenticationAdded(object sender, EventArgs e)
         {
-            RsaSecurityKey rsa = null;
-            var xml = _options.Configuration.JsonWebKeys.First().SerializedKey;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            var oauthSecurityKey = GetSecurityKey(STORE_LOCATION_NAME, FIND_BY_SUBJECT_DISTINGUIDES_NAME, "puk.txt");
+            var openidSecurityKey = GetSecurityKey(OPENID_STORE_LOCATION_NAME, OPENID_FIND_BY_SUBJECT_DISTINGUISHED_NAME, OPENID_PUBLIC_KEY_FILE_NAME);
+            var openidIssuer = DEFAULT_OPENID_ISSUER;
+            var oauthIssuer = DEFAULT_OAUTH_ISSUER;
+            if (_properties.ContainsKey(OAUTH_ISSUER))
             {
-                var provider = new RSACryptoServiceProvider();
-                provider.FromXmlStringNetCore(xml);
-                rsa = new RsaSecurityKey(provider);
-            }
-            else
-            {
-                var r = new RSAOpenSsl();
-                r.FromXmlStringNetCore(xml);
-                rsa = new RsaSecurityKey(r);
+                oauthIssuer = _properties[OAUTH_ISSUER];
             }
 
-            AspPipelineContext.Instance().ConfigureServiceContext.Services.AddAuthentication(cfg =>
+            if (_properties.ContainsKey(OPENID_ISSUER))
+            {
+                openidIssuer = _properties[OPENID_ISSUER];
+            }
+
+            var services = AspPipelineContext.Instance().ConfigureServiceContext.Services;
+            services.AddAuthentication(cfg =>
             {
                 cfg.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 cfg.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -82,10 +89,23 @@ namespace SimpleIdServer.Uma.Host
             {
                 cfg.TokenValidationParameters = new TokenValidationParameters()
                 {
+                    ValidateIssuer = true,
+                    ValidIssuers = new List<string>
+                    {
+                        oauthIssuer,
+                        openidIssuer
+                    },
                     ValidateAudience = false,
-                    ValidateIssuer = false,
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = rsa
+                    IssuerSigningKeyResolver = (string token, SecurityToken securityToken, string kid, TokenValidationParameters validationParameters) =>
+                    {
+                        List<SecurityKey> keys = new List<SecurityKey>
+                        {
+                            oauthSecurityKey,
+                            openidSecurityKey
+                        };
+                        return keys;
+                    }
                 };
             });
         }
@@ -193,7 +213,50 @@ namespace SimpleIdServer.Uma.Host
             return result;
         }
 
-        private static void NewCertificate()
+        private RsaSecurityKey GetSecurityKey(string locationName, string subDistName, string txtFileName)
+        {
+            string xml = string.Empty;
+            if (_properties.ContainsKey(locationName) && _properties.ContainsKey(subDistName))
+            {
+                var storeLocation = _properties[locationName];
+                if (_mappingStrToStoreLocation.ContainsKey(storeLocation))
+                {
+                    using (var store = new X509Store(_mappingStrToStoreLocation[storeLocation]))
+                    {
+                        store.Open(OpenFlags.OpenExistingOnly);
+                        var certificates = store.Certificates.Find(X509FindType.FindBySubjectDistinguishedName, _properties[subDistName], true);
+                        if (certificates.Count > 0)
+                        {
+                            xml = ((RSACryptoServiceProvider)certificates[0].PrivateKey).ToXmlStringNetCore(false);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var locationPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                var publicKeyLocationPath = Path.Combine(locationPath, txtFileName);
+                xml = File.ReadAllText(publicKeyLocationPath);
+            }
+
+            RsaSecurityKey rsa = null;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                var provider = new RSACryptoServiceProvider();
+                provider.FromXmlStringNetCore(xml);
+                rsa = new RsaSecurityKey(provider);
+            }
+            else
+            {
+                var r = new RSAOpenSsl();
+                r.FromXmlStringNetCore(xml);
+                rsa = new RsaSecurityKey(r);
+            }
+
+            return rsa;
+        }
+
+        public static void NewCertificate()
         {
             var privateSerializedRsa = string.Empty;
             var publicSerializedRsa = string.Empty;

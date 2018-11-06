@@ -14,14 +14,13 @@
 // limitations under the License.
 #endregion
 
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using SimpleIdServer.Scim.Core;
 using SimpleIdServer.Scim.Core.Stores;
+using System.Threading.Tasks;
 
 namespace SimpleIdServer.Scim.Host.Controllers
 {
-    [Route(Constants.RoutePaths.SchemasController)]
+    [Route(Core.Constants.RoutePaths.SchemasController)]
     public class SchemasController : Controller
     {
         private readonly ISchemaStore _schemaStore;

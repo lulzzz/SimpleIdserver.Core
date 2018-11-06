@@ -17,6 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Common\SimpleIdServer.Lib\SimpleIdServer.Lib.csproj" />
     <ProjectReference Include="..\..\Common\SimpleIdServer.Module\SimpleIdServer.Module.csproj" />
     <ProjectReference Include="..\..\Common\SimpleIdServer.Concurrency\SimpleIdServer.Concurrency.csproj" />
     <ProjectReference Include="..\SimpleIdServer.Scim.Core\SimpleIdServer.Scim.Core.csproj" />
@@ -31,6 +32,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.0" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="2.1.0" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="2.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="2.1.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">

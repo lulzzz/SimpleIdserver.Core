@@ -10,7 +10,7 @@ namespace SimpleIdServer.Authenticate.LoginPassword
 
         public void Init(IDictionary<string, string> properties)
         {
-            _properties = properties;
+            _properties = properties == null ? new Dictionary<string, string>() : properties;
             AspPipelineContext.Instance().ConfigureServiceContext.MvcAdded += HandleMvcAdded;
             AspPipelineContext.Instance().ApplicationBuilderContext.RouteConfigured += HandleRouteConfigured;
         }

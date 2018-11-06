@@ -18,6 +18,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Configuration\**" />
+    <EmbeddedResource Remove="Configuration\**" />
+    <None Remove="Configuration\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\Common\SimpleIdServer.Concurrency\SimpleIdServer.Concurrency.csproj" />
     <ProjectReference Include="..\SimpleIdServer.Uma.Core\SimpleIdServer.Uma.Core.csproj" />
     <ProjectReference Include="..\..\Common\SimpleIdServer.Common.Dtos\SimpleIdServer.Common.Dtos.csproj" />
@@ -42,9 +48,5 @@
     <Reference Include="System.Web" />
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Configuration\" />
   </ItemGroup>
 </Project>

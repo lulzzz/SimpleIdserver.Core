@@ -321,7 +321,8 @@ namespace SimpleIdServer.Host
                 Password = PasswordHelper.ComputeHash("password"),
                 Claims = new List<Claim>
                 {
-                    new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject, "administrator")
+                    new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject, "administrator"),
+                    new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Role, "['administrator']")
                 }
             }
         };

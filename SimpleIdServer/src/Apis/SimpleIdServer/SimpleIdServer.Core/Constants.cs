@@ -144,6 +144,20 @@ namespace SimpleIdServer.Core
                 Type = ScopeType.ResourceOwner
             };
 
+            public static Scope Role = new Scope
+            {
+                Name = "role",
+                IsExposed = true,
+                IsOpenIdScope = true,
+                IsDisplayedInConsent = true,
+                Description = "Access to the role",
+                Claims = new List<string>
+                {
+                    Jwt.Constants.StandardResourceOwnerClaimNames.Role
+                },
+                Type = ScopeType.ResourceOwner
+            };
+
             public static Scope OpenId = new Scope
             {
                 Name = "openid",

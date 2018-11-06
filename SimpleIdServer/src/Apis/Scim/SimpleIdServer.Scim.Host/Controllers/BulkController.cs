@@ -25,7 +25,7 @@ using SimpleIdServer.Scim.Host.Extensions;
 
 namespace SimpleIdServer.Scim.Host.Controllers
 {
-    [Route(Constants.RoutePaths.BulkController)]
+    [Route(Core.Constants.RoutePaths.BulkController)]
     public class BulkController : Controller
     {
         private readonly IBulkAction _bulkAction;

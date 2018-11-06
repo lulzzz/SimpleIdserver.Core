@@ -22,7 +22,7 @@ using SimpleIdServer.Scim.Host.Extensions;
 
 namespace SimpleIdServer.Scim.Host.Controllers
 {
-    [Route(Constants.RoutePaths.ServiceProviderConfigController)]
+    [Route(Core.Constants.RoutePaths.ServiceProviderConfigController)]
     public class ServiceProviderConfigController : Controller
     {
         [HttpGet]

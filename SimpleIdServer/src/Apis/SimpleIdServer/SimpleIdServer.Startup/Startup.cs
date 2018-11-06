@@ -1,67 +1,27 @@
-﻿#region copyright
-// Copyright 2015 Habart Thierry
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-#endregion
-
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
-using SimpleIdServer.Authenticate.Basic;
 using SimpleIdServer.Authenticate.LoginPassword;
-using SimpleIdServer.Lib;
-using SimpleIdServer.Host.Extensions;
-using SimpleIdServer.OAuth2Introspection;
+using SimpleIdServer.Host;
+using SimpleIdServer.Module;
 using SimpleIdServer.Shell;
 using SimpleIdServer.UserManagement;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 
 namespace SimpleIdServer.Startup
 {
     public class Startup
     {
-        private IdentityServerOptions _options;
-        private IHostingEnvironment _env;
-        public IConfigurationRoot Configuration { get; set; }
-
         public Startup(IHostingEnvironment env)
         {
-            var builder = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
-                .AddEnvironmentVariables();
-            Configuration = builder.Build();
-            _options = new IdentityServerOptions
-            {
-                Scim = new ScimOptions
-                {
-                    IsEnabled = true,
-                    EndPoint = "http://localhost:5555/"
-                },
-                Configuration = new OpenIdServerConfiguration
-                {
-                    Users = DefaultConfiguration.GetUsers(),
-                    JsonWebKeys = DefaultConfiguration.GetJsonWebKeys(),
-                    Clients = DefaultConfiguration.GetClients()
-                }
-            };
-            _env = env;
+            var simpleIdServerModule = new SimpleIdentityServerHostModule();
+            var shellModule = new ShellModule();
+            var loginPasswordModule = new LoginPasswordModule();
+            var userManagementModule = new UserManagementModule();
+            simpleIdServerModule.Init(null);
+            shellModule.Init(null);
+            loginPasswordModule.Init(null);
+            userManagementModule.Init(null);
         }
 
         public void ConfigureServices(IServiceCollection services)
@@ -70,6 +30,8 @@ namespace SimpleIdServer.Startup
                 .AllowAnyMethod()
                 .AllowAnyHeader()));
             services.AddLogging();
+            var mvcBuilder = services.AddMvc();
+            AspPipelineContext.Instance().StartConfigureServices(services);
             services.AddAuthentication(Host.Constants.CookieNames.ExternalCookieName)
                 .AddCookie(Host.Constants.CookieNames.ExternalCookieName)
                 .AddFacebook(opts =>
@@ -85,72 +47,29 @@ namespace SimpleIdServer.Startup
                 {
                     opts.LoginPath = "/Authenticate";
                 });
-            var xml = _options.Configuration.JsonWebKeys.First().SerializedKey;
-            RsaSecurityKey rsa = null;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                var provider = new RSACryptoServiceProvider();
-                provider.FromXmlStringNetCore(xml);
-                rsa = new RsaSecurityKey(provider);
-            }
-            else
-            {
-                var r = new RSAOpenSsl();
-                r.FromXmlStringNetCore(xml);
-                rsa = new RsaSecurityKey(r);
-            }
 
-            services.AddAuthentication(cfg =>
-            {
-                cfg.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                cfg.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(cfg =>
-            {
-                cfg.TokenValidationParameters = new TokenValidationParameters()
-                {
-                    ValidateIssuer = true,
-                    ValidIssuer = "http://localhost:60000",
-                    ValidateAudience = false,
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = rsa
-                };
-            });
+            AspPipelineContext.Instance().ConfigureServiceContext.AddAuthentication();
+            AspPipelineContext.Instance().ConfigureServiceContext.AddMvc(mvcBuilder);
             services.AddAuthorization(opts =>
             {
-                opts.AddOpenIdSecurityPolicy();
+                AspPipelineContext.Instance().ConfigureServiceContext.AddAuthorization(opts);
             });
-            // 5. Configure MVC
-            var mvcBuilder = services.AddMvc();
-            services.AddOpenIdApi(_options); // API
-            services.AddBasicShell(mvcBuilder);  // SHELL
-            services.AddLoginPasswordAuthentication(mvcBuilder, new BasicAuthenticateOptions());  // LOGIN & PASSWORD
-            services.AddUserManagement(mvcBuilder);  // USER MANAGEMENT
         }
 
         public void Configure(IApplicationBuilder app,
             IHostingEnvironment env,
             ILoggerFactory loggerFactory)
         {
+            AspPipelineContext.Instance().StartConfigureApplicationBuilder(app, env, loggerFactory);
+            app.UseCors("AllowAll");
             loggerFactory.AddConsole();
             app.UseAuthentication();
-            //1 . Enable CORS.
-            app.UseCors("AllowAll");
-            // 2. Use static files.
-            app.UseShellStaticFiles();
-            // 3. Redirect error to custom pages.
-            app.UseStatusCodePagesWithRedirects("~/Error/{0}");
-            // 4. Enable SimpleIdentityServer
-            app.UseOpenIdApi(_options, loggerFactory);
-            // 5. Configure ASP.NET MVC
             app.UseMvc(routes =>
             {
-                routes.UseLoginPasswordAuthentication();
+                AspPipelineContext.Instance().ApplicationBuilderContext.ConfigureRoutes(routes);
                 routes.MapRoute("AuthArea",
                     "{area:exists}/Authenticate/{action}/{id?}",
                     new { controller = "Authenticate", action = "Index" });
-                routes.UseUserManagement();
-                routes.UseShell();
             });
         }
     }

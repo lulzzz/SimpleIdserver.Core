@@ -1,10 +1,12 @@
-﻿using System;
-using System.Linq;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using SimpleIdServer.Bus;
 using SimpleIdServer.Concurrency;
 using SimpleIdServer.Scim.Core;
+using System;
+using System.Linq;
+using System.Security.Claims;
 
 namespace SimpleIdServer.Scim.Host.Extensions
 {
@@ -30,7 +32,7 @@ namespace SimpleIdServer.Scim.Host.Extensions
 
             options.AddPolicy("scim_manage", policy =>
             {
-				policy.AddAuthenticationSchemes("UserInfoIntrospection", "OAuth2Introspection");
+                policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
                 policy.RequireAssertion(p =>
                 {
                     if (p.User == null || p.User.Identity == null || !p.User.Identity.IsAuthenticated)
@@ -38,19 +40,19 @@ namespace SimpleIdServer.Scim.Host.Extensions
                         return false;
                     }
 
-                    var claimRole = p.User.Claims.FirstOrDefault(c => c.Type == "role");
+                    var claimRoles = p.User.Claims.Where(c => c.Type == ClaimTypes.Role);
                     var claimScopes = p.User.Claims.Where(c => c.Type == "scope");
-                    if (claimRole == null && !claimScopes.Any())
+                    if (!claimRoles.Any() && !claimScopes.Any())
                     {
                         return false;
                     }
 
-                    return claimRole != null && claimRole.Value == "administrator" || claimScopes.Any(c => c.Value == "scim_manage");
+                    return claimRoles.Any(c => c.Value == "administrator") || claimScopes.Any(c => c.Value == "scim_manage");
                 });
             });
             options.AddPolicy("scim_read", policy =>
             {
-				policy.AddAuthenticationSchemes("UserInfoIntrospection", "OAuth2Introspection");
+                policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
                 policy.RequireAssertion(p =>
                 {
                     if (p.User == null || p.User.Identity == null || !p.User.Identity.IsAuthenticated)
@@ -58,19 +60,19 @@ namespace SimpleIdServer.Scim.Host.Extensions
                         return false;
                     }
 
-                    var claimRole = p.User.Claims.FirstOrDefault(c => c.Type == "role");
+                    var claimRoles = p.User.Claims.Where(c => c.Type == ClaimTypes.Role);
                     var claimScopes = p.User.Claims.Where(c => c.Type == "scope");
-                    if (claimRole == null && !claimScopes.Any())
+                    if (!claimRoles.Any() && !claimScopes.Any())
                     {
                         return false;
                     }
 
-                    return claimRole != null && claimRole.Value == "administrator" || claimScopes.Any(c => c.Value == "scim_read");
+                    return claimRoles.Any(c => c.Value == "administrator") || claimScopes.Any(c => c.Value == "scim_read");
                 });
             });
             options.AddPolicy("authenticated", policy =>
             {
-                policy.AddAuthenticationSchemes("UserInfoIntrospection");
+                policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
                 policy.RequireAuthenticatedUser();
             });
             return options;

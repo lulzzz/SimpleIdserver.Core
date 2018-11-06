@@ -35,8 +35,8 @@ namespace SimpleIdServer.Host
 
         public void Init(IDictionary<string, string> properties)
         {
-            _properties = properties;
-            _identityServerOptions = BuildOptions(properties);
+            _properties = properties == null ? new Dictionary<string, string>() : properties;
+            _identityServerOptions = BuildOptions(_properties);
             AspPipelineContext.Instance().ConfigureServiceContext.Initialized += HandleServiceContextInitialized;
             AspPipelineContext.Instance().ConfigureServiceContext.MvcAdded += HandleMvcAdded;
             AspPipelineContext.Instance().ConfigureServiceContext.AuthenticationAdded += HandleAuthenticationAdded;

@@ -40,4 +40,13 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="prk.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="puk.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
