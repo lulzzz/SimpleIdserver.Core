@@ -360,7 +360,68 @@ namespace SimpleIdServer.Host
                 {
                     ResponseType.token
                 }
-            }
+            },
+			new Client
+			{
+				ClientId = "adminui",
+				Secrets = new List<ClientSecret>
+				{
+					new ClientSecret
+					{
+						Type = ClientSecretTypes.SharedSecret,
+						Value = "adminuiSecret"
+					}
+				},
+				ClientName = "AdminUI",
+                TokenEndPointAuthMethod = TokenEndPointAuthenticationMethods.client_secret_post,
+                ApplicationType = ApplicationTypes.web,
+                UpdateDateTime = DateTime.UtcNow,
+                CreateDateTime = DateTime.UtcNow,
+                AllowedScopes = new List<Scope>
+                {
+                    new Scope
+                    {
+                        Name = "openid"
+                    },
+                    new Scope
+                    {
+                        Name = "role"
+                    },
+                    new Scope
+                    {
+                        Name = "profile"
+                    },
+                    new Scope
+                    {
+                        Name = "scim"
+                    },
+                    new Scope
+                    {
+                        Name = "phone"
+                    },
+                    new Scope
+                    {
+                        Name = "address"
+                    }
+                },				
+                GrantTypes = new List<GrantType>
+                {
+                    GrantType.@implicit
+                },
+                ResponseTypes = new List<ResponseType>
+                {
+                    ResponseType.token,
+                    ResponseType.id_token
+                },
+				RedirectionUrls = new List<string>
+				{
+					"http://localhost:64950/callback"
+				},
+				PostLogoutRedirectUris = new List<string>
+				{
+					"http://localhost:64950/end_session"
+				}
+			}
         };
 
         public static List<ClaimAggregate> DEFAULT_CLAIMS = new List<ClaimAggregate>
