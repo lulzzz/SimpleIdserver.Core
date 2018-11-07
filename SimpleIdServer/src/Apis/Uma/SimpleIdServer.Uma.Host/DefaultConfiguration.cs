@@ -39,7 +39,29 @@ namespace SimpleIdServer.Uma.Host
                 Type = ScopeType.ProtectedApi,
                 UpdateDateTime = DateTime.UtcNow,
                 CreateDateTime = DateTime.UtcNow
-            }
+            },
+			new Scope
+			{
+				Name = "scim_manage",
+				IsExposed = false,
+				IsOpenIdScope = false,
+				IsDisplayedInConsent = true,
+				Description = "Manage the SCIM resources",
+				Type = ScopeType.ProtectedApi,
+				UpdateDateTime = DateTime.UtcNow,
+				CreateDateTime = DateTime.UtcNow
+			},
+			new Scope
+			{
+				Name = "scim_read",
+				IsExposed = false,
+				IsOpenIdScope = false,
+				IsDisplayedInConsent = true,
+				Description = "Read the SCIM resources",
+				Type = ScopeType.ProtectedApi,
+				UpdateDateTime = DateTime.UtcNow,
+				CreateDateTime = DateTime.UtcNow
+			}		
         };
 
         public static List<Client> DEFAULT_CLIENTS = new List<Client>
@@ -97,6 +119,42 @@ namespace SimpleIdServer.Uma.Host
                     new Scope
                     {
                         Name = "adminapi"
+                    }
+                },
+                GrantTypes = new List<GrantType>
+                {
+                    GrantType.client_credentials
+                },
+                ResponseTypes = new List<ResponseType>
+                {
+                    ResponseType.token
+                }
+            },
+            new Client
+            {
+                ClientId = "scimManagerClient",
+                Secrets = new List<ClientSecret>
+                {
+                    new ClientSecret
+                    {
+                        Type = ClientSecretTypes.SharedSecret,
+                        Value = "scimManagerPassword"
+                    }
+                },
+                ClientName = "SCIM manager client",
+                TokenEndPointAuthMethod = TokenEndPointAuthenticationMethods.client_secret_post,
+                ApplicationType = ApplicationTypes.native,
+                UpdateDateTime = DateTime.UtcNow,
+                CreateDateTime = DateTime.UtcNow,
+                AllowedScopes = new List<Scope>
+                {
+					new Scope
+					{
+						Name = "scim_manage"
+					},
+                    new Scope
+                    {
+                        Name = "scim_read"
                     }
                 },
                 GrantTypes = new List<GrantType>
