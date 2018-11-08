@@ -30,6 +30,7 @@ using SimpleIdServer.Storage;
 using SimpleIdServer.Store;
 using SimpleIdServer.Logging;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Security.Claims;
 
 namespace SimpleIdServer.Host.Extensions
 {
@@ -109,7 +110,7 @@ namespace SimpleIdServer.Host.Extensions
                         return false;
                     }
 
-                    var claimRoles = p.User.Claims.Where(c => c.Type == "role");
+                    var claimRoles = p.User.Claims.Where(c => c.Type == ClaimTypes.Role);
                     var claimScopes = p.User.Claims.Where(c => c.Type == "scope");
                     if (!claimRoles.Any() && !claimScopes.Any())
                     {
@@ -129,7 +130,7 @@ namespace SimpleIdServer.Host.Extensions
                         return false;
                     }
 
-                    var claimRoles = p.User.Claims.Where(c => c.Type == "role");
+                    var claimRoles = p.User.Claims.Where(c => c.Type == ClaimTypes.Role);
                     var claimScopes = p.User.Claims.Where(c => c.Type == "scope");
                     if (!claimRoles.Any() && !claimScopes.Any())
                     {

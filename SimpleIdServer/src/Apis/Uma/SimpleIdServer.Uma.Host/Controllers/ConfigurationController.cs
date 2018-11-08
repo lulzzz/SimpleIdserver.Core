@@ -31,6 +31,27 @@ namespace SimpleIdServer.Uma.Host.Controllers
                 RegistrationEndpoint = $"{issuer}{Constants.RouteValues.Registration}",
                 IntrospectionEndpoint = $"{issuer}{Constants.RouteValues.Introspection}",
                 RevocationEndpoint = $"{issuer}{Constants.RouteValues.Token}/revoke",
+                GrantTypesSupported = new List<string>
+                {
+                    "authorization_code",
+                    "implicit",
+                    "refresh_token",
+                    "client_credentials",
+                    "password",
+                    "uma_ticket"
+                },
+                TokenEndpointAuthSigningAlgValuesSupported = new List<string>
+                {
+                    "RS256"
+                },
+                TokenEndpointAuthMethodsSupported = new List<string>
+                {
+                    "client_secret_basic",
+                    "client_secret_post",
+                    "client_secret_jwt",
+                    "private_key_jwt",
+                    "tls_client_auth"
+                }
             };
             return new OkObjectResult(result);
         }
