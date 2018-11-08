@@ -26,7 +26,7 @@
             }
             else
             {
-                using (Html.BeginForm("ExternalLogin", "Authenticate"))
+                using (Html.BeginForm("ExternalLogin", "Authenticate", new { area = "sms" }))
                 {
                     foreach (var loginProvider in Model.IdProviders)
                     {
@@ -44,7 +44,7 @@
         </div>
         <div>
             @Html.ValidationMessage("message_error")
-            <form name="form" method="POST" action="@Url.Action("LocalLogin")">
+            <form name="form" method="POST" action="@Url.Action("LocalLogin", "Authenticate", new { area = "sms" })">
                 <fieldset>
                     @if (phoneNumberState != null && phoneNumberState.Errors.Any())
                     {

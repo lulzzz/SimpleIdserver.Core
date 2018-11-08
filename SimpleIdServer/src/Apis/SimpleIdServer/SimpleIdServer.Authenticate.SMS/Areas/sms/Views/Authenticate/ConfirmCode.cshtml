@@ -15,7 +15,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">@ViewBag.Translations["confirmation_code"]</div>
             <div class="panel-body">
-                @using (Html.BeginForm("ConfirmCode", "Authenticate", null, FormMethod.Post))
+                @using (Html.BeginForm("ConfirmCode", "Authenticate", new { area = "sms" }, FormMethod.Post))
                 {
                     @Html.ValidationMessage("message_error")
                     @Html.AntiForgeryToken()
