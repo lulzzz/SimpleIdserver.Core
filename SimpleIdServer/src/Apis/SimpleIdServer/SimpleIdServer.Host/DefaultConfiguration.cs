@@ -415,11 +415,13 @@ namespace SimpleIdServer.Host
                 },
 				RedirectionUrls = new List<string>
 				{
-					"http://localhost:64950/callback"
+					"http://localhost:64950/callback",
+					"https://localhost:64951/callback"
 				},
 				PostLogoutRedirectUris = new List<string>
 				{
-					"http://localhost:64950/end_session"
+					"http://localhost:64950/end_session",
+					"https://localhost:64951/end_session"
 				}
 			}
         };
