@@ -64,9 +64,9 @@ namespace SimpleIdServer.Uma.Host
 			}		
         };
 
-        public static List<Client> DEFAULT_CLIENTS = new List<Client>
+        public static List<SimpleIdServer.Core.Common.Models.Client> DEFAULT_CLIENTS = new List<SimpleIdServer.Core.Common.Models.Client>
         {
-            new Client
+            new SimpleIdServer.Core.Common.Models.Client
             {
                 ClientId = "registrationClient",
                 Secrets = new List<ClientSecret>
@@ -98,7 +98,7 @@ namespace SimpleIdServer.Uma.Host
                     ResponseType.token
                 }
             },
-            new Client
+            new SimpleIdServer.Core.Common.Models.Client
             {
                 ClientId = "adminUiClient",
                 Secrets = new List<ClientSecret>
@@ -130,7 +130,7 @@ namespace SimpleIdServer.Uma.Host
                     ResponseType.token
                 }
             },
-            new Client
+            new SimpleIdServer.Core.Common.Models.Client
             {
                 ClientId = "scimManagerClient",
                 Secrets = new List<ClientSecret>

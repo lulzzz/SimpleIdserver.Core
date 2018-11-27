@@ -32,13 +32,7 @@ namespace SimpleIdServer.Uma.Host.Controllers
             }
 
             var parameter = postPermission.ToParameter();
-            var clientId = this.GetClientId();
-            if (string.IsNullOrWhiteSpace(clientId))
-            {
-                return BuildError(ErrorCodes.InvalidRequestCode, "the client_id cannot be extracted", HttpStatusCode.BadRequest);
-            }
-
-            var ticketId = await _permissionControllerActions.Add(parameter, clientId);
+            var ticketId = await _permissionControllerActions.Add(parameter);
             var result = new AddPermissionResponse
             {
                 TicketId = ticketId
@@ -59,13 +53,7 @@ namespace SimpleIdServer.Uma.Host.Controllers
             }
 
             var parameters = postPermissions.Select(p => p.ToParameter());
-            var clientId = this.GetClientId();
-            if (string.IsNullOrWhiteSpace(clientId))
-            {
-                return BuildError(ErrorCodes.InvalidRequestCode, "the client_id cannot be extracted", HttpStatusCode.BadRequest);
-            }
-
-            var ticketId = await _permissionControllerActions.Add(parameters, clientId);
+            var ticketId = await _permissionControllerActions.Add(parameters);
             var result = new AddPermissionResponse
             {
                 TicketId = ticketId

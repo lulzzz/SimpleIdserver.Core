@@ -22,7 +22,6 @@ namespace SimpleIdServer.Uma.Core.Models
     public class Ticket
     {
         public string Id { get; set; }
-        public string ClientId { get; set; }
         public bool IsAuthorizedByRo { get; set; }
         public DateTime ExpirationDateTime { get; set; }
         public DateTime CreateDateTime { get; set; }

@@ -15,6 +15,7 @@
 #endregion
 
 using Microsoft.Extensions.DependencyInjection;
+using SimpleIdServer.Client;
 using SimpleIdServer.Uma.Core.Api.PermissionController;
 using SimpleIdServer.Uma.Core.Api.PermissionController.Actions;
 using SimpleIdServer.Uma.Core.Api.PolicyController;
@@ -72,6 +73,7 @@ namespace SimpleIdServer.Uma.Core
             serviceCollection.AddTransient<ISearchResourceSetOperation, SearchResourceSetOperation>();
             serviceCollection.AddTransient<IUmaTokenActions, UmaTokenActions>();
             serviceCollection.AddTransient<IGetTokenByTicketIdAction, GetTokenByTicketIdAction>();
+            serviceCollection.AddTransient<IIdentityServerClientFactory, IdentityServerClientFactory>();
             serviceCollection.AddSingleton<IUmaConfigurationService>(new DefaultUmaConfigurationService(umaConfigurationOptions));
             serviceCollection.AddSingleton<IPolicyRepository>(new DefaultPolicyRepository(policies));
             serviceCollection.AddSingleton<IResourceSetRepository>(new DefaultResourceSetRepository(resources));

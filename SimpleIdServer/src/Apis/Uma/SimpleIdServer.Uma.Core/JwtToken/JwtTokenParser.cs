@@ -1,25 +1,10 @@
-﻿#region copyright
-// Copyright 2015 Habart Thierry
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-#endregion
-
-using System;
-using System.Threading.Tasks;
+﻿using SimpleIdServer.Client;
 using SimpleIdServer.Core.Common;
 using SimpleIdServer.Core.Jwt.Converter;
 using SimpleIdServer.Core.Jwt.Signature;
 using SimpleIdServer.Uma.Core.Models;
+using System;
+using System.Threading.Tasks;
 
 namespace SimpleIdServer.Uma.Core.JwtToken
 {
@@ -38,14 +23,16 @@ namespace SimpleIdServer.Uma.Core.JwtToken
     {
         private readonly IJwsParser _jwsParser;
         private readonly IJsonWebKeyConverter _jsonWebKeyConverter;
+        private readonly IIdentityServerClientFactory _identityServerClientFactory;
 
-        public JwtTokenParser(IJwsParser jwsParser, IJsonWebKeyConverter jsonWebKeyConverter)
+        public JwtTokenParser(IJwsParser jwsParser, IJsonWebKeyConverter jsonWebKeyConverter, IIdentityServerClientFactory identityServerClientFactory)
         {
             _jwsParser = jwsParser;
             _jsonWebKeyConverter = jsonWebKeyConverter;
+            _identityServerClientFactory = identityServerClientFactory;
         }
 
-        public Task<JwsPayload> UnSign(string jws, PolicyRule policyRule)
+        public async Task<JwsPayload> UnSign(string jws, PolicyRule policyRule)
         {
             if (string.IsNullOrWhiteSpace(jws))
             {
@@ -65,16 +52,11 @@ namespace SimpleIdServer.Uma.Core.JwtToken
             
             if (protectedHeader.Alg == SimpleIdServer.Core.Jwt.Constants.JwsAlgNames.NONE)
             {
-                return Task.FromResult(_jwsParser.GetPayload(jws));
+                return _jwsParser.GetPayload(jws);
             }
 
-            var jsonWebKey = new JsonWebKey
-            {
-                Kty = KeyType.RSA,
-                Kid = protectedHeader.Kid,
-                SerializedKey = policyRule.SerializedCertificate
-            };
-            return Task.FromResult(_jwsParser.ValidateSignature(jws, jsonWebKey));
+            var jsonWebKeySet = await _identityServerClientFactory.CreateJwksClient().ResolveAsync(policyRule.OpenIdProvider).ConfigureAwait(false);
+            return _jwsParser.ValidateSignature(jws, jsonWebKeySet);
         }
     }
 }

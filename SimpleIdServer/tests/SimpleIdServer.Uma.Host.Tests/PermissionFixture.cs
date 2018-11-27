@@ -45,39 +45,6 @@ namespace SimpleIdServer.Uma.Host.Tests
         #region Errors
 
         [Fact]
-        public async Task When_Client_Is_Not_Authenticated_Then_Error_Is_Returned()
-        {
-            // ARRANGE
-            InitializeFakeObjects();
-            _httpClientFactoryStub.Setup(h => h.GetHttpClient()).Returns(_server.Client);
-            var resource = await _resourceSetClient.AddByResolution(new PostResourceSet
-            {
-                Name = "picture",
-                Scopes = new List<string>
-                {
-                    "read"
-                }
-            }, baseUrl + "/.well-known/uma2-configuration", "header");
-
-            // ACT
-            UserStore.Instance().ClientId = null;
-            var ticket = await _permissionClient.AddByResolution(new PostPermission
-            {
-                ResourceSetId = resource.Content.Id,
-                Scopes = new List<string>
-                {
-                    "read"
-                }
-            }, baseUrl + "/.well-known/uma2-configuration", "header");
-            UserStore.Instance().ClientId = "client";
-
-            // ASSERTS
-            Assert.True(ticket.ContainsError);
-            Assert.Equal("invalid_request", ticket.Error.Error);
-            Assert.Equal("the client_id cannot be extracted", ticket.Error.ErrorDescription);
-        }
-
-        [Fact]
         public async Task When_ResourceSetId_Is_Null_Then_Error_Is_Returned()
         {
             // ARRANGE

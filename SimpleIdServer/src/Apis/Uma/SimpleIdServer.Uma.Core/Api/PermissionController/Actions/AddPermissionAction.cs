@@ -33,8 +33,8 @@ namespace SimpleIdServer.Uma.Core.Api.PermissionController.Actions
 {
     internal interface IAddPermissionAction
     {
-        Task<string> Execute(string clientId, AddPermissionParameter addPermissionParameters);
-        Task<string> Execute(string clientId, IEnumerable<AddPermissionParameter> addPermissionParameters);
+        Task<string> Execute(AddPermissionParameter addPermissionParameters);
+        Task<string> Execute(IEnumerable<AddPermissionParameter> addPermissionParameters);
     }
 
     internal class AddPermissionAction : IAddPermissionAction
@@ -59,19 +59,19 @@ namespace SimpleIdServer.Uma.Core.Api.PermissionController.Actions
             _umaServerEventSource = umaServerEventSource;
         }
 
-        public async Task<string> Execute(string clientId, AddPermissionParameter addPermissionParameter)
+        public async Task<string> Execute(AddPermissionParameter addPermissionParameter)
         {
-            var result = await Execute(clientId, new[] { addPermissionParameter });
+            if (addPermissionParameter == null)
+            {
+                throw new ArgumentNullException(nameof(addPermissionParameter));
+            }
+
+            var result = await Execute(new[] { addPermissionParameter });
             return result;
         }
 
-        public async Task<string> Execute(string clientId, IEnumerable<AddPermissionParameter> addPermissionParameters)
+        public async Task<string> Execute(IEnumerable<AddPermissionParameter> addPermissionParameters)
         {
-            if (string.IsNullOrWhiteSpace(clientId))
-            {
-                throw new ArgumentNullException(clientId);
-            }
-
             if (addPermissionParameters == null)
             {
                 throw new ArgumentNullException(nameof(addPermissionParameters));
@@ -84,7 +84,6 @@ namespace SimpleIdServer.Uma.Core.Api.PermissionController.Actions
             var ticket = new Ticket
             {
                 Id = Guid.NewGuid().ToString(),
-                ClientId = clientId,
                 CreateDateTime = DateTime.UtcNow,
                 ExpiresIn = ticketLifetimeInSeconds,
                 ExpirationDateTime = DateTime.UtcNow.AddSeconds(ticketLifetimeInSeconds)

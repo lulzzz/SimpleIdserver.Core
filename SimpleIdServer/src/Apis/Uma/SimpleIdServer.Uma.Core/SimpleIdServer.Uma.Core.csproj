@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\SimpleIdServer\SimpleIdServer.Client\SimpleIdServer.Client.csproj" />
     <ProjectReference Include="..\SimpleIdServer.Uma.Common\SimpleIdServer.Uma.Common.csproj" />
     <ProjectReference Include="..\..\SimpleIdServer\SimpleIdServer.Core\SimpleIdServer.Core.csproj" />
     <ProjectReference Include="..\..\SimpleIdServer\SimpleIdServer.Core.Jwt\SimpleIdServer.Core.Jwt.csproj" />

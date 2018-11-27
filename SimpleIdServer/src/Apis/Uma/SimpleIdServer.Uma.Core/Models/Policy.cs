@@ -33,7 +33,6 @@ namespace SimpleIdServer.Uma.Core.Models
         public bool IsResourceOwnerConsentNeeded { get; set; }
         public string Script { get; set; }
         public string OpenIdProvider { get; set; }
-        public string SerializedCertificate { get; set; }
     }
 
     public class Policy

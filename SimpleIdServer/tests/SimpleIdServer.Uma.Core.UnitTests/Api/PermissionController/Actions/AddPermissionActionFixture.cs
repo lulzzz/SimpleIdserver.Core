@@ -48,21 +48,19 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Api.PermissionController.Actions
             InitializeFakeObjects();
 
             // ACT & ASSERT
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _addPermissionAction.Execute(null, (IEnumerable<AddPermissionParameter>)null));
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _addPermissionAction.Execute("client_id", (IEnumerable<AddPermissionParameter>)null));
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _addPermissionAction.Execute(null, (AddPermissionParameter)null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _addPermissionAction.Execute((IEnumerable<AddPermissionParameter>)null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _addPermissionAction.Execute((AddPermissionParameter)null));
         }
 
         [Fact]
         public async Task When_RequiredParameter_ResourceSetId_Is_Not_Specified_Then_Exception_Is_Thrown()
         {
             // ARRANGE
-            const string clientId = "client_id";
             InitializeFakeObjects();
             var addPermissionParameter = new AddPermissionParameter();
 
             // ACT & ASSERTS
-            var exception = await Assert.ThrowsAsync<BaseUmaException>(() => _addPermissionAction.Execute(clientId, addPermissionParameter));
+            var exception = await Assert.ThrowsAsync<BaseUmaException>(() => _addPermissionAction.Execute(addPermissionParameter));
             Assert.NotNull(exception);
             Assert.True(exception.Code == ErrorCodes.InvalidRequestCode);
             Assert.True(exception.Message == string.Format(ErrorDescriptions.TheParameterNeedsToBeSpecified, Constants.AddPermissionNames.ResourceSetId));
@@ -72,7 +70,6 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Api.PermissionController.Actions
         public async Task When_RequiredParameter_Scopes_Is_Not_Specified_Then_Exception_Is_Thrown()
         {
             // ARRANGE
-            const string clientId = "client_id";
             InitializeFakeObjects();
             var addPermissionParameter = new AddPermissionParameter
             {
@@ -80,7 +77,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Api.PermissionController.Actions
             };
 
             // ACT & ASSERTS
-            var exception = await Assert.ThrowsAsync<BaseUmaException>(() => _addPermissionAction.Execute(clientId, addPermissionParameter));
+            var exception = await Assert.ThrowsAsync<BaseUmaException>(() => _addPermissionAction.Execute(addPermissionParameter));
             Assert.NotNull(exception);
             Assert.True(exception.Code == ErrorCodes.InvalidRequestCode);
             Assert.True(exception.Message == string.Format(ErrorDescriptions.TheParameterNeedsToBeSpecified, Constants.AddPermissionNames.Scopes));
@@ -90,7 +87,6 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Api.PermissionController.Actions
         public async Task When_ResourceSet_Doesnt_Exist_Then_Exception_Is_Thrown()
         {
             // ARRANGE
-            const string clientId = "client_id";
             const string resourceSetId = "resource_set_id";
             InitializeFakeObjects();
             var addPermissionParameter = new AddPermissionParameter
@@ -105,7 +101,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Api.PermissionController.Actions
                 .Returns(Task.FromResult((IEnumerable<ResourceSet>)new List<ResourceSet>()));
 
             // ACT & ASSERTS
-            var exception = await Assert.ThrowsAsync<BaseUmaException>(() => _addPermissionAction.Execute(clientId, addPermissionParameter));
+            var exception = await Assert.ThrowsAsync<BaseUmaException>(() => _addPermissionAction.Execute(addPermissionParameter));
             Assert.NotNull(exception);
             Assert.True(exception.Code == ErrorCodes.InvalidResourceSetId);
             Assert.True(exception.Message == string.Format(ErrorDescriptions.TheResourceSetDoesntExist, resourceSetId));
@@ -115,7 +111,6 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Api.PermissionController.Actions
         public async Task When_Scope_Doesnt_Exist_Then_Exception_Is_Thrown()
         {
             // ARRANGE
-            const string clientId = "client_id";
             const string resourceSetId = "resource_set_id";
             InitializeFakeObjects();
             var addPermissionParameter = new AddPermissionParameter
@@ -141,7 +136,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Api.PermissionController.Actions
                 .Returns(Task.FromResult(resources));
 
             // ACT & ASSERTS
-            var exception = await Assert.ThrowsAsync<BaseUmaException>(() => _addPermissionAction.Execute(clientId, addPermissionParameter));
+            var exception = await Assert.ThrowsAsync<BaseUmaException>(() => _addPermissionAction.Execute(addPermissionParameter));
             Assert.NotNull(exception);
             Assert.True(exception.Code == ErrorCodes.InvalidScope);
             Assert.True(exception.Message == ErrorDescriptions.TheScopeAreNotValid);
@@ -151,7 +146,6 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Api.PermissionController.Actions
         public async Task When_Adding_Permission_Then_TicketId_Is_Returned()
         {           
             // ARRANGE
-            const string clientId = "client_id";
             const string resourceSetId = "resource_set_id";
             InitializeFakeObjects();
             var addPermissionParameter = new AddPermissionParameter
@@ -179,7 +173,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Api.PermissionController.Actions
             _configurationServiceStub.Setup(c => c.GetTicketLifeTime()).Returns(Task.FromResult(2));
 
             // ACT
-            var result = await _addPermissionAction.Execute(clientId, addPermissionParameter);
+            var result = await _addPermissionAction.Execute(addPermissionParameter);
 
             // ASSERTS
             Assert.NotEmpty(result);
