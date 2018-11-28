@@ -58,6 +58,11 @@ namespace SimpleIdServer.Uma.EF.Repositories
                 resourceSet = resourceSet.Where(r => parameter.Types.Any(t => r.Type.Contains(t)));
             }
 
+            if (parameter.Owners != null && parameter.Owners.Any())
+            {
+                resourceSet = resourceSet.Where(r => parameter.Owners.Contains(r.Owner));
+            }
+
             var nbResult = await resourceSet.CountAsync().ConfigureAwait(false);
             resourceSet = resourceSet.OrderBy(c => c.Id);
             if (parameter.IsPagingEnabled)
@@ -125,6 +130,7 @@ namespace SimpleIdServer.Uma.EF.Repositories
                     record.Type = resourceSet.Type;
                     record.Uri = resourceSet.Uri;
                     record.IconUri = resourceSet.IconUri;
+                    record.Owner = resourceSet.Owner;
                     await _context.SaveChangesAsync().ConfigureAwait(false);
                     transaction.Commit();
                     return true;

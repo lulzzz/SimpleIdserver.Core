@@ -26,5 +26,6 @@ namespace SimpleIdServer.Uma.Core.Parameters
         public string Type { get; set; }
         public List<string> Scopes { get; set; }
         public string IconUri { get; set; }
+        public string Owner { get; set; }
     }
 }

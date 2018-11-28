@@ -34,5 +34,7 @@ namespace SimpleIdServer.Uma.Common.DTOs
         public List<string> Scopes { get; set; }
         [DataMember(Name = ResourceSetResponseNames.IconUri)]
         public string IconUri { get; set; }
+        [DataMember(Name = ResourceSetResponseNames.Owner)]
+        public string Owner { get; set; }
     }
 }

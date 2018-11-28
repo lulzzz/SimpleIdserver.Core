@@ -423,7 +423,66 @@ namespace SimpleIdServer.Host
 					"http://localhost:64950/end_session",
 					"https://localhost:64951/end_session"
 				}
-			}
+			},
+            new Client
+            {
+                ClientId = "uma",
+                Secrets = new List<ClientSecret>
+                {
+                    new ClientSecret
+                    {
+                        Type = ClientSecretTypes.SharedSecret,
+                        Value = "umaSecret"
+                    }
+                },
+                ClientName = "Uma",
+                TokenEndPointAuthMethod = TokenEndPointAuthenticationMethods.client_secret_post,
+                ApplicationType = ApplicationTypes.web,
+                UpdateDateTime = DateTime.UtcNow,
+                CreateDateTime = DateTime.UtcNow,
+                AllowedScopes = new List<Scope>
+                {
+                    new Scope
+                    {
+                        Name = "openid"
+                    },
+                    new Scope
+                    {
+                        Name = "role"
+                    },
+                    new Scope
+                    {
+                        Name = "profile"
+                    },
+                    new Scope
+                    {
+                        Name = "scim"
+                    },
+                    new Scope
+                    {
+                        Name = "phone"
+                    },
+                    new Scope
+                    {
+                        Name = "address"
+                    }
+                },
+                GrantTypes = new List<GrantType>
+                {
+                    GrantType.authorization_code
+                },
+                ResponseTypes = new List<ResponseType>
+                {
+                    ResponseType.token,
+                    ResponseType.id_token,
+                    ResponseType.code
+                },
+                RedirectionUrls = new List<string>
+                {
+                    "http://localhost:60004/Authenticate/Callback",
+                    "https://localhost:60014/Authenticate/Callback"
+                }
+            }
         };
 
         public static List<ClaimAggregate> DEFAULT_CLAIMS = new List<ClaimAggregate>

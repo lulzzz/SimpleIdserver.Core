@@ -64,7 +64,8 @@ namespace SimpleIdServer.Uma.Core.Api.ResourceSetController.Actions
                 Uri = addResourceSetParameter.Uri,
                 Type = addResourceSetParameter.Type,
                 Scopes = addResourceSetParameter.Scopes,
-                IconUri = addResourceSetParameter.IconUri
+                IconUri = addResourceSetParameter.IconUri,
+                Owner = addResourceSetParameter.Owner
             };
 
             _resourceSetParameterValidator.CheckResourceSetParameter(resourceSet);

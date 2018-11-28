@@ -362,7 +362,8 @@ namespace SimpleIdServer.Uma.Host.Tests
                 Scopes = new List<string>
                 {
                     "scope"
-                }
+                },
+                Owner = "owner"
             },
             baseUrl + "/.well-known/uma2-configuration", "header");
 
@@ -433,6 +434,64 @@ namespace SimpleIdServer.Uma.Host.Tests
             Assert.True(information.Content.Name == "name2");
             Assert.True(information.Content.Type == "type");
             Assert.True(information.Content.Scopes.Count() == 1 && information.Content.Scopes.First() == "scope2");
+        }
+
+        #endregion
+
+        #region End to end
+        
+        [Fact]
+        public async Task When_Execute_All_Operations_Then_No_Exception_Is_Thrown()
+        {
+            // ARRANGE
+            InitializeFakeObjects();
+            _httpClientFactoryStub.Setup(h => h.GetHttpClient()).Returns(_server.Client);
+
+            // ACT
+            var resource = await _resourceSetClient.AddByResolution(new PostResourceSet
+            {
+                Name = "name",
+                Scopes = new List<string>
+                {
+                    "scope"
+                },
+                IconUri = "iconuri",
+                Type = "type",
+                Uri = "uri",
+                Owner = "owner"
+            },
+            baseUrl + "/.well-known/uma2-configuration", "header").ConfigureAwait(false);
+            var firstResult = await _resourceSetClient.GetByResolution(resource.Content.Id, baseUrl + "/.well-known/uma2-configuration", "header").ConfigureAwait(false);
+            await _resourceSetClient.UpdateByResolution(new PutResourceSet
+            {
+                Id = resource.Content.Id,
+                IconUri = "iconuri2",
+                Name = "name2",
+                Owner = "owner2",
+                Scopes = new List<string>
+                {
+                    "scope2"
+                },
+                Type = "type2",
+                Uri = "uri2"
+            }, baseUrl + "/.well-known/uma2-configuration", "header").ConfigureAwait(false);
+            var secondResult = await _resourceSetClient.GetByResolution(resource.Content.Id, baseUrl + "/.well-known/uma2-configuration", "header").ConfigureAwait(false);
+
+            // ASSERT
+            Assert.NotNull(firstResult);
+            Assert.NotNull(secondResult);
+            Assert.Equal("name", firstResult.Content.Name);
+            Assert.Equal("iconuri", firstResult.Content.IconUri);
+            Assert.Equal("type", firstResult.Content.Type);
+            Assert.Equal("uri", firstResult.Content.Uri);
+            Assert.Equal("owner", firstResult.Content.Owner);
+            Assert.True(firstResult.Content.Scopes.Contains("scope"));
+            Assert.Equal("name2", secondResult.Content.Name);
+            Assert.Equal("iconuri2", secondResult.Content.IconUri);
+            Assert.Equal("type2", secondResult.Content.Type);
+            Assert.Equal("uri2", secondResult.Content.Uri);
+            Assert.Equal("owner2", secondResult.Content.Owner);
+            Assert.True(secondResult.Content.Scopes.Contains("scope2"));
         }
 
         #endregion

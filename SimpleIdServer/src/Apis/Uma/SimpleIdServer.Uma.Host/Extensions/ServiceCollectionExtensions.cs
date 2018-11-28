@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.Extensions.DependencyInjection;
 using SimpleIdServer.Bus;
 using SimpleIdServer.Concurrency;
@@ -11,6 +12,7 @@ using SimpleIdServer.Logging;
 using SimpleIdServer.OAuth.Logging;
 using SimpleIdServer.Store;
 using SimpleIdServer.Uma.Core;
+using SimpleIdServer.Uma.Host.Controllers;
 using SimpleIdServer.Uma.Logging;
 using System;
 using System.Collections.Generic;
@@ -21,14 +23,13 @@ namespace SimpleIdServer.Uma.Host.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddUmaHost(this IServiceCollection services, AuthorizationServerOptions authorizationServerOptions)
+        public static IServiceCollection AddUmaHost(this IServiceCollection services, AuthorizationServerOptions authorizationServerOptions, IMvcBuilder mvcBuilder)
         {
             if (services == null)
             {
                 throw new ArgumentNullException(nameof(services));
             }
-
-            // 1. Add the dependencies.
+            
             RegisterServices(services, authorizationServerOptions);
             return services;
         }

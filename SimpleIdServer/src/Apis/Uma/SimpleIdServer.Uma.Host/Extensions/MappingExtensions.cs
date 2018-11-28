@@ -25,7 +25,6 @@ using SimpleIdServer.Uma.Core.Parameters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using DomainResponse = SimpleIdServer.Uma.Core.Responses;
 
 namespace SimpleIdServer.Uma.Host.Extensions
 {
@@ -45,6 +44,7 @@ namespace SimpleIdServer.Uma.Host.Extensions
                 Count = searchResourceSet.TotalResults,
                 Ids = searchResourceSet.Ids,
                 Names = searchResourceSet.Names,
+                Owners = searchResourceSet.Owners,
                 StartIndex = searchResourceSet.StartIndex,
                 Types = searchResourceSet.Types
             };

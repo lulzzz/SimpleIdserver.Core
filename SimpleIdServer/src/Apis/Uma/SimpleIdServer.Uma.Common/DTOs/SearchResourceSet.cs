@@ -12,6 +12,8 @@ namespace SimpleIdServer.Uma.Common.DTOs
         public IEnumerable<string> Names { get; set; }
         [DataMember(Name = SearchResourceSetNames.Types)]
         public IEnumerable<string> Types { get; set; }
+        [DataMember(Name = SearchResourceSetNames.Owners)]
+        public IEnumerable<string> Owners { get; set; }
         [DataMember(Name = SearchResponseNames.StartIndex)]
         public int StartIndex { get; set; }
         [DataMember(Name = SearchResponseNames.TotalResults)]

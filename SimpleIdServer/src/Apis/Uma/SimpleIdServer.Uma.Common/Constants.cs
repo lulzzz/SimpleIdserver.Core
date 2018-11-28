@@ -27,6 +27,7 @@ namespace SimpleIdServer.Uma.Common
         public const string Ids = "ids";
         public const string Names = "names";
         public const string Types = "types";
+        public const string Owners = "owners";
     }
 
     public static class SearchResponseNames
@@ -44,6 +45,7 @@ namespace SimpleIdServer.Uma.Common
         public const string Type = "type";
         public const string Scopes = "scopes";
         public const string IconUri = "icon_uri";
+        public const string Owner = "owner";
     }
 
     public static class AddResourceSetResponseNames

@@ -1,20 +1,4 @@
-﻿#region copyright
-// Copyright 2015 Habart Thierry
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-#endregion
-
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using SimpleIdServer.Client;
 using SimpleIdServer.Uma.Core.Api.PermissionController;
 using SimpleIdServer.Uma.Core.Api.PermissionController.Actions;
@@ -32,6 +16,8 @@ using SimpleIdServer.Uma.Core.Repositories;
 using SimpleIdServer.Uma.Core.Services;
 using SimpleIdServer.Uma.Core.Stores;
 using SimpleIdServer.Uma.Core.Validators;
+using SimpleIdServer.Uma.Core.Website.ResourcesController;
+using SimpleIdServer.Uma.Core.Website.ResourcesController.Actions;
 using System.Collections.Generic;
 
 namespace SimpleIdServer.Uma.Core
@@ -41,6 +27,14 @@ namespace SimpleIdServer.Uma.Core
         public static IServiceCollection AddSimpleIdServerUmaCore(this IServiceCollection serviceCollection, UmaConfigurationOptions umaConfigurationOptions = null, ICollection<ResourceSet> resources = null, ICollection<Policy> policies = null)
         {
             RegisterDependencies(serviceCollection, umaConfigurationOptions, resources, policies);
+            return serviceCollection;
+        }
+
+        public static IServiceCollection AddSimpleIdServerUmaWebsite(this IServiceCollection serviceCollection, ICollection<ResourceSet> resources = null)
+        {
+            serviceCollection.AddTransient<IResourcesActions, ResourcesActions>();
+            serviceCollection.AddTransient<IGetCurrentUserResourcesAction, GetCurrentUserResourcesAction>();
+            serviceCollection.AddSingleton<IResourceSetRepository>(new DefaultResourceSetRepository(resources));
             return serviceCollection;
         }
 

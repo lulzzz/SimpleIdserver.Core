@@ -39,6 +39,7 @@ namespace SimpleIdServer.Uma.EF.Extensions
                 Id = resourceSet.Id,
                 Type = resourceSet.Type,
                 Uri = resourceSet.Uri,
+                Owner = resourceSet.Owner,
                 AuthorizationPolicyIds = policyIds,
                 Policies = policies
             };
@@ -107,6 +108,7 @@ namespace SimpleIdServer.Uma.EF.Extensions
                 Scopes = GetConcatenatedList(resourceSet.Scopes),
                 Type = resourceSet.Type,
                 Uri = resourceSet.Uri,
+                Owner = resourceSet.Owner,
                 PolicyResources = policyIds
             };
         }
