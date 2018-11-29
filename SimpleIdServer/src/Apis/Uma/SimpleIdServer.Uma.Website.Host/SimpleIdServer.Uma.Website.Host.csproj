@@ -26,9 +26,15 @@
     <EmbeddedResource Include="wwwroot\lib\**\*.js" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="Views\Resources\Confirm.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\Common\SimpleIdServer.Module\SimpleIdServer.Module.csproj" />
     <ProjectReference Include="..\..\SimpleIdServer\SimpleIdServer.Client\SimpleIdServer.Client.csproj" />
     <ProjectReference Include="..\..\SimpleIdServer\SimpleIdServer.Core.Jwt\SimpleIdServer.Core.Jwt.csproj" />
     <ProjectReference Include="..\SimpleIdServer.Uma.Core\SimpleIdServer.Uma.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="wwwroot\lib\selectize\" />
   </ItemGroup>
 </Project>

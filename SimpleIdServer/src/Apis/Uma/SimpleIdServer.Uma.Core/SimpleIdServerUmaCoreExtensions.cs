@@ -24,17 +24,23 @@ namespace SimpleIdServer.Uma.Core
 {
     public static class SimpleIdServerUmaCoreExtensions
     {
-        public static IServiceCollection AddSimpleIdServerUmaCore(this IServiceCollection serviceCollection, UmaConfigurationOptions umaConfigurationOptions = null, ICollection<ResourceSet> resources = null, ICollection<Policy> policies = null)
+        public static IServiceCollection AddSimpleIdServerUmaCore(this IServiceCollection serviceCollection, UmaConfigurationOptions umaConfigurationOptions = null, ICollection<ResourceSet> resources = null, ICollection<Policy> policies = null, ICollection<SharedLink> sharedLinks = null)
         {
             RegisterDependencies(serviceCollection, umaConfigurationOptions, resources, policies);
             return serviceCollection;
         }
 
-        public static IServiceCollection AddSimpleIdServerUmaWebsite(this IServiceCollection serviceCollection, ICollection<ResourceSet> resources = null)
+        public static IServiceCollection AddSimpleIdServerUmaWebsite(this IServiceCollection serviceCollection, ICollection<ResourceSet> resources = null, ICollection<SharedLink> sharedLinks = null, ICollection<Policy> policies = null)
         {
             serviceCollection.AddTransient<IResourcesActions, ResourcesActions>();
             serviceCollection.AddTransient<IGetCurrentUserResourcesAction, GetCurrentUserResourcesAction>();
+            serviceCollection.AddTransient<IConfirmSharedLinkAction, ConfirmSharedLinkAction>();
+            serviceCollection.AddTransient<IShareResourceAction, ShareResourceAction>();
+            serviceCollection.AddTransient<IUpdateResourcePermissionsAction, UpdateResourcePermissionsAction>();
+            serviceCollection.AddTransient<IGetResourcesSharedWithMeAction, GetResourcesSharedWithMeAction>();
+            serviceCollection.AddSingleton<IPolicyRepository>(new DefaultPolicyRepository(policies));
             serviceCollection.AddSingleton<IResourceSetRepository>(new DefaultResourceSetRepository(resources));
+            serviceCollection.AddSingleton<ISharedLinkRepository>(new DefaultSharedLinkRepository(sharedLinks));
             return serviceCollection;
         }
 

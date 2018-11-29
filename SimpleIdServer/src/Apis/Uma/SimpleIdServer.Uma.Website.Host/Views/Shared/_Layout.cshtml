@@ -9,6 +9,8 @@
         <title>Simple identity server - @ViewBag.Title</title>
         <link rel="stylesheet" href="@Url.Content("~/lib/bootstrap/bootstrap.css")" />
         <link rel="stylesheet" href="@Url.Content("~/lib/bootstrap/bootstrap-theme.css")" />
+        <link rel="stylesheet" href="@Url.Content("~/lib/datatable/datatables.min.css")" />
+        <link rel="stylesheet" href="@Url.Content("~/lib/selectize/selectize.bootstrap3.css")" />
         <link rel="stylesheet" href="@Url.Content("~/css/home.index.css")" />
         <link rel="stylesheet" href="@Url.Content("~/css/tile.theme.css")" />
     </head>
@@ -27,7 +29,7 @@
                             <a href="@Url.Action("Index", "Resources")">My resources</a>
                         </li>
                         <li>
-                            <a href="@Url.Action("Shared", "Resources")">Shared resources</a>
+                            <a href="@Url.Action("Shared", "Resources")">Resources shared with me</a>
                         </li>
                         <li>
                             <a href="@Url.Action("Disconnect", "Authenticate")">Disconnect</a>
@@ -55,10 +57,15 @@
         </div>
         <script type="text/javascript" src="@Url.Content("~/lib/jquery/jquery.js")"></script>
         <script type="text/javascript" src="@Url.Content("~/lib/bootstrap/bootstrap.js")"></script>
-        @RenderSection("Scripts", required:false)
+        <script type="text/javascript" src="@Url.Content("~/lib/datatable/datatables.min.js")"></script>
+        <script type="text/javascript" src="@Url.Content("~/lib/selectize/selectize.min.js")"></script>
+        @RenderSection("Scripts", required: false)
         <script type="text/javascript">
-            $(document).ready(function() {
-                $(function() {
+            Selectize.define('no-delete', function (options) {
+                this.deleteSelection = function () { };
+            });
+            $(document).ready(function () {
+                $(function () {
                     $('[data-toggle="tooltip"]').tooltip();
                 });
             });

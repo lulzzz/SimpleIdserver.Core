@@ -8,11 +8,9 @@ using SimpleIdServer.Lib;
 using SimpleIdServer.Module;
 using SimpleIdServer.Uma.Host;
 using SimpleIdServer.Uma.Host.Extensions;
-using SimpleIdServer.Uma.Startup.Extensions;
 using SimpleIdServer.Uma.Website.Host;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -27,7 +25,9 @@ namespace SimpleIdServer.Uma.Startup
             {
                 Configuration = new AuthorizationServerConfiguration
                 {
-                    JsonWebKeys = DefaultConfiguration.GetJsonWebKeys()
+                    JsonWebKeys = DefaultConfiguration.GetJsonWebKeys(),
+                    Resources = DefaultConfiguration.GetResources(),
+                    Policies = DefaultConfiguration.GetPolicies()
                 }
             };
         }
@@ -57,6 +57,11 @@ namespace SimpleIdServer.Uma.Startup
                     OpenidWellKnownConfigurationUrl = "http://localhost:60000/.well-known/openid-configuration",
                     ClientId = "uma",
                     ClientSecret = "umaSecret"
+                },
+                Configuration = new UmaConfigurationWebsiteOptions
+                {
+                    ResourceSet = DefaultConfiguration.GetResources(),
+                    Policies = DefaultConfiguration.GetPolicies()
                 }
             });
         }

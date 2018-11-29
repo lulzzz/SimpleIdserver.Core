@@ -10,12 +10,12 @@ namespace SimpleIdServer.Uma.Core.Repositories
 {
     internal sealed class DefaultPolicyRepository : IPolicyRepository
     {
-        public ICollection<Policy> _policies;
-
         public DefaultPolicyRepository(ICollection<Policy> policies)
         {
-            _policies = policies == null ? new List<Policy>() : policies;
+            Policies = policies == null ? new List<Policy>() : policies;
         }
+
+        public static ICollection<Policy> Policies;
 
         public Task<bool> Add(Policy policy)
         {
@@ -24,7 +24,7 @@ namespace SimpleIdServer.Uma.Core.Repositories
                 throw new ArgumentNullException(nameof(policy));
             }
 
-            _policies.Add(policy.Copy());
+            Policies.Add(policy.Copy());
             return Task.FromResult(true);
         }
 
@@ -35,13 +35,13 @@ namespace SimpleIdServer.Uma.Core.Repositories
                 throw new ArgumentNullException(nameof(id));
             }
 
-            var policy = _policies.FirstOrDefault(p => p.Id == id);
+            var policy = Policies.FirstOrDefault(p => p.Id == id);
             if (policy == null)
             {
                 return Task.FromResult(false);
             }
 
-            _policies.Remove(policy);
+            Policies.Remove(policy);
             return Task.FromResult(true);
         }
 
@@ -52,7 +52,7 @@ namespace SimpleIdServer.Uma.Core.Repositories
                 throw new ArgumentNullException(nameof(id));
             }
 
-            var r = _policies.FirstOrDefault(p => p.Id == id);
+            var r = Policies.FirstOrDefault(p => p.Id == id);
             if (r == null)
             {
                 return Task.FromResult((Policy)null);
@@ -63,7 +63,7 @@ namespace SimpleIdServer.Uma.Core.Repositories
 
         public Task<ICollection<Policy>> GetAll()
         {
-            ICollection<Policy> result = _policies.Select(p => p.Copy()).ToList();
+            ICollection<Policy> result = Policies.Select(p => p.Copy()).ToList();
             return Task.FromResult(result);
         }
 
@@ -74,7 +74,7 @@ namespace SimpleIdServer.Uma.Core.Repositories
                 throw new ArgumentNullException(nameof(parameter));
             }
 
-            IEnumerable<Policy> result = _policies;
+            IEnumerable<Policy> result = Policies;
             if (parameter.Ids != null && parameter.Ids.Any())
             {
                 result = result.Where(r => parameter.Ids.Contains(r.Id));
@@ -107,7 +107,7 @@ namespace SimpleIdServer.Uma.Core.Repositories
                 throw new ArgumentNullException(nameof(resourceSetId));
             }
 
-            ICollection<Policy> result = _policies.Where(p => p.ResourceSetIds.Contains(resourceSetId))
+            ICollection<Policy> result = Policies.Where(p => p.ResourceSetIds.Contains(resourceSetId))
                 .Select(r => r.Copy())
                 .ToList();
             return Task.FromResult(result);
@@ -120,7 +120,7 @@ namespace SimpleIdServer.Uma.Core.Repositories
                 throw new ArgumentNullException(nameof(policy));
             }
 
-            var rec = _policies.FirstOrDefault(p => p.Id == policy.Id);
+            var rec = Policies.FirstOrDefault(p => p.Id == policy.Id);
             if (rec == null)
             {
                 return Task.FromResult(false);

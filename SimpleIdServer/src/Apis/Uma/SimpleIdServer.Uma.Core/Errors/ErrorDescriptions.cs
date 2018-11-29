@@ -56,5 +56,11 @@ namespace SimpleIdServer.Uma.Core.Errors
         public const string TheClaimTokenIsNotValid = "the claim token parameter is not valid";
         public const string TheAuthorizationPolicyIsNotSatisfied = "the authorization policy is not satisfied";
         public const string TheClientDoesntSupportTheGrantType = "the client doesn't support the grant type {0}";
+        public const string TheScopesMustBeSpecified = "the scopes must be specified";
+        public const string TheResourceIdMustBeSpecified = "the resource id must be specified";
+        public const string TheConfirmationCodeMustBeSpecified = "the confirmation code must be specified";
+        public const string TheConfirmationCodeIsInvalid = "the confirmation code is invalid";
+        public const string TheSharedLinkCannotBeInserted = "an internal error occured while trying to add the shared link";
+        public const string TheSharedLinkCannotBeUsedByTheOwner = "the shared link cannot be used by the owner";
     }
 }

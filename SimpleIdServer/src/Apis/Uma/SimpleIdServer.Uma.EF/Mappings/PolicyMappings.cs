@@ -28,6 +28,11 @@ namespace SimpleIdServer.Uma.EF.Mappings
             modelBuilder.Entity<Policy>()
                 .ToTable("Policies")
                 .HasKey(a => a.Id);
+            modelBuilder.Entity<Policy>()
+                .HasMany(p => p.Rules)
+                .WithOne(p => p.Policy)
+                .HasForeignKey(p => p.PolicyId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
         #endregion

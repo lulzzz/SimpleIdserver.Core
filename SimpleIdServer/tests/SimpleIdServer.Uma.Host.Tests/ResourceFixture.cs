@@ -455,9 +455,9 @@ namespace SimpleIdServer.Uma.Host.Tests
                 {
                     "scope"
                 },
-                IconUri = "iconuri",
+                IconUri = "http://localhost/picture.png",
                 Type = "type",
-                Uri = "uri",
+                Uri = "http://localhost/r",
                 Owner = "owner"
             },
             baseUrl + "/.well-known/uma2-configuration", "header").ConfigureAwait(false);
@@ -465,7 +465,7 @@ namespace SimpleIdServer.Uma.Host.Tests
             await _resourceSetClient.UpdateByResolution(new PutResourceSet
             {
                 Id = resource.Content.Id,
-                IconUri = "iconuri2",
+                IconUri = "http://localhost/picture2.png",
                 Name = "name2",
                 Owner = "owner2",
                 Scopes = new List<string>
@@ -473,7 +473,7 @@ namespace SimpleIdServer.Uma.Host.Tests
                     "scope2"
                 },
                 Type = "type2",
-                Uri = "uri2"
+                Uri = "http://localhost/r2"
             }, baseUrl + "/.well-known/uma2-configuration", "header").ConfigureAwait(false);
             var secondResult = await _resourceSetClient.GetByResolution(resource.Content.Id, baseUrl + "/.well-known/uma2-configuration", "header").ConfigureAwait(false);
 
@@ -481,15 +481,15 @@ namespace SimpleIdServer.Uma.Host.Tests
             Assert.NotNull(firstResult);
             Assert.NotNull(secondResult);
             Assert.Equal("name", firstResult.Content.Name);
-            Assert.Equal("iconuri", firstResult.Content.IconUri);
+            Assert.Equal("http://localhost/picture.png", firstResult.Content.IconUri);
             Assert.Equal("type", firstResult.Content.Type);
-            Assert.Equal("uri", firstResult.Content.Uri);
+            Assert.Equal("http://localhost/r", firstResult.Content.Uri);
             Assert.Equal("owner", firstResult.Content.Owner);
             Assert.True(firstResult.Content.Scopes.Contains("scope"));
             Assert.Equal("name2", secondResult.Content.Name);
-            Assert.Equal("iconuri2", secondResult.Content.IconUri);
+            Assert.Equal("http://localhost/picture2.png", secondResult.Content.IconUri);
             Assert.Equal("type2", secondResult.Content.Type);
-            Assert.Equal("uri2", secondResult.Content.Uri);
+            Assert.Equal("http://localhost/r2", secondResult.Content.Uri);
             Assert.Equal("owner2", secondResult.Content.Owner);
             Assert.True(secondResult.Content.Scopes.Contains("scope2"));
         }

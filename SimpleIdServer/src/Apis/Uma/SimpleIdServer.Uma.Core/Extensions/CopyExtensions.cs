@@ -15,6 +15,7 @@ namespace SimpleIdServer.Uma.Core.Extensions
                 Id = resourceSet.Id,
                 Name = resourceSet.Name,
                 Type = resourceSet.Type,
+                Owner = resourceSet.Owner,
                 Uri = resourceSet.Uri,
                 Policies = resourceSet.Policies == null ? new List<Policy>() : resourceSet.Policies.Select(p => p.Copy()).ToList(),
                 Scopes = resourceSet.Scopes == null ? new List<string>() : resourceSet.Scopes.ToList()

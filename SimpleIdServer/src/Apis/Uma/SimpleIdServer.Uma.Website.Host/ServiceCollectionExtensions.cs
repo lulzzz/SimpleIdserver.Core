@@ -36,7 +36,7 @@ namespace SimpleIdServer.Uma.Website.Host
 
             mvcBuilder.AddApplicationPart(assembly);
             services.AddSingleton(umaWebsiteOptions.Authentication);
-            services.AddSimpleIdServerUmaWebsite(umaWebsiteOptions.Configuration.ResourceSet);
+            services.AddSimpleIdServerUmaWebsite(umaWebsiteOptions.Configuration.ResourceSet, null, umaWebsiteOptions.Configuration.Policies);
             return services;
         }
 

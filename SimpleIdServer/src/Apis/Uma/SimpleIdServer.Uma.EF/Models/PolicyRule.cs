@@ -14,18 +14,20 @@
 // limitations under the License.
 #endregion
 
+using System.Collections.Generic;
+
 namespace SimpleIdServer.Uma.EF.Models
 {
     public class PolicyRule
     {
         public string Id { get; set; }
-        public string ClientIdsAllowed { get; set; }
-        public string Scopes { get; set; }
         public bool IsResourceOwnerConsentNeeded { get; set; }
         public string Script { get; set; }
-        public string Claims { get; set; }
         public string PolicyId { get; set; }
         public string OpenIdProvider { get; set; }
+        public virtual ICollection<PolicyRuleScope> Scopes { get; set; }
+        public virtual ICollection<PolicyRuleClientId> ClientIdsAllowed { get; set; }
+        public virtual ICollection<PolicyRuleClaim> Claims { get; set; }
         public virtual Policy Policy { get; set; }
     }
 }

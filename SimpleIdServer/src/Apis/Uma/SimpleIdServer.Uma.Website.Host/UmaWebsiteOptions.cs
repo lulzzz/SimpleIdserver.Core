@@ -13,6 +13,7 @@ namespace SimpleIdServer.Uma.Website.Host
     public class UmaConfigurationWebsiteOptions
     {
         public ICollection<ResourceSet> ResourceSet { get; set; }
+        public ICollection<Policy> Policies { get; set; }
     }
 
     public class UmaWebsiteOptions

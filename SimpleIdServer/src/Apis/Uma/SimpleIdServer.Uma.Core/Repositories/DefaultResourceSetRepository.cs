@@ -1,21 +1,21 @@
-﻿using System;
+﻿using SimpleIdServer.Uma.Core.Extensions;
+using SimpleIdServer.Uma.Core.Models;
+using SimpleIdServer.Uma.Core.Parameters;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using SimpleIdServer.Uma.Core.Extensions;
-using SimpleIdServer.Uma.Core.Models;
-using SimpleIdServer.Uma.Core.Parameters;
 
 namespace SimpleIdServer.Uma.Core.Repositories
 {
     internal sealed class DefaultResourceSetRepository : IResourceSetRepository
     {
-        public ICollection<ResourceSet> _resources;
-
         public DefaultResourceSetRepository(ICollection<ResourceSet> resources)
         {
-            _resources = resources == null ? new List<ResourceSet>() : resources;
+            Resources = resources == null ? new List<ResourceSet>() : resources;
         }
+
+        public static ICollection<ResourceSet> Resources;
 
         public Task<bool> Delete(string id)
         {
@@ -24,13 +24,13 @@ namespace SimpleIdServer.Uma.Core.Repositories
                 throw new ArgumentNullException(nameof(id));
             }
 
-            var policy = _resources.FirstOrDefault(p => p.Id == id);
+            var policy = Resources.FirstOrDefault(p => p.Id == id);
             if (policy == null)
             {
                 return Task.FromResult(false);
             }
 
-            _resources.Remove(policy);
+            Resources.Remove(policy);
             return Task.FromResult(true);
         }
 
@@ -41,13 +41,15 @@ namespace SimpleIdServer.Uma.Core.Repositories
                 throw new ArgumentNullException(nameof(id));
             }
 
-            var rec = _resources.FirstOrDefault(p => p.Id == id);
+            var rec = Resources.FirstOrDefault(p => p.Id == id);
             if (rec == null)
             {
                 return Task.FromResult((ResourceSet)null);
             }
 
-            return Task.FromResult(rec.Copy());
+            var result = rec.Copy();
+            Enrich(result);
+            return Task.FromResult(result);
         }
 
         public Task<IEnumerable<ResourceSet>> Get(IEnumerable<string> ids)
@@ -57,15 +59,20 @@ namespace SimpleIdServer.Uma.Core.Repositories
                 throw new ArgumentNullException(nameof(ids));
             }
 
-            IEnumerable<ResourceSet> result = _resources.Where(r => ids.Contains(r.Id))
+            IEnumerable<ResourceSet> result = Resources.Where(r => ids.Contains(r.Id))
                 .Select(r => r.Copy())
                 .ToList();
+            foreach(var r in result)
+            {
+                Enrich(r);
+            }
+
             return Task.FromResult(result);
         }
 
         public Task<ICollection<ResourceSet>> GetAll()
         {
-            ICollection<ResourceSet> result = _resources.Select(r => r.Copy()).ToList();
+            ICollection<ResourceSet> result = Resources.Select(r => r.Copy()).ToList();
             return Task.FromResult(result);
         }
 
@@ -76,7 +83,7 @@ namespace SimpleIdServer.Uma.Core.Repositories
                 throw new ArgumentNullException(nameof(resourceSet));
             }
 
-            _resources.Add(resourceSet.Copy());
+            Resources.Add(resourceSet.Copy());
             return Task.FromResult(true);
         }
 
@@ -87,7 +94,7 @@ namespace SimpleIdServer.Uma.Core.Repositories
                 throw new ArgumentNullException(nameof(parameter));
             }
 
-            IEnumerable<ResourceSet> result = _resources;
+            IEnumerable<ResourceSet> result = Resources.Select(r => Enrich(r)).ToList();
             if (parameter.Ids != null && parameter.Ids.Any())
             {
                 result = result.Where(r => parameter.Ids.Contains(r.Id));
@@ -103,6 +110,16 @@ namespace SimpleIdServer.Uma.Core.Repositories
                 result = result.Where(r => parameter.Types.Any(t => r.Type.Contains(t)));
             }
 
+            if (parameter.Owners != null && parameter.Owners.Any())
+            {
+                result = result.Where(r => parameter.Owners.Contains(r.Owner));
+            }
+
+            if (parameter.Subjects != null && parameter.Subjects.Any())
+            {
+                result = result.Where(r => r.Policies.Any(p => p.Rules != null && p.Rules.Any(ru => ru.Claims != null && ru.Claims.Any(c => c.Type == "sub" && parameter.Subjects.Contains(c.Value)))));
+            }
+
             var nbResult = result.Count();
             result = result.OrderBy(c => c.Id);
             if (parameter.IsPagingEnabled)
@@ -110,9 +127,14 @@ namespace SimpleIdServer.Uma.Core.Repositories
                 result = result.Skip(parameter.StartIndex).Take(parameter.Count);
             }
 
+            var content = result.Select(r => r.Copy()).ToList();
+            foreach(var r in content)
+            {
+                Enrich(r);
+            }
             return Task.FromResult(new SearchResourceSetResult
             {
-                Content = result.Select(r => r.Copy()),
+                Content = content,
                 StartIndex = parameter.StartIndex,
                 TotalResults = nbResult
             });
@@ -125,7 +147,7 @@ namespace SimpleIdServer.Uma.Core.Repositories
                 throw new ArgumentNullException(nameof(resourceSet));
             }
 
-            var rec = _resources.FirstOrDefault(p => p.Id == resourceSet.Id);
+            var rec = Resources.FirstOrDefault(p => p.Id == resourceSet.Id);
             if (rec == null)
             {
                 return Task.FromResult(false);
@@ -138,7 +160,15 @@ namespace SimpleIdServer.Uma.Core.Repositories
             rec.Scopes = resourceSet.Scopes;
             rec.Type = resourceSet.Type;
             rec.Uri = resourceSet.Uri;
+            rec.Owner = resourceSet.Owner;
             return Task.FromResult(true);
+        }
+
+        private static ResourceSet Enrich(ResourceSet resourceSet)
+        {
+            var policies = DefaultPolicyRepository.Policies.Where(p => p.ResourceSetIds.Contains(resourceSet.Id));
+            resourceSet.Policies = policies.ToList();
+            return resourceSet;
         }
     }
 }

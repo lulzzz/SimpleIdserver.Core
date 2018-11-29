@@ -24,9 +24,9 @@ namespace SimpleIdServer.Uma.EF.Models
         public string Name { get; set; }
         public string Uri { get; set; }
         public string Type { get; set; }
-        public string Scopes { get; set; }        
         public string IconUri { get; set; }
         public string Owner { get; set; }
+        public virtual ICollection<ResourceScope> Scopes { get; set; }
         public virtual ICollection<PolicyResource> PolicyResources { get; set; }
     }
 }

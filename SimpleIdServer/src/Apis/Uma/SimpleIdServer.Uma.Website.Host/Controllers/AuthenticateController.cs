@@ -82,14 +82,14 @@ namespace SimpleIdServer.Uma.Website.Host.Controllers
                 return new UnauthorizedResult();
             }
 
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", "Home");
         }
 
         [HttpGet]
         public async Task<IActionResult> Disconnect()
         {
             await _authenticationService.SignOutAsync(HttpContext, Constants.DEFAULT_COOKIE_NAME, new AuthenticationProperties()).ConfigureAwait(false);
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", "Home");
         }
 
         #endregion

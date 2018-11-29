@@ -74,7 +74,8 @@ namespace SimpleIdServer.Uma.Host.Extensions
                 Name = postResourceSet.Name,
                 Scopes = postResourceSet.Scopes,
                 Type = postResourceSet.Type,
-                Uri = postResourceSet.Uri
+                Uri = postResourceSet.Uri,
+                Owner = postResourceSet.Owner
             };
         }
 
@@ -87,7 +88,8 @@ namespace SimpleIdServer.Uma.Host.Extensions
                 IconUri = putResourceSet.IconUri,
                 Scopes = putResourceSet.Scopes,
                 Type = putResourceSet.Type,
-                Uri = putResourceSet.Uri
+                Uri = putResourceSet.Uri,
+                Owner = putResourceSet.Owner
             };
         }
 
@@ -247,7 +249,8 @@ namespace SimpleIdServer.Uma.Host.Extensions
                 Name = resourceSet.Name,
                 Scopes = resourceSet.Scopes,
                 Type = resourceSet.Type,
-                Uri = resourceSet.Uri 
+                Uri = resourceSet.Uri ,
+                Owner = resourceSet.Owner
             };
         }
 

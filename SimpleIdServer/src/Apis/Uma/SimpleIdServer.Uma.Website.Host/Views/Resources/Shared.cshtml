@@ -1,15 +1,50 @@
-﻿<div>
-    <h4>Resources shared with me</h4>
-    <table>
+﻿<h4>Resources shared with me</h4>
+
+<div>
+    <table id="my-resources" class="table table-striped table-bordered">
         <thead>
             <tr>
                 <th></th>
                 <th>Name</th>
                 <th>Type</th>
                 <th>Uri</th>
-                <th></th>
             </tr>
         </thead>
         <tbody></tbody>
     </table>
 </div>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#my-resources").DataTable({
+                processing: true,
+                serverSide: true,
+                searching: false,
+                ordering: false,
+                ajax: {
+                    url: "@Url.Action("GetSharedResources", "Resources")",
+                    data: function (d) {
+                        return JSON.stringify(d);
+                    },
+                    contentType: "application/json",
+                    type: 'POST'
+                },
+                columns: [
+                    { "name": "picture" },
+                    { "name": "name" },
+                    { "name": "type" },
+                    { "name": "uri" }
+                ],
+                columnDefs: [
+                    {
+                        targets: 0,
+                        render: function (data) {
+                            return "<img src='" + data + "' style='max-width: 50px' />";
+                        }
+                    }
+                ]
+            });
+        });
+    </script>
+}
