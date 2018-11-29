@@ -1,5 +1,4 @@
 ﻿using SimpleIdServer.Uma.Core.Exceptions;
-using SimpleIdServer.Uma.Core.Models;
 using SimpleIdServer.Uma.Core.Parameters;
 using SimpleIdServer.Uma.Core.Repositories;
 using System;

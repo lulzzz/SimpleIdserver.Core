@@ -52,7 +52,7 @@ namespace SimpleIdServer.Uma.Core.Website.ResourcesController.Actions
                 throw new BaseUmaException(Errors.ErrorCodes.InvalidRequestCode, Errors.ErrorDescriptions.TheScopeAreNotValid);
             }
 
-            if (shareResourceParameter.Owner != shareResourceParameter.Owner)
+            if (resource.Owner != shareResourceParameter.Owner)
             {
                 throw new UmaNotAuthorizedException();
             }
