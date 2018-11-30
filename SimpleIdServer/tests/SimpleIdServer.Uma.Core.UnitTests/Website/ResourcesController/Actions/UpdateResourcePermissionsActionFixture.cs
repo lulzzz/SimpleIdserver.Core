@@ -47,6 +47,28 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Website.ResourcesController.Actions
             Assert.NotNull(exception);
         }
 
+		[Fact]
+		public async Task When_User_Is_Not_Authorized_Then_Exception_Is_Thrown()
+		{
+            // ARRANGE
+            InitializeFakeObjects();
+            _resourceSetRepositoryStub.Setup(s => s.Get(It.IsAny<string>())).Returns(() => Task.FromResult(new ResourceSet
+			{			
+				Id = "resourceid",
+                Owner = "owner"
+			}));
+			
+			// ACT
+            var exception = await Assert.ThrowsAsync<UmaNotAuthorizedException>(() => _updateResourcePermissionsAction.Execute(new UpdateResourcePermissionsParameter
+            {
+                ResourceId = "resourceid",
+				Subject = "incorrectowner"
+            }));
+			
+			// ASSERT
+			Assert.NotNull(exception);
+		}
+		
         private void InitializeFakeObjects()
         {
             _resourceSetRepositoryStub = new Mock<IResourceSetRepository>();
