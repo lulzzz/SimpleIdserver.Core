@@ -1,60 +1,52 @@
-﻿#region copyright
-// Copyright 2015 Habart Thierry
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-#endregion
-
+﻿using Newtonsoft.Json.Linq;
+using SimpleIdServer.Uma.Core.JwtToken;
+using SimpleIdServer.Uma.Core.Models;
+using SimpleIdServer.Uma.Core.Parameters;
+using SimpleIdServer.Uma.Core.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
-using SimpleIdServer.Uma.Core.JwtToken;
-using SimpleIdServer.Uma.Core.Models;
-using SimpleIdServer.Uma.Core.Parameters;
 
 namespace SimpleIdServer.Uma.Core.Policies
 {
     public interface IBasicAuthorizationPolicy
     {
-        Task<AuthorizationPolicyResult> Execute(TicketLineParameter ticket, Policy policy, ClaimTokenParameter claimTokenParameters);
+        Task<ResourceValidationResult> Execute(string openidProvider, TicketLineParameter ticket, IEnumerable<Policy> policies, ClaimTokenParameter claimTokenParameters);
+    }
+
+    public class ResourceValidationResult
+    {
+        public bool IsValid { get; set; }
+        public IEnumerable<AuthorizationPolicyResult> AuthorizationPoliciesResult { get; set; }
     }
 
     internal class BasicAuthorizationPolicy : IBasicAuthorizationPolicy
     {
         private readonly IJwtTokenParser _jwtTokenParser;
+        private readonly IPendingRequestRepository _pendingRequestRepository;
         
-        public BasicAuthorizationPolicy(IJwtTokenParser jwtTokenParser)
+        public BasicAuthorizationPolicy(IJwtTokenParser jwtTokenParser, IPendingRequestRepository pendingRequestRepository)
         {
             _jwtTokenParser = jwtTokenParser;
+            _pendingRequestRepository = pendingRequestRepository;
         }
 
         #region Public methods
 
-        public async Task<AuthorizationPolicyResult> Execute(TicketLineParameter ticketLineParameter, Policy authorizationPolicy, ClaimTokenParameter claimTokenParameter)
+        public async Task<ResourceValidationResult> Execute(string openidProvider, TicketLineParameter ticketLineParameter, IEnumerable<Policy> policies, ClaimTokenParameter claimTokenParameter)
         {
+            if (string.IsNullOrWhiteSpace(openidProvider))
+            {
+                throw new ArgumentNullException(nameof(openidProvider));
+            }
+
             if (ticketLineParameter == null)
             {
                 throw new ArgumentNullException(nameof(ticketLineParameter));
             }
 
-            if (authorizationPolicy == null)
-            {
-                throw new ArgumentNullException(nameof(authorizationPolicy));
-            }
-
-            if (authorizationPolicy.Rules == null ||
-                !authorizationPolicy.Rules.Any())
+            if (policies == null || !policies.Any())
             {
                 return new AuthorizationPolicyResult
                 {
@@ -62,63 +54,84 @@ namespace SimpleIdServer.Uma.Core.Policies
                 };
             }
 
-            AuthorizationPolicyResult result = null;
-            foreach (var rule in authorizationPolicy.Rules)
+            var validationsResult = new List<AuthorizationPolicyResult>();
+            foreach (var policy in policies)
             {
-                result = await ExecuteAuthorizationPolicyRule(ticketLineParameter, rule, claimTokenParameter);
-                if (result.Type == AuthorizationPolicyResultEnum.Authorized)
+                if (ticketLineParameter.Scopes.Any(s => !policy.Scopes.Contains(s)))
                 {
-                    return result;
+                    validationsResult.Add(new AuthorizationPolicyResult
+                    {
+                        Type = AuthorizationPolicyResultEnum.NotAuthorized
+                    });
+                    continue;
+                }
+
+                var validationResult = await CheckClaims(openidProvider, policy, claimTokenParameter).ConfigureAwait(false);
+                validationsResult.Add(validationResult);
+            }
+
+            var vr = validationsResult.FirstOrDefault(v => v.Type == AuthorizationPolicyResultEnum.Authorized);
+            if (vr == null)
+            {
+                return new ResourceValidationResult
+                {
+                    IsValid = false,
+                    AuthorizationPoliciesResult = validationsResult
+                };
+            }
+
+            if (vr.Policy.IsResourceOwnerConsentNeeded)
+            {
+                var pendingRequest = await _pendingRequestRepository.Get(vr.Policy.Id, vr.Subject).ConfigureAwait(false);
+                if (pendingRequest == null)
+                {
+                    await _pendingRequestRepository.Add(new PendingRequest
+                    {
+                        CreateDateTime = DateTime.UtcNow,
+                        AuthorizationPolicyRuleId = vr.Policy.Id,
+                        IsConfirmed = false,
+                        RequesterSubject = vr.Subject
+                    }).ConfigureAwait(false);
+                    return new ResourceValidationResult
+                    {
+                        IsValid = false,
+                        AuthorizationPoliciesResult = new[]
+                        {
+                            new AuthorizationPolicyResult
+                            {
+                                Type = AuthorizationPolicyResultEnum.RequestSubmitted,,
+                                Policy = vr.Policy
+                            }
+                        }
+                    };
+                }
+
+                if (!pendingRequest.IsConfirmed)
+                {
+                    return new ResourceValidationResult
+                    {
+                        IsValid = false,
+                        AuthorizationPoliciesResult = new[]
+                        {
+                            new AuthorizationPolicyResult
+                            {
+                                Type = AuthorizationPolicyResultEnum.RequestNotConfirmed,
+                                Policy = vr.Policy
+                            }
+                        }
+                    };
                 }
             }
 
-            return result;
+            return new ResourceValidationResult
+            {
+                IsValid = true
+            };
         }
 
         #endregion
 
         #region Private methods
-
-        private async Task<AuthorizationPolicyResult> ExecuteAuthorizationPolicyRule(TicketLineParameter ticketLineParameter, PolicyRule authorizationPolicy, ClaimTokenParameter claimTokenParameter)
-        {
-            // 1. Check can access to the scope
-            if (ticketLineParameter.Scopes.Any(s => !authorizationPolicy.Scopes.Contains(s)))
-            {
-                return new AuthorizationPolicyResult
-                {
-                    Type = AuthorizationPolicyResultEnum.NotAuthorized
-                };
-            }
-
-            // 2. Check clients are correct
-            var clientAuthorizationResult = CheckClients(authorizationPolicy, ticketLineParameter);
-            if (clientAuthorizationResult != null &&
-                clientAuthorizationResult.Type != AuthorizationPolicyResultEnum.Authorized)
-            {
-                return clientAuthorizationResult;
-            }
-
-            // 3. Check claims are correct
-            var claimAuthorizationResult = await CheckClaims(authorizationPolicy, claimTokenParameter).ConfigureAwait(false);
-            if (claimAuthorizationResult != null && claimAuthorizationResult.Type != AuthorizationPolicyResultEnum.Authorized)
-            {
-                return claimAuthorizationResult;
-            }
-
-            // 4. Check the resource owner consent is needed
-            if (authorizationPolicy.IsResourceOwnerConsentNeeded && !ticketLineParameter.IsAuthorizedByRo)
-            {
-                return new AuthorizationPolicyResult
-                {
-                    Type = AuthorizationPolicyResultEnum.RequestSubmitted
-                };
-            }
-
-            return new AuthorizationPolicyResult
-            {
-                Type = AuthorizationPolicyResultEnum.Authorized
-            };
-        }
 
         private AuthorizationPolicyResult GetNeedInfoResult(List<Claim> claims, string openidConfigurationUrl)
         {
@@ -155,33 +168,38 @@ namespace SimpleIdServer.Uma.Core.Policies
             };
         }
 
-        private async Task<AuthorizationPolicyResult> CheckClaims(PolicyRule authorizationPolicy, ClaimTokenParameter claimTokenParameter)
+        private async Task<AuthorizationPolicyResult> CheckClaims(string openidProvider, Policy authorizationPolicy, ClaimTokenParameter claimTokenParameter)
         {
-            if (authorizationPolicy.Claims == null ||
-                !authorizationPolicy.Claims.Any())
+            if (authorizationPolicy.Claims == null || !authorizationPolicy.Claims.Any())
             {
-                return null;
+                return new AuthorizationPolicyResult
+                {
+                    Type = AuthorizationPolicyResultEnum.Authorized,
+                    Policy = authorizationPolicy
+                };
             }
 
             if (claimTokenParameter == null || claimTokenParameter.Format != Constants.IdTokenType)
             {
-                return GetNeedInfoResult(authorizationPolicy.Claims, authorizationPolicy.OpenIdProvider);
+                var tmp = GetNeedInfoResult(authorizationPolicy.Claims, openidProvider);
+                tmp.Policy = authorizationPolicy;
+                return tmp;
             }
 
             var idToken = claimTokenParameter.Token;
-            var jwsPayload = await _jwtTokenParser.UnSign(idToken, authorizationPolicy).ConfigureAwait(false);
+            var jwsPayload = await _jwtTokenParser.UnSign(idToken, openidProvider, authorizationPolicy).ConfigureAwait(false);
             if (jwsPayload == null)
             {
                 return new AuthorizationPolicyResult
                 {
-                    Type = AuthorizationPolicyResultEnum.NotAuthorized
+                    Type = AuthorizationPolicyResultEnum.NotAuthorized,
+                    Policy = authorizationPolicy
                 };
             }
-
+            
             foreach (var claim in authorizationPolicy.Claims)
             {
-                var payload = jwsPayload
-                    .FirstOrDefault(j => j.Key == claim.Type);
+                var payload = jwsPayload.FirstOrDefault(j => j.Key == claim.Type);
                 if (payload.Equals(default(KeyValuePair<string, object>)))
                 {
                     return new AuthorizationPolicyResult
@@ -232,31 +250,18 @@ namespace SimpleIdServer.Uma.Core.Policies
                 }
             }
 
-            return new AuthorizationPolicyResult
+            var subjectClaim = jwsPayload.FirstOrDefault(c => c.Key == SimpleIdServer.Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject);
+            var subject = string.Empty;
+            if (!subjectClaim.Equals(default(KeyValuePair<string, object>)) && subjectClaim.Value != null)
             {
-                Type = AuthorizationPolicyResultEnum.Authorized
-            };
-        }
-
-        private AuthorizationPolicyResult CheckClients(PolicyRule authorizationPolicy, TicketLineParameter ticketLineParameter)
-        {
-            if (authorizationPolicy.ClientIdsAllowed == null ||
-                !authorizationPolicy.ClientIdsAllowed.Any())
-            {
-                return null;
-            }
-
-            if (!authorizationPolicy.ClientIdsAllowed.Contains(ticketLineParameter.ClientId))
-            {
-                return new AuthorizationPolicyResult
-                {
-                    Type = AuthorizationPolicyResultEnum.NotAuthorized
-                };
+                subject = subjectClaim.Value.ToString();
             }
 
             return new AuthorizationPolicyResult
             {
-                Type = AuthorizationPolicyResultEnum.Authorized
+                Type = AuthorizationPolicyResultEnum.Authorized,
+                Subject = subject,
+                Policy = authorizationPolicy
             };
         }
 

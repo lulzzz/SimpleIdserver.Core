@@ -14,9 +14,10 @@ namespace SimpleIdServer.Uma.Core.JwtToken
         /// Unsign the JWS
         /// </summary>
         /// <param name="jws"></param>
+        /// <param name="openidProvider"></param>
         /// <param name="policyRule"></param>
         /// <returns></returns>
-        Task<JwsPayload> UnSign(string jws, PolicyRule policyRule);
+        Task<JwsPayload> UnSign(string jws, string openidProvider, Policy policyRule);
     }
 
     internal class JwtTokenParser : IJwtTokenParser
@@ -32,11 +33,16 @@ namespace SimpleIdServer.Uma.Core.JwtToken
             _identityServerClientFactory = identityServerClientFactory;
         }
 
-        public async Task<JwsPayload> UnSign(string jws, PolicyRule policyRule)
+        public async Task<JwsPayload> UnSign(string jws, string openidProvider, Policy policyRule)
         {
             if (string.IsNullOrWhiteSpace(jws))
             {
                 throw new ArgumentNullException(nameof(jws));
+            }
+
+            if (string.IsNullOrWhiteSpace(openidProvider))
+            {
+                throw new ArgumentNullException(nameof(openidProvider));
             }
 
             if (policyRule == null)
@@ -55,7 +61,7 @@ namespace SimpleIdServer.Uma.Core.JwtToken
                 return _jwsParser.GetPayload(jws);
             }
 
-            var jsonWebKeySet = await _identityServerClientFactory.CreateJwksClient().ResolveAsync(policyRule.OpenIdProvider).ConfigureAwait(false);
+            var jsonWebKeySet = await _identityServerClientFactory.CreateJwksClient().ResolveAsync(openidProvider).ConfigureAwait(false);
             return _jwsParser.ValidateSignature(jws, jsonWebKeySet);
         }
     }

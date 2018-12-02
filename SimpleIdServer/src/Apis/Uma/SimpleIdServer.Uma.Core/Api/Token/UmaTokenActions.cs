@@ -1,15 +1,13 @@
-﻿using System.Net.Http.Headers;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
-using SimpleIdServer.Core.Common.Models;
-using SimpleIdServer.Uma.Core.Api.Token.Actions;
+﻿using SimpleIdServer.Uma.Core.Api.Token.Actions;
 using SimpleIdServer.Uma.Core.Parameters;
+using SimpleIdServer.Uma.Core.Responses;
+using System.Threading.Tasks;
 
 namespace SimpleIdServer.Uma.Core.Api.Token
 {
     public interface IUmaTokenActions
     {
-        Task<GrantedToken> GetTokenByTicketId(GetTokenViaTicketIdParameter parameter, AuthenticationHeaderValue authenticationHeaderValue, X509Certificate2 certificate, string issuerName);
+        Task<GetTokenByTicketIdResponse> GetTokenByTicketId(GetTokenViaTicketIdParameter parameter, string openidProvider, string issuerName);
     }
 
     internal sealed class UmaTokenActions : IUmaTokenActions
@@ -21,9 +19,9 @@ namespace SimpleIdServer.Uma.Core.Api.Token
             _getTokenByTicketIdAction = getTokenByTicketIdAction;
         }
 
-        public Task<GrantedToken> GetTokenByTicketId(GetTokenViaTicketIdParameter parameter, AuthenticationHeaderValue authenticationHeaderValue, X509Certificate2 certificate, string issuerName)
+        public Task<GetTokenByTicketIdResponse> GetTokenByTicketId(GetTokenViaTicketIdParameter parameter, string openidProvider, string issuerName)
         {
-            return _getTokenByTicketIdAction.Execute(parameter, authenticationHeaderValue, certificate, issuerName);
+            return _getTokenByTicketIdAction.Execute(parameter, openidProvider, issuerName);
         }
     }
 }

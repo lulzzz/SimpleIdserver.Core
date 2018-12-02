@@ -25,5 +25,6 @@ namespace SimpleIdServer.Uma.Host
         public Core.UmaConfigurationOptions UmaConfigurationOptions { get; set; }
         public OAuthConfigurationOptions OAuthConfigurationOptions { get; set; }
         public AuthorizationServerConfiguration Configuration { get; set; }
+        public string OpenidWellKnwonConfiguration { get; set; }
     }
 }

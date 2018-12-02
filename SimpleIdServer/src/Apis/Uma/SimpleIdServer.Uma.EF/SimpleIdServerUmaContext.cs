@@ -18,8 +18,8 @@ namespace SimpleIdServer.Uma.EF
 
         public virtual DbSet<ResourceSet> ResourceSets { get; set; }
         public virtual DbSet<Policy> Policies { get; set; }
-        public virtual DbSet<PolicyRule> PolicyRules { get; set; }
         public virtual DbSet<ShareResourceLink> ShareResourceLinks { get; set; }
+        public virtual DbSet<ResourceSetPolicy> ResourceSetPolicies { get; set; }
 
         #endregion
 
@@ -29,12 +29,10 @@ namespace SimpleIdServer.Uma.EF
         {
             modelBuilder.AddResourceSetMappings();
             modelBuilder.AddPolicyMappings();
-            modelBuilder.AddPolicyRuleMappings();
-            modelBuilder.AddPolicyResourceMappings();
+            modelBuilder.AddResourceSetPolicyMapping();
             modelBuilder.AddShareResourceLinkMapping();
-            modelBuilder.AddPolicyRuleClaimMapping();
-            modelBuilder.AddPolicyRuleClientIdMapping();
-            modelBuilder.AddPolicyRuleScopeMapping();
+            modelBuilder.AddPolicyClaimMapping();
+            modelBuilder.AddPolicyScopeMapping();
             modelBuilder.AddResourceScopeMapping();
             base.OnModelCreating(modelBuilder);
         }

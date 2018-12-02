@@ -3,16 +3,16 @@ using SimpleIdServer.Uma.EF.Models;
 
 namespace SimpleIdServer.Uma.EF.Mappings
 {
-    internal static class PolicyRuleScopeMapping
+    internal static class PolicyScopeMapping
     {
-        public static ModelBuilder AddPolicyRuleScopeMapping(this ModelBuilder modelBuilder)
+        public static ModelBuilder AddPolicyScopeMapping(this ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<PolicyRuleScope>()
-                .ToTable("PolicyRuleScopes")
+            modelBuilder.Entity<PolicyScope>()
+                .ToTable("PolicyScopes")
                 .HasKey(a => new
                 {
                     a.Scope,
-                    a.PolicyRuleId
+                    a.PolicyId
                 });
             return modelBuilder;
         }

@@ -20,11 +20,11 @@ namespace SimpleIdServer.Uma.EF.Extensions
 
         public static Domain.ResourceSet ToDomain(this ResourceSet resourceSet)
         {
-            var policyIds = resourceSet.PolicyResources != null ?
-                resourceSet.PolicyResources.Select(p => p.PolicyId)
+            var policyIds = resourceSet.ResourceSetPolicies != null ?
+                resourceSet.ResourceSetPolicies.Select(p => p.PolicyId)
                 .ToList() : new List<string>();
-            var policies = resourceSet.PolicyResources == null ? new Domain.Policy[0] :
-                resourceSet.PolicyResources.Where(p => p.Policy != null).Select(p => p.Policy.ToDomain());
+            var policies = resourceSet.ResourceSetPolicies == null ? new Domain.Policy[0] :
+                resourceSet.ResourceSetPolicies.Where(p => p.Policy != null).Select(p => p.Policy.ToDomain());
             return new Domain.ResourceSet
             {
                 IconUri = resourceSet.IconUri,
@@ -35,56 +35,38 @@ namespace SimpleIdServer.Uma.EF.Extensions
                 Uri = resourceSet.Uri,
                 Owner = resourceSet.Owner,
                 AuthorizationPolicyIds = policyIds,
-                Policies = policies
+                AuthPolicies = policies
             };
         }
 
         public static Domain.Policy ToDomain(this Policy policy)
         {
-            var rules = new List<Domain.PolicyRule>();
             var resourceSetIds = new List<string>();
-            if (policy.Rules != null)
+            var claims = new List<Domain.Claim>();
+            if (policy.ResourceSetPolicies != null)
             {
-                rules = policy.Rules.Select(r => r.ToDomain()).ToList();
-            }
-
-            if (policy.PolicyResources != null)
-            {
-                resourceSetIds = policy.PolicyResources
+                resourceSetIds = policy.ResourceSetPolicies
                     .Select(r => r.ResourceSetId)
                     .ToList();
             }
 
-            return new Domain.Policy
+            if (policy.Claims != null && policy.Claims.Any())
             {
-                Id = policy.Id,
-                Rules = rules,
-                ResourceSetIds = resourceSetIds
-            };
-        }
-
-        public static Domain.PolicyRule ToDomain(this PolicyRule policyRule)
-        {
-            var claims = new List<Domain.Claim>();
-            if (policyRule.Claims != null &&
-                policyRule.Claims.Any())
-            {
-                claims = policyRule.Claims.Select(c => new Domain.Claim
+                claims = policy.Claims.Select(c => new Domain.Claim
                 {
                     Type = c.Key,
                     Value = c.Value
                 }).ToList();
             }
 
-            return new Domain.PolicyRule
+            return new Domain.Policy
             {
-                Id = policyRule.Id,
-                ClientIdsAllowed = policyRule.ClientIdsAllowed.Select(c => c.ClientId).ToList(),
-                Scopes = policyRule.Scopes.Select(s => s.Scope).ToList(),
-                IsResourceOwnerConsentNeeded = policyRule.IsResourceOwnerConsentNeeded,
-                Script = policyRule.Script,
+                Id = policy.Id,
                 Claims = claims,
-                OpenIdProvider = policyRule.OpenIdProvider
+                Script = policy.Script,
+                IsResourceOwnerConsentNeeded = policy.IsResourceOwnerConsentNeeded,
+                Scopes = policy.Scopes.Select(s => s.Scope).ToList(),
+                ResourceSetIds = resourceSetIds
             };
         }
 
@@ -102,12 +84,12 @@ namespace SimpleIdServer.Uma.EF.Extensions
         {
             var policyIds = resourceSet.AuthorizationPolicyIds != null ?
                 resourceSet.AuthorizationPolicyIds.Select(p =>
-                    new PolicyResource
+                    new ResourceSetPolicy
                     {
                         ResourceSetId = resourceSet.Id,
                         PolicyId = p
                     }).ToList()
-                : new List<PolicyResource>();
+                : new List<ResourceSetPolicy>();
             return new ResourceSet
             {
                 Id = resourceSet.Id,
@@ -121,22 +103,28 @@ namespace SimpleIdServer.Uma.EF.Extensions
                 Type = resourceSet.Type,
                 Uri = resourceSet.Uri,
                 Owner = resourceSet.Owner,
-                PolicyResources = policyIds
+                ResourceSetPolicies = policyIds
             };
         }
 
         public static Policy ToModel(this Domain.Policy policy)
         {
-            var rules = new List<PolicyRule>();
-            var resources = new List<PolicyResource>();
-            if (policy.Rules != null)
+            var resources = new List<ResourceSetPolicy>();
+            var claims = new List<PolicyClaim>();
+            if (policy.Claims != null && policy.Claims.Any())
             {
-                rules = policy.Rules.Select(r => r.ToModel()).ToList();
+                claims = policy.Claims.Select(c =>
+                new PolicyClaim
+                {
+                    Key = c.Type,
+                    Value = c.Value,
+                    PolicyId = policy.Id
+                }).ToList();
             }
 
             if (policy.ResourceSetIds != null)
             {
-                resources = policy.ResourceSetIds.Select(r => new PolicyResource
+                resources = policy.ResourceSetIds.Select(r => new ResourceSetPolicy
                 {
                     PolicyId = policy.Id,
                     ResourceSetId = r
@@ -146,45 +134,16 @@ namespace SimpleIdServer.Uma.EF.Extensions
             return new Policy
             {
                 Id = policy.Id,
-                Rules = rules,
-                PolicyResources = resources
-            };
-        }
-
-        public static PolicyRule ToModel(this Domain.PolicyRule policyRule)
-        {
-            var claims = new List<PolicyRuleClaim>();
-            if (policyRule.Claims != null && 
-                policyRule.Claims.Any())
-            {
-                claims = policyRule.Claims.Select(c =>
-                new PolicyRuleClaim
-                {
-                    Key = c.Type,
-                    Value = c.Value,
-                    PolicyRuleId = policyRule.Id
-                }).ToList();
-            }
-
-            return new PolicyRule
-            {
-                Id = policyRule.Id,
-                ClientIdsAllowed = policyRule.ClientIdsAllowed == null ? new List<PolicyRuleClientId>() : policyRule.ClientIdsAllowed.Select(c =>
-                    new PolicyRuleClientId
+                Claims = claims,
+                IsResourceOwnerConsentNeeded = policy.IsResourceOwnerConsentNeeded,
+                Script = policy.Script,
+                Scopes = policy.Scopes == null ? new List<PolicyScope>() : policy.Scopes.Select(s =>
+                    new PolicyScope
                     {
-                        ClientId = c,
-                        PolicyRuleId = policyRule.Id
-                    }).ToList(),
-                Scopes = policyRule.Scopes == null ? new List<PolicyRuleScope>() : policyRule.Scopes.Select(s =>
-                    new PolicyRuleScope
-                    {
-                        PolicyRuleId = policyRule.Id,
+                        PolicyId = policy.Id,
                         Scope = s
                     }).ToList(),
-                IsResourceOwnerConsentNeeded = policyRule.IsResourceOwnerConsentNeeded,
-                Script = policyRule.Script,
-                Claims = claims,
-                OpenIdProvider=  policyRule.OpenIdProvider
+                ResourceSetPolicies = resources
             };
         }
 

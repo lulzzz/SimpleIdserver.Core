@@ -274,11 +274,9 @@ namespace SimpleIdServer.Uma.Host.Extensions
             {
                 Id = policyRule.Id,
                 Claims = claims,
-                ClientIdsAllowed = policyRule.ClientIdsAllowed,
                 IsResourceOwnerConsentNeeded = policyRule.IsResourceOwnerConsentNeeded,
                 Scopes = policyRule.Scopes,
-                Script = policyRule.Script,
-                OpenIdProvider = policyRule.OpenIdProvider
+                Script = policyRule.Script
             };
         }
 
@@ -466,10 +464,6 @@ namespace SimpleIdServer.Uma.Host.Extensions
             {
                 ClaimToken = request.ClaimToken,
                 ClaimTokenFormat = request.ClaimTokenFormat,
-                ClientId = request.ClientId,
-                ClientAssertion = request.ClientAssertion,
-                ClientAssertionType = request.ClientAssertionType,
-                ClientSecret = request.ClientSecret,
                 Pct = request.Pct,
                 Rpt = request.Rpt,
                 Ticket = request.Ticket

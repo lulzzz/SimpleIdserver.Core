@@ -29,7 +29,17 @@ namespace SimpleIdServer.Uma.EF.Mappings
                 .ToTable("Policies")
                 .HasKey(a => a.Id);
             modelBuilder.Entity<Policy>()
-                .HasMany(p => p.Rules)
+                .HasMany(p => p.ResourceSetPolicies)
+                .WithOne(p => p.Policy)
+                .HasForeignKey(p => p.PolicyId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Policy>()
+                .HasMany(p => p.Claims)
+                .WithOne(p => p.Policy)
+                .HasForeignKey(p => p.PolicyId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Policy>()
+                .HasMany(p => p.Scopes)
                 .WithOne(p => p.Policy)
                 .HasForeignKey(p => p.PolicyId)
                 .OnDelete(DeleteBehavior.Cascade);

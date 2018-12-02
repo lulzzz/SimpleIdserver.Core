@@ -23,7 +23,7 @@ namespace SimpleIdServer.Uma.Host.Controllers
         }
 
         [HttpPost]
-        [Authorize("uma_protection")]
+        [Authorize("permissions")]
         public async Task<ActionResult> PostPermission([FromBody] PostPermission postPermission)
         {
             if (postPermission == null)
@@ -31,8 +31,9 @@ namespace SimpleIdServer.Uma.Host.Controllers
                 return BuildError(ErrorCodes.InvalidRequestCode, "no parameter in body request", HttpStatusCode.BadRequest);
             }
 
+            var audiences = GetAudiences();
             var parameter = postPermission.ToParameter();
-            var ticketId = await _permissionControllerActions.Add(parameter);
+            var ticketId = await _permissionControllerActions.Add(audiences, parameter);
             var result = new AddPermissionResponse
             {
                 TicketId = ticketId
@@ -44,7 +45,7 @@ namespace SimpleIdServer.Uma.Host.Controllers
         }
 
         [HttpPost("bulk")]
-        [Authorize("uma_protection")]
+        [Authorize("permissions")]
         public async Task<ActionResult> PostPermissions([FromBody] IEnumerable<PostPermission> postPermissions)
         {
             if (postPermissions == null)
@@ -52,8 +53,9 @@ namespace SimpleIdServer.Uma.Host.Controllers
                 return BuildError(ErrorCodes.InvalidRequestCode, "no parameter in body request", HttpStatusCode.BadRequest);
             }
 
+            var audiences = GetAudiences();
             var parameters = postPermissions.Select(p => p.ToParameter());
-            var ticketId = await _permissionControllerActions.Add(parameters);
+            var ticketId = await _permissionControllerActions.Add(audiences, parameters);
             var result = new AddPermissionResponse
             {
                 TicketId = ticketId
@@ -62,6 +64,18 @@ namespace SimpleIdServer.Uma.Host.Controllers
             {
                 StatusCode = (int)HttpStatusCode.Created
             };
+        }
+
+        private IEnumerable<string> GetAudiences()
+        {
+            var audiences = new List<string>();
+            var audienceClaims = User.Claims.Where(c => c.Type == SimpleIdServer.Core.Common.StandardClaimNames.Audiences);
+            if (audienceClaims != null && audienceClaims.Any())
+            {
+                audiences = audienceClaims.Select(c => c.Value).ToList();
+            }
+
+            return audiences;
         }
 
         private static JsonResult BuildError(string code, string message, HttpStatusCode statusCode)

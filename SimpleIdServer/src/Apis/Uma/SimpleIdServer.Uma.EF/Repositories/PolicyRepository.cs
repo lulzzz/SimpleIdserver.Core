@@ -27,10 +27,9 @@ namespace SimpleIdServer.Uma.EF.Repositories
         public async Task<Policy> Get(string id)
         {
             var policy = await _context.Policies
-                .Include(p => p.PolicyResources)
-                .Include(p => p.Rules).ThenInclude(p => p.Scopes)
-                .Include(p => p.Rules).ThenInclude(p => p.ClientIdsAllowed)
-                .Include(p => p.Rules).ThenInclude(p => p.Claims)
+                .Include(p => p.ResourceSetPolicies)
+                .Include(p => p.Scopes)
+                .Include(p => p.Claims)
                 .FirstOrDefaultAsync(p => p.Id == id).ConfigureAwait(false);
             return policy == null ? null : policy.ToDomain();
         }
@@ -43,10 +42,9 @@ namespace SimpleIdServer.Uma.EF.Repositories
             }
 
             IQueryable<Models.Policy> policies = _context.Policies
-                .Include(p => p.PolicyResources)
-                .Include(p => p.Rules).ThenInclude(p => p.Scopes)
-                .Include(p => p.Rules).ThenInclude(p => p.ClientIdsAllowed)
-                .Include(p => p.Rules).ThenInclude(p => p.Claims);
+                .Include(p => p.ResourceSetPolicies)
+                .Include(p => p.Scopes)
+                .Include(p => p.Claims);
             if (parameter.Ids != null && parameter.Ids.Any())
             {
                 policies = policies.Where(r => parameter.Ids.Contains(r.Id));
@@ -54,7 +52,7 @@ namespace SimpleIdServer.Uma.EF.Repositories
 
             if (parameter.ResourceIds != null && parameter.ResourceIds.Any())
             {
-                policies = policies.Where(p => p.PolicyResources.Any(r => parameter.ResourceIds.Contains(r.ResourceSetId)));
+                policies = policies.Where(p => p.ResourceSetPolicies.Any(r => parameter.ResourceIds.Contains(r.ResourceSetId)));
             }
 
             var nbResult = await policies.CountAsync().ConfigureAwait(false);
@@ -82,9 +80,8 @@ namespace SimpleIdServer.Uma.EF.Repositories
         public async Task<bool> Delete(string id)
         {
             var policy = await _context.Policies
-                .Include(p => p.Rules).ThenInclude(p => p.Scopes)
-                .Include(p => p.Rules).ThenInclude(p => p.ClientIdsAllowed)
-                .Include(p => p.Rules).ThenInclude(p => p.Claims)
+                .Include(p => p.Scopes)
+                .Include(p => p.Claims)
                 .FirstOrDefaultAsync(p => p.Id == id).ConfigureAwait(false);
             if (policy == null)
             {
@@ -105,77 +102,44 @@ namespace SimpleIdServer.Uma.EF.Repositories
             }
 
             var rulesNotToBeDeleted = new List<string>();
-            if (policy.Rules != null)
+            record.IsResourceOwnerConsentNeeded = policy.IsResourceOwnerConsentNeeded;
+            record.Script = policy.Script;
+            record.Scopes = policy.Scopes == null ? new List<Models.PolicyScope>() : policy.Scopes.Select(c => new Models.PolicyScope
             {
-                foreach (var ru in policy.Rules)
-                {
-                    var rule = record.Rules.FirstOrDefault(r => r.Id == ru.Id);
-                    if (rule == null)
-                    {
-                        rule = new Models.PolicyRule
-                        {
-                            Id = Guid.NewGuid().ToString(),
-                            PolicyId = policy.Id
-                        };
-                        record.Rules.Add(rule);
-                    }
-
-                    rule.IsResourceOwnerConsentNeeded = ru.IsResourceOwnerConsentNeeded;
-                    rule.Script = ru.Script;
-                    rule.OpenIdProvider = ru.OpenIdProvider;
-                    rule.ClientIdsAllowed = ru.ClientIdsAllowed == null ? new List<Models.PolicyRuleClientId>() : ru.ClientIdsAllowed.Select(c => new Models.PolicyRuleClientId
-                    {
-                        ClientId = c,
-                        PolicyRuleId = rule.Id
-                    }).ToList();
-                    rule.Scopes = ru.Scopes == null ? new List<Models.PolicyRuleScope>() : ru.ClientIdsAllowed.Select(c => new Models.PolicyRuleScope
-                    {
-                        Scope = c,
-                        PolicyRuleId = rule.Id
-                    }).ToList();
-                    rule.Claims = ru.Claims == null ? new List<Models.PolicyRuleClaim>() : ru.Claims.Select(c => new Models.PolicyRuleClaim
-                    {
-                        Key = c.Type,
-                        Value = c.Value,
-                        PolicyRuleId = rule.Id
-                    }).ToList();
-                    rulesNotToBeDeleted.Add(rule.Id);
-                }
-            }
-
-            var ruleIds = record.Rules.Select(o => o.Id).ToList();
-            foreach (var ruleId in ruleIds.Where(id => !rulesNotToBeDeleted.Contains(id)))
+                Scope = c,
+                PolicyId = record.Id
+            }).ToList();
+            record.Claims = policy.Claims == null ? new List<Models.PolicyClaim>() : policy.Claims.Select(c => new Models.PolicyClaim
             {
-                var removedRule = record.Rules.First(o => o.Id == ruleId);
-                record.Rules.Remove(removedRule);
-                _context.PolicyRules.Remove(removedRule);
-            }
-
+                Key = c.Type,
+                Value = c.Value,
+                PolicyId = record.Id
+            }).ToList();
             var resourceSetIdsNotToBeDeleted = new List<string>();
             if (policy.ResourceSetIds != null)
             {
                 foreach (var resourceSetId in policy.ResourceSetIds)
                 {
-                    var policyResource = record.PolicyResources.FirstOrDefault(p => p.ResourceSetId == resourceSetId);
+                    var policyResource = record.ResourceSetPolicies.FirstOrDefault(p => p.ResourceSetId == resourceSetId);
                     if (policyResource == null)
                     {
-                        policyResource = new Models.PolicyResource
+                        policyResource = new Models.ResourceSetPolicy
                         {
                             ResourceSetId = resourceSetId,
                             PolicyId = policy.Id
                         };
-                        record.PolicyResources.Add(policyResource);
+                        record.ResourceSetPolicies.Add(policyResource);
                     }
 
                     resourceSetIdsNotToBeDeleted.Add(policyResource.ResourceSetId);
                 }
             }
 
-            var resourceSetIds = record.PolicyResources.Select(o => o.ResourceSetId).ToList();
+            var resourceSetIds = record.ResourceSetPolicies.Select(o => o.ResourceSetId).ToList();
             foreach (var resourceSetId in resourceSetIds.Where(id => !resourceSetIdsNotToBeDeleted.Contains(id)))
             {
-                var removedResource = record.PolicyResources.First(o => o.ResourceSetId == resourceSetId);
-                record.PolicyResources.Remove(removedResource);
+                var removedResource = record.ResourceSetPolicies.First(o => o.ResourceSetId == resourceSetId);
+                record.ResourceSetPolicies.Remove(removedResource);
             }
 
             await _context.SaveChangesAsync().ConfigureAwait(false);
@@ -185,8 +149,8 @@ namespace SimpleIdServer.Uma.EF.Repositories
         public async Task<ICollection<Policy>> SearchByResourceId(string resourceSetId)
         {
             return await _context.Policies
-                .Include(p => p.PolicyResources)
-                .Where(p => p.PolicyResources.Any(r => r.ResourceSetId == resourceSetId))
+                .Include(p => p.ResourceSetPolicies)
+                .Where(p => p.ResourceSetPolicies.Any(r => r.ResourceSetId == resourceSetId))
                 .Select(p => p.ToDomain())
                 .ToListAsync();
         }

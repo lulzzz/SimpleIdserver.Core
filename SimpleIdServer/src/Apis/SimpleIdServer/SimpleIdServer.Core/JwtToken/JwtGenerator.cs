@@ -14,16 +14,7 @@
 // limitations under the License.
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using SimpleIdServer.Core.Common;
-using SimpleIdServer.Lib;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.Core.Errors;
@@ -37,13 +28,23 @@ using SimpleIdServer.Core.Jwt.Signature;
 using SimpleIdServer.Core.Parameters;
 using SimpleIdServer.Core.Services;
 using SimpleIdServer.Core.Validators;
+using SimpleIdServer.Lib;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace SimpleIdServer.Core.JwtToken
 {
     public interface IJwtGenerator
     {
         Task<JwsPayload> UpdatePayloadDate(JwsPayload jwsPayload);
-        Task<JwsPayload> GenerateAccessToken(Core.Common.Models.Client client, IEnumerable<string> scopes, string issuerName);
+        Task<JwsPayload> GenerateAccessToken(Client client, IEnumerable<string> scopes, string issuerName);
+        Task<JwsPayload> GenerateAccessToken(IEnumerable<string> audiences, IEnumerable<string> scopes, string issuerName);
         Task<JwsPayload> GenerateIdTokenPayloadForScopesAsync(ClaimsPrincipal claimsPrincipal, AuthorizationParameter authorizationParameter, string issuerName);
         Task<JwsPayload> GenerateFilteredIdTokenPayloadAsync(ClaimsPrincipal claimsPrincipal, AuthorizationParameter authorizationParameter, List<ClaimParameter> claimParameters, string issuerName);
         Task<JwsPayload> GenerateUserInfoPayloadForScopeAsync(ClaimsPrincipal claimsPrincipal, AuthorizationParameter authorizationParameter);
@@ -159,11 +160,16 @@ namespace SimpleIdServer.Core.JwtToken
             return jwsPayload;
         }
 
-        public async Task<JwsPayload> GenerateAccessToken(Common.Models.Client client, IEnumerable<string> scopes, string issuerName)
+        public Task<JwsPayload> GenerateAccessToken(Common.Models.Client client, IEnumerable<string> scopes, string issuerName)
         {
-            if (client == null)
+            return GenerateAccessToken(new[] { client.ClientId }, scopes, issuerName);
+        }
+
+        public async Task<JwsPayload> GenerateAccessToken(IEnumerable<string> audiences, IEnumerable<string> scopes, string issuerName)
+        {
+            if (audiences == null)
             {
-                throw new ArgumentNullException(nameof(client));
+                throw new ArgumentNullException(nameof(audiences));
             }
 
             if (scopes == null)
@@ -176,10 +182,7 @@ namespace SimpleIdServer.Core.JwtToken
             var issuedAtTime = timeKeyValuePair.Value;
 
             var jwsPayload = new JwsPayload();
-            jwsPayload.Add(StandardClaimNames.Audiences, new[]
-            {
-                client.ClientId
-            });
+            jwsPayload.Add(StandardClaimNames.Audiences, audiences);
             jwsPayload.Add(StandardClaimNames.Issuer, issuerName);
             jwsPayload.Add(StandardClaimNames.ExpirationTime, expirationInSeconds);
             jwsPayload.Add(StandardClaimNames.Iat, issuedAtTime);

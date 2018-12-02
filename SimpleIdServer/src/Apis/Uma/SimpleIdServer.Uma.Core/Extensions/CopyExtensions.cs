@@ -36,12 +36,9 @@ namespace SimpleIdServer.Uma.Core.Extensions
         {
             return new PolicyRule
             {
-                ClientIdsAllowed = policyRule.ClientIdsAllowed == null ? new List<string>() : policyRule.ClientIdsAllowed.ToList(),
                 Id = policyRule.Id,
-                IsResourceOwnerConsentNeeded = policyRule.IsResourceOwnerConsentNeeded, 
                 Scopes = policyRule.Scopes == null ? new List<string>() : policyRule.Scopes.ToList(),
                 Script = policyRule.Script,
-                OpenIdProvider = policyRule.OpenIdProvider,
                 Claims = policyRule.Claims == null ? new List<Claim>() : policyRule.Claims.Select(c =>
                     new Claim
                     {

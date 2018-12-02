@@ -44,7 +44,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
 
             // ACTS & ASSERTS
             Assert.ThrowsAsync<ArgumentNullException>(() => _authorizationPolicyValidator.IsAuthorized(null, null, null));
-            Assert.ThrowsAsync<ArgumentNullException>(() => _authorizationPolicyValidator.IsAuthorized(new Ticket(), null, null));
+            Assert.ThrowsAsync<ArgumentNullException>(() => _authorizationPolicyValidator.IsAuthorized("openid", new Ticket(), null));
         }
 
         [Fact]
@@ -67,7 +67,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                 .Returns(() => Task.FromResult((ResourceSet)null));
 
             // ACT & ASSERTS
-            var exception = await Assert.ThrowsAsync<BaseUmaException>(() => _authorizationPolicyValidator.IsAuthorized(ticket, "client_id", null));
+            var exception = await Assert.ThrowsAsync<BaseUmaException>(() => _authorizationPolicyValidator.IsAuthorized("openid", ticket, null));
             Assert.NotNull(exception);
             Assert.True(exception.Code == ErrorCodes.InternalError);
             Assert.True(exception.Message == ErrorDescriptions.SomeResourcesDontExist);
@@ -99,7 +99,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                 .Returns(Task.FromResult(resourceSet));
 
             // ACT
-            var result = await _authorizationPolicyValidator.IsAuthorized(ticket, "client_id", null);
+            var result = await _authorizationPolicyValidator.IsAuthorized("openid", ticket, null);
 
             // ASSERT
             Assert.True(result.Type == AuthorizationPolicyResultEnum.Authorized);
@@ -134,14 +134,14 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
             InitializeFakeObjects();
             _resourceSetRepositoryStub.Setup(r => r.Get(It.IsAny<IEnumerable<string>>()))
                 .Returns(Task.FromResult(resourceSet));
-            _basicAuthorizationPolicyStub.Setup(b => b.Execute(It.IsAny<TicketLineParameter>(), It.IsAny<Policy>(), It.IsAny<ClaimTokenParameter>()))
+            _basicAuthorizationPolicyStub.Setup(b => b.Execute(It.IsAny<string>(), It.IsAny<TicketLineParameter>(), It.IsAny<Policy>(), It.IsAny<ClaimTokenParameter>()))
                 .Returns(Task.FromResult(new AuthorizationPolicyResult
                 {
                     Type = AuthorizationPolicyResultEnum.Authorized
                 }));
 
             // ACT
-            var result = await _authorizationPolicyValidator.IsAuthorized(ticket, "client_id", null);
+            var result = await _authorizationPolicyValidator.IsAuthorized("openid", ticket, null);
 
             // ASSERT
             Assert.True(result.Type == AuthorizationPolicyResultEnum.Authorized);

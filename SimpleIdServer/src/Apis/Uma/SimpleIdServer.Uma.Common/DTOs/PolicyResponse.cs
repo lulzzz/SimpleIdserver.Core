@@ -35,8 +35,6 @@ namespace SimpleIdServer.Uma.Common.DTOs
     {
         [DataMember(Name = PolicyRuleNames.Id)]
         public string Id { get; set; }
-        [DataMember(Name = PolicyRuleNames.ClientIdsAllowed)]
-        public List<string> ClientIdsAllowed { get; set; }
         [DataMember(Name = PolicyRuleNames.Scopes)]
         public List<string> Scopes { get; set; }
         [DataMember(Name = PolicyRuleNames.Claims)]
@@ -45,7 +43,5 @@ namespace SimpleIdServer.Uma.Common.DTOs
         public bool IsResourceOwnerConsentNeeded { get; set; }
         [DataMember(Name = PolicyRuleNames.Script)]
         public string Script { get; set; }
-        [DataMember(Name = PolicyRuleNames.OpenIdProvider)]
-        public string OpenIdProvider { get; set; }
     }
 }

@@ -26,7 +26,7 @@ namespace SimpleIdServer.Uma.Host.Controllers
         }
 
         [HttpPost(".search")]
-        [Authorize("uma_protection")]
+        [Authorize("resources")]
         public async Task<IActionResult> SearchResourceSets([FromBody] SearchResourceSet searchResourceSet)
         {
             if (searchResourceSet == null)
@@ -40,7 +40,7 @@ namespace SimpleIdServer.Uma.Host.Controllers
         }
 
         [HttpGet]
-        [Authorize("uma_protection")]
+        [Authorize("resources")]
         public async Task<ActionResult> GetResourceSets()
         {
             var resourceSetIds = await _resourceSetActions.GetAllResourceSet().ConfigureAwait(false);
@@ -48,7 +48,7 @@ namespace SimpleIdServer.Uma.Host.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize("uma_protection")]
+        [Authorize("resources")]
         public async Task<ActionResult> GetResourceSet(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
@@ -76,7 +76,7 @@ namespace SimpleIdServer.Uma.Host.Controllers
         }
 
         [HttpPost]
-        [Authorize("uma_protection")]
+        [Authorize("resources")]
         public async Task<ActionResult> AddResourceSet([FromBody] PostResourceSet postResourceSet)
         {
             if (postResourceSet == null)
@@ -97,7 +97,7 @@ namespace SimpleIdServer.Uma.Host.Controllers
         }
 
         [HttpPut]
-        [Authorize("uma_protection")]
+        [Authorize("resources")]
         public async Task<ActionResult> UpdateResourceSet([FromBody] PutResourceSet putResourceSet)
         {
             if (putResourceSet == null)
@@ -125,7 +125,7 @@ namespace SimpleIdServer.Uma.Host.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize("uma_protection")]
+        [Authorize("resources")]
         public async Task<ActionResult> DeleteResourceSet(string id)
         {
             if (string.IsNullOrWhiteSpace(id))

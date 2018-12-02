@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using SimpleIdServer.Common.Dtos.Responses;
 using SimpleIdServer.Core.Api.Token;
 using SimpleIdServer.Core.Common.Models;
@@ -7,6 +9,7 @@ using SimpleIdServer.Core.Errors;
 using SimpleIdServer.Dtos.Requests;
 using SimpleIdServer.Lib;
 using SimpleIdServer.Uma.Core.Api.Token;
+using SimpleIdServer.Uma.Core.Policies;
 using SimpleIdServer.Uma.Host.Extensions;
 using System;
 using System.Collections.Generic;
@@ -23,11 +26,13 @@ namespace SimpleIdServer.Uma.Host.Controllers
     {
         private readonly ITokenActions _tokenActions;
         private readonly IUmaTokenActions _umaTokenActions;
+        private readonly AuthorizationServerOptions _authorizationServerOptions;
 
-        public TokenController(ITokenActions tokenActions, IUmaTokenActions umaTokenActions)
+        public TokenController(ITokenActions tokenActions, IUmaTokenActions umaTokenActions, AuthorizationServerOptions authorizationServerOptions)
         {
             _tokenActions = tokenActions;
             _umaTokenActions = umaTokenActions;
+            _authorizationServerOptions = authorizationServerOptions;
         }
 
         [HttpPost]
@@ -84,7 +89,35 @@ namespace SimpleIdServer.Uma.Host.Controllers
                     break;
                 case GrantTypes.uma_ticket:
                     var tokenIdParameter = tokenRequest.ToTokenIdGrantTypeParameter();
-                    result = await _umaTokenActions.GetTokenByTicketId(tokenIdParameter, authenticationHeaderValue, certificate, issuerName);
+                    var getTokenByTicketIdResponse = await _umaTokenActions.GetTokenByTicketId(tokenIdParameter, _authorizationServerOptions.OpenidWellKnwonConfiguration, issuerName);
+                    if (!getTokenByTicketIdResponse.IsValid)
+                    {
+                        var jArr = new JArray();
+                        foreach (var policyResult in getTokenByTicketIdResponse.ResourceValidationResult.AuthorizationPoliciesResult)
+                        {
+                            if (policyResult.Type != AuthorizationPolicyResultEnum.Authorized)
+                            {
+                                continue;
+                            }
+
+                            var record = new JObject();
+                            record.Add("policy_id", policyResult.Policy.Id);
+                            record.Add("status", policyResult.Type.ToString());
+                            if (policyResult.ErrorDetails != null)
+                            {
+                                record.Add("description", JObject.Parse(JsonConvert.SerializeObject(policyResult.ErrorDetails)));
+                            }
+
+                            jArr.Add(record);
+                        }
+
+                        return new JsonResult(jArr)
+                        {
+                            StatusCode = (int)HttpStatusCode.InternalServerError
+                        };
+                    }
+
+                    result = getTokenByTicketIdResponse.GrantedToken;
                     break;
             }
 

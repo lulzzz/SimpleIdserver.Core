@@ -41,6 +41,7 @@ namespace SimpleIdServer.Uma.Core
             serviceCollection.AddSingleton<IPolicyRepository>(new DefaultPolicyRepository(policies));
             serviceCollection.AddSingleton<IResourceSetRepository>(new DefaultResourceSetRepository(resources));
             serviceCollection.AddSingleton<ISharedLinkRepository>(new DefaultSharedLinkRepository(sharedLinks));
+            serviceCollection.AddSingleton<IPendingRequestRepository, DefaultPendingRequestRepository>();
             return serviceCollection;
         }
 
@@ -78,6 +79,7 @@ namespace SimpleIdServer.Uma.Core
             serviceCollection.AddSingleton<IPolicyRepository>(new DefaultPolicyRepository(policies));
             serviceCollection.AddSingleton<IResourceSetRepository>(new DefaultResourceSetRepository(resources));
             serviceCollection.AddSingleton<ITicketStore, DefaultTicketStore>();
+            serviceCollection.AddSingleton<IPendingRequestRepository, DefaultPendingRequestRepository>();
         }
     }
 }

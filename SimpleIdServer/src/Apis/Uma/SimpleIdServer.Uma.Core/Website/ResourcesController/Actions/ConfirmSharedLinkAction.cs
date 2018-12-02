@@ -76,7 +76,6 @@ namespace SimpleIdServer.Uma.Core.Website.ResourcesController.Actions
                                 Value = confirmSharedLinkParameter.Subject
                             }
                         },
-                        OpenIdProvider = confirmSharedLinkParameter.OpenidProvider,
                         Scopes = sharedLink.Scopes.ToList()
                     }
                 }

@@ -1,8 +1,12 @@
-﻿@using SimpleIdServer.Uma.Website.Host.ViewModels
+﻿@{
+    ViewBag.Title = "Resource";
+}
+
+@using SimpleIdServer.Uma.Website.Host.ViewModels
 @model ConfirmViewModel
 
 <div>
-    @if(!string.IsNullOrWhiteSpace(Model.SuccessMessage))
+    @if (!string.IsNullOrWhiteSpace(Model.SuccessMessage))
     {
         <div class="alert alert-success">
             <strong>Success!</strong> @Model.SuccessMessage

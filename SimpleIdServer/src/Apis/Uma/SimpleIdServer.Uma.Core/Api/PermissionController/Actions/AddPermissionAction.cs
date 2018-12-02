@@ -1,24 +1,4 @@
-﻿#region copyright
-// Copyright 2015 Habart Thierry
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-#endregion
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using SimpleIdServer.Uma.Core.Errors;
 using SimpleIdServer.Uma.Core.Exceptions;
 using SimpleIdServer.Uma.Core.Helpers;
@@ -28,13 +8,17 @@ using SimpleIdServer.Uma.Core.Repositories;
 using SimpleIdServer.Uma.Core.Services;
 using SimpleIdServer.Uma.Core.Stores;
 using SimpleIdServer.Uma.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SimpleIdServer.Uma.Core.Api.PermissionController.Actions
 {
     internal interface IAddPermissionAction
     {
-        Task<string> Execute(AddPermissionParameter addPermissionParameters);
-        Task<string> Execute(IEnumerable<AddPermissionParameter> addPermissionParameters);
+        Task<string> Execute(IEnumerable<string> audiences, AddPermissionParameter addPermissionParameters);
+        Task<string> Execute(IEnumerable<string> audiences, IEnumerable<AddPermissionParameter> addPermissionParameters);
     }
 
     internal class AddPermissionAction : IAddPermissionAction
@@ -59,19 +43,29 @@ namespace SimpleIdServer.Uma.Core.Api.PermissionController.Actions
             _umaServerEventSource = umaServerEventSource;
         }
 
-        public async Task<string> Execute(AddPermissionParameter addPermissionParameter)
+        public async Task<string> Execute(IEnumerable<string> audiences, AddPermissionParameter addPermissionParameter)
         {
+            if (audiences == null)
+            {
+                throw new ArgumentNullException(nameof(audiences));
+            }
+
             if (addPermissionParameter == null)
             {
                 throw new ArgumentNullException(nameof(addPermissionParameter));
             }
 
-            var result = await Execute(new[] { addPermissionParameter });
+            var result = await Execute(audiences, new[] { addPermissionParameter });
             return result;
         }
 
-        public async Task<string> Execute(IEnumerable<AddPermissionParameter> addPermissionParameters)
+        public async Task<string> Execute(IEnumerable<string> audiences, IEnumerable<AddPermissionParameter> addPermissionParameters)
         {
+            if (audiences == null)
+            {
+                throw new ArgumentNullException(nameof(audiences));
+            }
+
             if (addPermissionParameters == null)
             {
                 throw new ArgumentNullException(nameof(addPermissionParameters));
@@ -84,12 +78,13 @@ namespace SimpleIdServer.Uma.Core.Api.PermissionController.Actions
             var ticket = new Ticket
             {
                 Id = Guid.NewGuid().ToString(),
+                Audiences = audiences,
                 CreateDateTime = DateTime.UtcNow,
                 ExpiresIn = ticketLifetimeInSeconds,
                 ExpirationDateTime = DateTime.UtcNow.AddSeconds(ticketLifetimeInSeconds)
             };
             var ticketLines = new List<TicketLine>();
-            foreach(var addPermissionParameter in addPermissionParameters) // TH : ONE TICKET FOR MULTIPLE PERMISSIONS.
+            foreach(var addPermissionParameter in addPermissionParameters)
             {
                 ticketLines.Add(new TicketLine
                 {

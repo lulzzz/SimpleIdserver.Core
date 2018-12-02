@@ -27,7 +27,7 @@ namespace SimpleIdServer.Uma.Host.Controllers
         }
 
         [HttpPost(".search")]
-        [Authorize("uma_protection")]
+        [Authorize("policies")]
         public async Task<IActionResult> SearchPolicies([FromBody] SearchAuthPolicies searchAuthPolicies)
         {
             if (searchAuthPolicies == null)
@@ -41,7 +41,7 @@ namespace SimpleIdServer.Uma.Host.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize("uma_protection")]
+        [Authorize("policies")]
         public async Task<ActionResult> GetPolicy(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
@@ -69,7 +69,7 @@ namespace SimpleIdServer.Uma.Host.Controllers
         }
 
         [HttpGet]
-        [Authorize("uma_protection")]
+        [Authorize("policies")]
         public async Task<ActionResult> GetPolicies()
         {
             var policies = await _policyActions.GetPolicies().ConfigureAwait(false);
@@ -78,7 +78,7 @@ namespace SimpleIdServer.Uma.Host.Controllers
 
         // Partial update
         [HttpPut]
-        [Authorize("uma_protection")]
+        [Authorize("policies")]
         public async Task<ActionResult> PutPolicy([FromBody] PutPolicy putPolicy)
         {
             if (putPolicy == null)
@@ -97,7 +97,7 @@ namespace SimpleIdServer.Uma.Host.Controllers
         }
         
         [HttpPost("{id}/resources")]
-        [Authorize("uma_protection")]
+        [Authorize("policies")]
         public async Task<ActionResult> PostAddResourceSet(string id, [FromBody] PostAddResourceSet postAddResourceSet)
         {
             if (string.IsNullOrWhiteSpace(id))
@@ -125,7 +125,7 @@ namespace SimpleIdServer.Uma.Host.Controllers
         }
 
         [HttpDelete("{id}/resources/{resourceId}")]
-        [Authorize("uma_protection")]
+        [Authorize("policies")]
         public async Task<ActionResult> DeleteResourceSet(string id, string resourceId)
         {
             if (string.IsNullOrWhiteSpace(id))
@@ -149,7 +149,7 @@ namespace SimpleIdServer.Uma.Host.Controllers
         }
 
         [HttpPost]
-        [Authorize("uma_protection")]
+        [Authorize("policies")]
         public async Task<ActionResult> PostPolicy([FromBody] PostPolicy postPolicy)
         {
             if (postPolicy == null)
@@ -169,7 +169,7 @@ namespace SimpleIdServer.Uma.Host.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize("uma_protection")]
+        [Authorize("policies")]
         public async Task<ActionResult> DeletePolicy(string id)
         {
             if (string.IsNullOrWhiteSpace(id))

@@ -1,20 +1,4 @@
-﻿#region copyright
-// Copyright 2015 Habart Thierry
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-#endregion
-
-using Moq;
+﻿using Moq;
 using SimpleIdServer.Uma.Core.Api.PermissionController.Actions;
 using SimpleIdServer.Uma.Core.Errors;
 using SimpleIdServer.Uma.Core.Exceptions;
@@ -48,8 +32,8 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Api.PermissionController.Actions
             InitializeFakeObjects();
 
             // ACT & ASSERT
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _addPermissionAction.Execute((IEnumerable<AddPermissionParameter>)null));
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _addPermissionAction.Execute((AddPermissionParameter)null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _addPermissionAction.Execute(null, (IEnumerable<AddPermissionParameter>)null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _addPermissionAction.Execute(new[] { "audience" }, (AddPermissionParameter)null));
         }
 
         [Fact]
@@ -60,7 +44,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Api.PermissionController.Actions
             var addPermissionParameter = new AddPermissionParameter();
 
             // ACT & ASSERTS
-            var exception = await Assert.ThrowsAsync<BaseUmaException>(() => _addPermissionAction.Execute(addPermissionParameter));
+            var exception = await Assert.ThrowsAsync<BaseUmaException>(() => _addPermissionAction.Execute(new[] { "audience" }, addPermissionParameter));
             Assert.NotNull(exception);
             Assert.True(exception.Code == ErrorCodes.InvalidRequestCode);
             Assert.True(exception.Message == string.Format(ErrorDescriptions.TheParameterNeedsToBeSpecified, Constants.AddPermissionNames.ResourceSetId));
@@ -77,7 +61,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Api.PermissionController.Actions
             };
 
             // ACT & ASSERTS
-            var exception = await Assert.ThrowsAsync<BaseUmaException>(() => _addPermissionAction.Execute(addPermissionParameter));
+            var exception = await Assert.ThrowsAsync<BaseUmaException>(() => _addPermissionAction.Execute(new[] { "audience" }, addPermissionParameter));
             Assert.NotNull(exception);
             Assert.True(exception.Code == ErrorCodes.InvalidRequestCode);
             Assert.True(exception.Message == string.Format(ErrorDescriptions.TheParameterNeedsToBeSpecified, Constants.AddPermissionNames.Scopes));
@@ -101,7 +85,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Api.PermissionController.Actions
                 .Returns(Task.FromResult((IEnumerable<ResourceSet>)new List<ResourceSet>()));
 
             // ACT & ASSERTS
-            var exception = await Assert.ThrowsAsync<BaseUmaException>(() => _addPermissionAction.Execute(addPermissionParameter));
+            var exception = await Assert.ThrowsAsync<BaseUmaException>(() => _addPermissionAction.Execute(new[] { "audience" }, addPermissionParameter));
             Assert.NotNull(exception);
             Assert.True(exception.Code == ErrorCodes.InvalidResourceSetId);
             Assert.True(exception.Message == string.Format(ErrorDescriptions.TheResourceSetDoesntExist, resourceSetId));
@@ -136,7 +120,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Api.PermissionController.Actions
                 .Returns(Task.FromResult(resources));
 
             // ACT & ASSERTS
-            var exception = await Assert.ThrowsAsync<BaseUmaException>(() => _addPermissionAction.Execute(addPermissionParameter));
+            var exception = await Assert.ThrowsAsync<BaseUmaException>(() => _addPermissionAction.Execute(new[] { "audience" }, addPermissionParameter));
             Assert.NotNull(exception);
             Assert.True(exception.Code == ErrorCodes.InvalidScope);
             Assert.True(exception.Message == ErrorDescriptions.TheScopeAreNotValid);
@@ -173,7 +157,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Api.PermissionController.Actions
             _configurationServiceStub.Setup(c => c.GetTicketLifeTime()).Returns(Task.FromResult(2));
 
             // ACT
-            var result = await _addPermissionAction.Execute(addPermissionParameter);
+            var result = await _addPermissionAction.Execute(new[] { "audience" }, addPermissionParameter);
 
             // ASSERTS
             Assert.NotEmpty(result);

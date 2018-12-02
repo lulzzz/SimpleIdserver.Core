@@ -1,34 +1,18 @@
-﻿#region copyright
-// Copyright 2015 Habart Thierry
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-#endregion
-
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using SimpleIdServer.Uma.Core.Errors;
+﻿using SimpleIdServer.Uma.Core.Errors;
 using SimpleIdServer.Uma.Core.Exceptions;
 using SimpleIdServer.Uma.Core.Models;
 using SimpleIdServer.Uma.Core.Parameters;
 using SimpleIdServer.Uma.Core.Repositories;
 using SimpleIdServer.Uma.Logging;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SimpleIdServer.Uma.Core.Policies
 {
     public interface IAuthorizationPolicyValidator
     {
-        Task<AuthorizationPolicyResult> IsAuthorized(Ticket validTicket, string clientId, ClaimTokenParameter claimTokenParameter);
+        Task<ResourceValidationResult> IsAuthorized(string openidProvider, Ticket validTicket, ClaimTokenParameter claimTokenParameter);
     }
 
     internal class AuthorizationPolicyValidator : IAuthorizationPolicyValidator
@@ -49,16 +33,16 @@ namespace SimpleIdServer.Uma.Core.Policies
 
         #region Public methods
 
-        public async Task<AuthorizationPolicyResult> IsAuthorized(Ticket validTicket, string clientId, ClaimTokenParameter claimTokenParameter)
+        public async Task<ResourceValidationResult> IsAuthorized(string openidProvider, Ticket validTicket, ClaimTokenParameter claimTokenParameter)
         {
+            if (string.IsNullOrWhiteSpace(openidProvider))
+            {
+                throw new ArgumentNullException(nameof(openidProvider));
+            }
+
             if (validTicket == null)
             {
                 throw new ArgumentNullException(nameof(validTicket));
-            }
-
-            if (string.IsNullOrWhiteSpace(clientId))
-            {
-                throw new ArgumentNullException(nameof(clientId));
             }
             
             if (validTicket.Lines == null || !validTicket.Lines.Any())
@@ -73,13 +57,13 @@ namespace SimpleIdServer.Uma.Core.Policies
                 throw new BaseUmaException(ErrorCodes.InternalError, ErrorDescriptions.SomeResourcesDontExist);
             }
 
-            AuthorizationPolicyResult validationResult = null;
+            ResourceValidationResult validationResult = null;
             foreach (var ticketLine in validTicket.Lines)
             {
-                var ticketLineParameter = new TicketLineParameter(clientId, ticketLine.Scopes, validTicket.IsAuthorizedByRo);
+                var ticketLineParameter = new TicketLineParameter(ticketLine.Scopes);
                 var resource = resources.First(r => r.Id == ticketLine.ResourceSetId);
-                validationResult = await Validate(ticketLineParameter, resource, claimTokenParameter);
-                if (validationResult.Type != AuthorizationPolicyResultEnum.Authorized)
+                validationResult = await Validate(openidProvider, ticketLineParameter, resource, claimTokenParameter).ConfigureAwait(false);
+                if (!validationResult.IsValid)
                 {
                     _umaServerEventSource.AuthorizationPoliciesFailed(validTicket.Id);
                     return validationResult;
@@ -93,29 +77,17 @@ namespace SimpleIdServer.Uma.Core.Policies
 
         #region Private methods
 
-        private async Task<AuthorizationPolicyResult> Validate(TicketLineParameter ticketLineParameter, ResourceSet resource, ClaimTokenParameter claimTokenParameter)
+        private Task<ResourceValidationResult> Validate(string openidProvider, TicketLineParameter ticketLineParameter, ResourceSet resource, ClaimTokenParameter claimTokenParameter)
         {
-            if (resource.Policies == null || !resource.Policies.Any())
+            if (resource.AuthPolicies == null || !resource.AuthPolicies.Any())
             {
-                return new AuthorizationPolicyResult
+                return Task.FromResult(new ResourceValidationResult
                 {
-                    Type = AuthorizationPolicyResultEnum.Authorized
-                };
-            }
-            
-            foreach (var authorizationPolicy in resource.Policies)
-            {
-                var result = await _basicAuthorizationPolicy.Execute(ticketLineParameter, authorizationPolicy, claimTokenParameter);
-                if (result.Type == AuthorizationPolicyResultEnum.Authorized)
-                {
-                    return result;
-                }
+                    IsValid = true
+                });
             }
 
-            return new AuthorizationPolicyResult
-            {
-                Type = AuthorizationPolicyResultEnum.NotAuthorized
-            };
+            return _basicAuthorizationPolicy.Execute(openidProvider, ticketLineParameter, resource.AuthPolicies, claimTokenParameter);
         }
 
         #endregion

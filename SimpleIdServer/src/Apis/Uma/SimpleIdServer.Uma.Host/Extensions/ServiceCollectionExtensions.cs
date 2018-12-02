@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.Extensions.DependencyInjection;
 using SimpleIdServer.Bus;
 using SimpleIdServer.Concurrency;
@@ -12,7 +11,6 @@ using SimpleIdServer.Logging;
 using SimpleIdServer.OAuth.Logging;
 using SimpleIdServer.Store;
 using SimpleIdServer.Uma.Core;
-using SimpleIdServer.Uma.Host.Controllers;
 using SimpleIdServer.Uma.Logging;
 using System;
 using System.Collections.Generic;
@@ -46,7 +44,7 @@ namespace SimpleIdServer.Uma.Host.Extensions
                 policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
                 policy.RequireClaim("scope", "register_client");
             });
-            authorizationOptions.AddPolicy("uma_protection", policy =>
+            authorizationOptions.AddPolicy("policies", policy =>
             {
                 policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
                 policy.RequireAssertion(p =>
@@ -66,6 +64,34 @@ namespace SimpleIdServer.Uma.Host.Extensions
                     return claimRoles.Any(s => s.Value == "administrator") || claimScopes.Any(s => s.Value == "uma_protection");
                 });
             });
+            authorizationOptions.AddPolicy("permissions", policy =>
+            {
+                policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
+                policy.RequireAssertion(p =>
+                {
+                    if (p.User == null || p.User.Identity == null || !p.User.Identity.IsAuthenticated)
+                    {
+                        return false;
+                    }
+
+                    var claimScopes = p.User.Claims.Where(c => c.Type == "scope");
+                    return claimScopes.Any(s => s.Value == "uma_protection");
+                });
+            });
+            authorizationOptions.AddPolicy("resources", policy =>
+            {
+                policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
+                policy.RequireAssertion(p =>
+                {
+                    if (p.User == null || p.User.Identity == null || !p.User.Identity.IsAuthenticated)
+                    {
+                        return false;
+                    }
+
+                    var claimScopes = p.User.Claims.Where(c => c.Type == "scope");
+                    return claimScopes.Any(s => s.Value == "uma_protection");
+                });
+            });
             return authorizationOptions;
         }
 
@@ -83,6 +109,7 @@ namespace SimpleIdServer.Uma.Host.Extensions
                 .AddDefaultTokenStore()
                 .AddDefaultSimpleBus()
                 .AddDefaultConcurrency();
+            services.AddSingleton(authorizationServerOptions);
             services.AddTechnicalLogging();
             services.AddOAuthLogging();
             services.AddUmaLogging();

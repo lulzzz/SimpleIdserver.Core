@@ -108,12 +108,9 @@ namespace SimpleIdServer.Uma.Core.Api.PolicyController.Actions
                 rules.Add(new PolicyRule
                 {
                     Id = Guid.NewGuid().ToString(),
-                    IsResourceOwnerConsentNeeded = ruleParameter.IsResourceOwnerConsentNeeded,
-                    ClientIdsAllowed = ruleParameter.ClientIdsAllowed,
                     Scopes = ruleParameter.Scopes,
                     Script = ruleParameter.Script,
-                    Claims = claims,
-                    OpenIdProvider = ruleParameter.OpenIdProvider
+                    Claims = claims
                 });
             }
 

@@ -1,26 +1,11 @@
-﻿#region copyright
-// Copyright 2015 Habart Thierry
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-#endregion
-
-using Moq;
+﻿using Moq;
 using Newtonsoft.Json.Linq;
 using SimpleIdServer.Core.Common;
 using SimpleIdServer.Uma.Core.JwtToken;
 using SimpleIdServer.Uma.Core.Models;
 using SimpleIdServer.Uma.Core.Parameters;
 using SimpleIdServer.Uma.Core.Policies;
+using SimpleIdServer.Uma.Core.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,6 +17,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
     public class BasicAuthorizationPolicyFixture
     {
         private Mock<IJwtTokenParser> _jwtTokenParserStub;
+        private Mock<IPendingRequestRepository> _pendingRequestRepositorySub;
         private IBasicAuthorizationPolicy _basicAuthorizationPolicy;
 
         [Fact]
@@ -41,8 +27,8 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
             InitializeFakeObjects();
 
             // ACTS & ASSERTS
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _basicAuthorizationPolicy.Execute(null, null, null));
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _basicAuthorizationPolicy.Execute(new TicketLineParameter("client_id"), null, null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _basicAuthorizationPolicy.Execute(null, null, null, null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _basicAuthorizationPolicy.Execute("openid", new TicketLineParameter(), null, null));
         }
         
         [Fact]
@@ -50,7 +36,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
         {
             // ARRANGE
             InitializeFakeObjects();
-            var ticket = new TicketLineParameter("client_id")
+            var ticket = new TicketLineParameter
             {
                 Scopes = new List<string>
                 {
@@ -60,25 +46,22 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                 }
             };
 
-            var authorizationPolicy = new Policy
+            var authorizationPolicies = new List<Policy>
             {
-                Rules = new List<PolicyRule>
+                new Policy
                 {
-                    new PolicyRule
+                    Scopes = new List<string>
                     {
-                        Scopes = new List<string>
-                        {
-                            "read"
-                        }
+                        "read"
                     }
                 }
             };
 
             // ACT
-            var result = await _basicAuthorizationPolicy.Execute(ticket, authorizationPolicy, null);
+            var result = await _basicAuthorizationPolicy.Execute("openid", ticket, authorizationPolicies, null);
 
             // ASSERT
-            Assert.True(result.Type == AuthorizationPolicyResultEnum.NotAuthorized);
+            Assert.True(result.IsValid == false);
         }
 
         [Fact]
@@ -86,7 +69,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
         {
             // ARRANGE
             InitializeFakeObjects();
-            var ticket = new TicketLineParameter("invalid_client_id")
+            var ticket = new TicketLineParameter
             {
                 Scopes = new List<string>
                 {
@@ -102,10 +85,6 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                 {
                     new PolicyRule
                     {
-                        ClientIdsAllowed = new List<string>
-                        {
-                            "client_id"
-                        },
                         Scopes = new List<string>
                         {
                             "read",
@@ -118,10 +97,10 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
             };
             
             // ACT
-            var result = await _basicAuthorizationPolicy.Execute(ticket, authorizationPolicy, null);
+            var result = await _basicAuthorizationPolicy.Execute("openid", ticket, authorizationPolicy, null);
 
             // ASSERT
-            Assert.True(result.Type == AuthorizationPolicyResultEnum.NotAuthorized);
+            Assert.True(result.IsValid == false);
         }
 
         [Fact]
@@ -130,7 +109,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
             // ARRANGE
             const string configurationUrl = "http://localhost/configuration";
             InitializeFakeObjects();
-            var ticket = new TicketLineParameter("client_id")
+            var ticket = new TicketLineParameter
             {
                 Scopes = new List<string>
                 {
@@ -146,10 +125,6 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                 {
                     new PolicyRule
                     {
-                        ClientIdsAllowed = new List<string>
-                        {
-                            "client_id"
-                        },
                         Scopes = new List<string>
                         {
                             "read",
@@ -166,8 +141,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                             {
                                 Type = "email"
                             }
-                        },
-                        OpenIdProvider = configurationUrl
+                        }
                     }
                 }
             };
@@ -178,7 +152,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
             };
 
             // ACT
-            var result = await _basicAuthorizationPolicy.Execute(ticket, authorizationPolicy, claimTokenParameter);
+            var result = await _basicAuthorizationPolicy.Execute("openid", ticket, authorizationPolicy, claimTokenParameter);
 
             // ASSERT
             Assert.True(result.Type == AuthorizationPolicyResultEnum.NeedInfo);
@@ -203,7 +177,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
             // ARRANGE
             const string configurationUrl = "http://localhost/configuration";
             InitializeFakeObjects();
-            var ticket = new TicketLineParameter("client_id")
+            var ticket = new TicketLineParameter
             {
                 Scopes = new List<string>
                 {
@@ -219,10 +193,6 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                 {
                     new PolicyRule
                     {
-                        ClientIdsAllowed = new List<string>
-                        {
-                            "client_id"
-                        },
                         Scopes = new List<string>
                         {
                             "read",
@@ -239,8 +209,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                             {
                                 Type = "email"
                             }
-                        },
-                        OpenIdProvider = configurationUrl
+                        }
                     }
                 }
             };
@@ -249,11 +218,11 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                 Format = "http://openid.net/specs/openid-connect-core-1_0.html#HybridIDToken",
                 Token = "token"
             };
-            _jwtTokenParserStub.Setup(j => j.UnSign(It.IsAny<string>(), It.IsAny<PolicyRule>()))
+            _jwtTokenParserStub.Setup(j => j.UnSign(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<PolicyRule>()))
                 .Returns(Task.FromResult((JwsPayload)null));
 
             // ACT
-            var result = await _basicAuthorizationPolicy.Execute(ticket, authorizationPolicy, claimTokenParameters);
+            var result = await _basicAuthorizationPolicy.Execute("openid", ticket, authorizationPolicy, claimTokenParameters);
 
             // ASSERT
             Assert.True(result.Type == AuthorizationPolicyResultEnum.NeedInfo);
@@ -265,7 +234,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
             // ARRANGE
             const string configurationUrl = "http://localhost/configuration";
             InitializeFakeObjects();
-            var ticket = new TicketLineParameter("client_id")
+            var ticket = new TicketLineParameter
             {
                 Scopes = new List<string>
                 {
@@ -281,10 +250,6 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                 {
                     new PolicyRule
                     {
-                        ClientIdsAllowed = new List<string>
-                        {
-                            "client_id"
-                        },
                         Scopes = new List<string>
                         {
                             "read",
@@ -303,8 +268,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                                 Type = "role",
                                 Value = "role2"
                             }
-                        },
-                        OpenIdProvider = configurationUrl
+                        }
                     }
                 }
             };
@@ -313,7 +277,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                 Format = "http://openid.net/specs/openid-connect-core-1_0.html#HybridIDToken",
                 Token = "token"
             };
-            _jwtTokenParserStub.Setup(j => j.UnSign(It.IsAny<string>(), It.IsAny<PolicyRule>()))
+            _jwtTokenParserStub.Setup(j => j.UnSign(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<PolicyRule>()))
                 .Returns(Task.FromResult(new JwsPayload
                 {
                     {
@@ -322,7 +286,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                 }));
 
             // ACT
-            var result = await _basicAuthorizationPolicy.Execute(ticket, authorizationPolicy, claimTokenParameter);
+            var result = await _basicAuthorizationPolicy.Execute("openid", ticket, authorizationPolicy, claimTokenParameter);
 
             // ASSERT
             Assert.True(result.Type == AuthorizationPolicyResultEnum.NeedInfo);
@@ -334,7 +298,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
             // ARRANGE
             const string configurationUrl = "http://localhost/configuration";
             InitializeFakeObjects();
-            var ticket = new TicketLineParameter("client_id")
+            var ticket = new TicketLineParameter
             {
                 Scopes = new List<string>
                 {
@@ -350,10 +314,6 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                 {
                     new PolicyRule
                     {
-                        ClientIdsAllowed = new List<string>
-                        {
-                            "client_id"
-                        },
                         Scopes = new List<string>
                         {
                             "read",
@@ -372,8 +332,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                                 Type = "role",
                                 Value = "role2"
                             }
-                        },
-                        OpenIdProvider = configurationUrl
+                        }
                     }
                 }
             };
@@ -382,11 +341,11 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                 Format = "http://openid.net/specs/openid-connect-core-1_0.html#HybridIDToken",
                 Token = "token"
             };
-            _jwtTokenParserStub.Setup(j => j.UnSign(It.IsAny<string>(), It.IsAny<PolicyRule>()))
+            _jwtTokenParserStub.Setup(j => j.UnSign(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<PolicyRule>()))
                 .Returns(Task.FromResult(new JwsPayload()));
 
             // ACT
-            var result = await _basicAuthorizationPolicy.Execute(ticket, authorizationPolicy, claimTokenParameters);
+            var result = await _basicAuthorizationPolicy.Execute("openid", ticket, authorizationPolicy, claimTokenParameters);
 
             // ASSERT
             Assert.True(result.Type == AuthorizationPolicyResultEnum.NeedInfo);
@@ -398,7 +357,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
             // ARRANGE
             const string configurationUrl = "http://localhost/configuration";
             InitializeFakeObjects();
-            var ticket = new TicketLineParameter("client_id")
+            var ticket = new TicketLineParameter
             {
                 Scopes = new List<string>
                 {
@@ -414,10 +373,6 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                 {
                     new PolicyRule
                     {
-                        ClientIdsAllowed = new List<string>
-                        {
-                            "client_id"
-                        },
                         Scopes = new List<string>
                         {
                             "read",
@@ -436,8 +391,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                                 Type = "role",
                                 Value = "role2"
                             }
-                        },
-                        OpenIdProvider = configurationUrl
+                        }
                     }
                 }
             };
@@ -448,11 +402,11 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
             };
             var payload = new JwsPayload();
             payload.Add("role", new JArray("role3"));
-            _jwtTokenParserStub.Setup(j => j.UnSign(It.IsAny<string>(), It.IsAny<PolicyRule>()))
+            _jwtTokenParserStub.Setup(j => j.UnSign(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<PolicyRule>()))
                 .Returns(Task.FromResult(payload));
 
             // ACT
-            var result = await _basicAuthorizationPolicy.Execute(ticket, authorizationPolicy, claimTokenParameters);
+            var result = await _basicAuthorizationPolicy.Execute("openid", ticket, authorizationPolicy, claimTokenParameters);
 
             // ASSERT
             Assert.True(result.Type == AuthorizationPolicyResultEnum.NeedInfo);
@@ -464,7 +418,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
             // ARRANGE
             const string configurationUrl = "http://localhost/configuration";
             InitializeFakeObjects();
-            var ticket = new TicketLineParameter("client_id")
+            var ticket = new TicketLineParameter
             {
                 Scopes = new List<string>
                 {
@@ -480,10 +434,6 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                 {
                     new PolicyRule
                     {
-                        ClientIdsAllowed = new List<string>
-                        {
-                            "client_id"
-                        },
                         Scopes = new List<string>
                         {
                             "read",
@@ -502,8 +452,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                                 Type = "role",
                                 Value = "role2"
                             }
-                        },
-                        OpenIdProvider = configurationUrl
+                        }
                     }
                 }
             };
@@ -514,11 +463,11 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
             };
             var payload = new JwsPayload();
             payload.Add("role", new string[] { "role3" });
-            _jwtTokenParserStub.Setup(j => j.UnSign(It.IsAny<string>(), It.IsAny<PolicyRule>()))
+            _jwtTokenParserStub.Setup(j => j.UnSign(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<PolicyRule>()))
                 .Returns(Task.FromResult(payload));
 
             // ACT
-            var result = await _basicAuthorizationPolicy.Execute(ticket, authorizationPolicy, claimTokenParameter);
+            var result = await _basicAuthorizationPolicy.Execute("openid", ticket, authorizationPolicy, claimTokenParameter);
 
             // ASSERT
             Assert.True(result.Type == AuthorizationPolicyResultEnum.NeedInfo);
@@ -530,7 +479,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
             // ARRANGE
             const string configurationUrl = "http://localhost/configuration";
             InitializeFakeObjects();
-            var ticket = new TicketLineParameter("client_id")
+            var ticket = new TicketLineParameter
             {
                 Scopes = new List<string>
                 {
@@ -546,10 +495,6 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                 {
                     new PolicyRule
                     {
-                        ClientIdsAllowed = new List<string>
-                        {
-                            "client_id"
-                        },
                         Scopes = new List<string>
                         {
                             "read",
@@ -568,8 +513,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                                 Type = "email",
                                 Value = "email"
                             }
-                        },
-                        OpenIdProvider = configurationUrl
+                        }
                     }
                 }
             };
@@ -578,7 +522,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                 Format = "http://openid.net/specs/openid-connect-core-1_0.html#HybridIDToken",
                 Token = "token"
             };
-            _jwtTokenParserStub.Setup(j => j.UnSign(It.IsAny<string>(), It.IsAny<PolicyRule>()))
+            _jwtTokenParserStub.Setup(j => j.UnSign(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<PolicyRule>()))
                 .Returns(Task.FromResult(new JwsPayload
                 {
                     {
@@ -587,7 +531,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                 }));
 
             // ACT
-            var result = await _basicAuthorizationPolicy.Execute(ticket, authorizationPolicy, claimTokenParameter);
+            var result = await _basicAuthorizationPolicy.Execute("openid", ticket, authorizationPolicy, claimTokenParameter);
 
             // ASSERT
             Assert.True(result.Type == AuthorizationPolicyResultEnum.NeedInfo);
@@ -598,9 +542,8 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
         {
             // ARRANGE
             InitializeFakeObjects();
-            var ticket = new TicketLineParameter("client_id")
+            var ticket = new TicketLineParameter
             {
-                IsAuthorizedByRo = false,
                 Scopes = new List<string>
                 {
                     "read",
@@ -615,10 +558,6 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                 {
                     new PolicyRule
                     {
-                        ClientIdsAllowed = new List<string>
-                        {
-                            "client_id"
-                        },
                         IsResourceOwnerConsentNeeded = true,
                         Scopes = new List<string>
                         {
@@ -631,7 +570,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
             };
 
             // ACT
-            var result = await _basicAuthorizationPolicy.Execute(ticket, authorizationPolicy, null);
+            var result = await _basicAuthorizationPolicy.Execute("openid", ticket, authorizationPolicy, null);
 
             // ASSERT
             Assert.True(result.Type == AuthorizationPolicyResultEnum.RequestSubmitted);
@@ -642,9 +581,8 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
         {
             // ARRANGE
             InitializeFakeObjects();
-            var ticket = new TicketLineParameter("client_id")
+            var ticket = new TicketLineParameter
             {
-                IsAuthorizedByRo = true,
                 Scopes = new List<string>
                 {
                     "create"
@@ -657,10 +595,6 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                 {
                     new PolicyRule
                     {
-                        ClientIdsAllowed = new List<string>
-                        {
-                            "client_id"
-                        },
                         IsResourceOwnerConsentNeeded = true,
                         Scopes = new List<string>
                         {
@@ -671,7 +605,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
             };
 
             // ACT
-            var result = await _basicAuthorizationPolicy.Execute(ticket, authorizationPolicy, null);
+            var result = await _basicAuthorizationPolicy.Execute("openid", ticket, authorizationPolicy, null);
 
             // ASSERT
             Assert.True(result.Type == AuthorizationPolicyResultEnum.Authorized);
@@ -680,7 +614,8 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
         private void InitializeFakeObjects()
         {
             _jwtTokenParserStub = new Mock<IJwtTokenParser>();
-            _basicAuthorizationPolicy = new BasicAuthorizationPolicy(_jwtTokenParserStub.Object);
+            _pendingRequestRepositorySub = new Mock<IPendingRequestRepository>();
+            _basicAuthorizationPolicy = new BasicAuthorizationPolicy(_jwtTokenParserStub.Object, _pendingRequestRepositorySub.Object);
         }
     }
 }
