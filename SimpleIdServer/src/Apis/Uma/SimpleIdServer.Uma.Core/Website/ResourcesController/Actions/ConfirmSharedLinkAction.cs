@@ -62,23 +62,15 @@ namespace SimpleIdServer.Uma.Core.Website.ResourcesController.Actions
             {
                 Id = Guid.NewGuid().ToString(),
                 ResourceSetIds = new List<string> { resourceId },
-                Rules = new List<PolicyRule>
+                Claims = new List<Claim>
                 {
-                    new PolicyRule
+                    new Claim
                     {
-                        Id = Guid.NewGuid().ToString(),
-                        IsResourceOwnerConsentNeeded = false,
-                        Claims = new List<Claim>
-                        {
-                            new Claim
-                            {
-                                Type = "sub",
-                                Value = confirmSharedLinkParameter.Subject
-                            }
-                        },
-                        Scopes = sharedLink.Scopes.ToList()
+                        Type = "sub",
+                        Value = confirmSharedLinkParameter.Subject
                     }
-                }
+                },
+                Scopes = sharedLink.Scopes.ToList()
             };
             
             using (var transaction = new CommittableTransaction(new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted }))

@@ -24,18 +24,6 @@ namespace SimpleIdServer.Uma.Common.DTOs
     {
         [DataMember(Name = PolicyRuleNames.Id)]
         public string Id { get; set; }
-        [DataMember(Name = PolicyRuleNames.ClientIdsAllowed)]
-        public List<string> ClientIdsAllowed { get; set; }
-        [DataMember(Name = PolicyRuleNames.Scopes)]
-        public List<string> Scopes { get; set; }
-        [DataMember(Name = PolicyRuleNames.Claims)]
-        public List<PostClaim> Claims { get; set; }
-        [DataMember(Name = PolicyRuleNames.IsResourceOwnerConsentNeeded)]
-        public bool IsResourceOwnerConsentNeeded { get; set; }
-        [DataMember(Name = PolicyRuleNames.Script)]
-        public string Script { get; set; }
-        [DataMember(Name = PolicyRuleNames.OpenIdProvider)]
-        public string OpenIdProvider { get; set; }
     }
 
     [DataContract]
@@ -43,7 +31,15 @@ namespace SimpleIdServer.Uma.Common.DTOs
     {
         [DataMember(Name = PolicyNames.Id)]
         public string PolicyId { get; set; }
-        [DataMember(Name = PolicyNames.Rules)]
-        public List<PutPolicyRule> Rules { get; set; }
+        [DataMember(Name = PolicyRuleNames.ClientIdsAllowed)]
+        public List<string> ClientIdsAllowed { get; set; }
+        [DataMember(Name = PolicyRuleNames.Claims)]
+        public List<PostClaim> Claims { get; set; }
+        [DataMember(Name = PolicyRuleNames.IsResourceOwnerConsentNeeded)]
+        public bool IsResourceOwnerConsentNeeded { get; set; }
+        [DataMember(Name = PolicyRuleNames.Scopes)]
+        public List<string> Scopes { get; set; }
+        [DataMember(Name = PolicyRuleNames.Script)]
+        public string Script { get; set; }
     }
 }

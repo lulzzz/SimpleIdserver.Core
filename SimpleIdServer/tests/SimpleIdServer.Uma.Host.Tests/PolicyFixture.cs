@@ -1,20 +1,4 @@
-﻿#region copyright
-// Copyright 2016 Habart Thierry
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-#endregion
-
-using Moq;
+﻿using Moq;
 using SimpleIdServer.Common.Client.Factories;
 using SimpleIdServer.Uma.Client.Configuration;
 using SimpleIdServer.Uma.Client.Policy;
@@ -100,13 +84,6 @@ namespace SimpleIdServer.Uma.Host.Tests
                 ResourceSetIds = new List<string>
                 {
                     "resource_id"
-                },
-                Rules = new List<PostPolicyRule>
-                {
-                    new PostPolicyRule
-                    {
-
-                    }
                 }
             }, baseUrl + "/.well-known/uma2-configuration", "header");
 
@@ -139,15 +116,9 @@ namespace SimpleIdServer.Uma.Host.Tests
                 {
                     addResponse.Content.Id
                 },
-                Rules = new List<PostPolicyRule>
+                Scopes = new List<string>
                 {
-                    new PostPolicyRule
-                    {
-                        Scopes = new List<string>
-                        {
-                            "scope"
-                        }
-                    }
+                    "scope"
                 }
             }, baseUrl + "/.well-known/uma2-configuration", "header");
 
@@ -233,14 +204,7 @@ namespace SimpleIdServer.Uma.Host.Tests
             // ACT
             var response = await _policyClient.UpdateByResolution(new PutPolicy
             {
-                PolicyId = "policy",
-                Rules = new List<PutPolicyRule>
-                {
-                    new PutPolicyRule
-                    {
-
-                    }
-                }
+                PolicyId = "policy"
             }, baseUrl + "/.well-known/uma2-configuration", "header");
 
             // ASSERT
@@ -266,24 +230,18 @@ namespace SimpleIdServer.Uma.Host.Tests
             }, baseUrl + "/.well-known/uma2-configuration", "header");
             var addResponse = await _policyClient.AddByResolution(new PostPolicy
             {
-                Rules = new List<PostPolicyRule>
+                IsResourceOwnerConsentNeeded = false,
+                Claims = new List<PostClaim>
                 {
-                    new PostPolicyRule
+                    new PostClaim
                     {
-                        IsResourceOwnerConsentNeeded = false,
-                        Claims = new List<PostClaim>
-                        {
-                            new PostClaim
-                            {
-                                Type = "role",
-                                Value = "administrator"
-                            }
-                        },
-                        Scopes = new List<string>
-                        {
-                            "read"
-                        }
+                        Type = "role",
+                        Value = "administrator"
                     }
+                },
+                Scopes = new List<string>
+                {
+                    "read"
                 },
                 ResourceSetIds = new List<string>
                 {
@@ -295,15 +253,9 @@ namespace SimpleIdServer.Uma.Host.Tests
             var response = await _policyClient.UpdateByResolution(new PutPolicy
             {
                 PolicyId = addResponse.Content.PolicyId,
-                Rules = new List<PutPolicyRule>
+                Scopes = new List<string>
                 {
-                    new PutPolicyRule
-                    {
-                        Scopes = new List<string>
-                        {
-                            "invalid_scope"
-                        }
-                    }
+                    "invalid_scope"
                 }
             }, baseUrl + "/.well-known/uma2-configuration", "header");
 
@@ -397,16 +349,10 @@ namespace SimpleIdServer.Uma.Host.Tests
             }, baseUrl + "/.well-known/uma2-configuration", "header");
             var addPolicy = await _policyClient.AddByResolution(new PostPolicy
             {
-                Rules = new List<PostPolicyRule>
+                IsResourceOwnerConsentNeeded = false,
+                Scopes = new List<string>
                 {
-                    new PostPolicyRule
-                    {
-                        IsResourceOwnerConsentNeeded = false,
-                        Scopes = new List<string>
-                        {
-                            "read"
-                        }
-                    }
+                    "read"
                 },
                 ResourceSetIds = new List<string>
                 {
@@ -466,16 +412,10 @@ namespace SimpleIdServer.Uma.Host.Tests
             }, baseUrl + "/.well-known/uma2-configuration", "header");
             var addPolicy = await _policyClient.AddByResolution(new PostPolicy
             {
-                Rules = new List<PostPolicyRule>
+                IsResourceOwnerConsentNeeded = false,
+                Scopes = new List<string>
                 {
-                    new PostPolicyRule
-                    {
-                        IsResourceOwnerConsentNeeded = false,
-                        Scopes = new List<string>
-                        {
-                            "read"
-                        }
-                    }
+                    "read"
                 },
                 ResourceSetIds = new List<string>
                 {
@@ -519,24 +459,18 @@ namespace SimpleIdServer.Uma.Host.Tests
             // ACT
             var response = await _policyClient.AddByResolution(new PostPolicy
             {
-                Rules = new List<PostPolicyRule>
+                Claims = new List<PostClaim>
                 {
-                    new PostPolicyRule
+                    new PostClaim
                     {
-                        IsResourceOwnerConsentNeeded = false,
-                        Claims = new List<PostClaim>
-                        {
-                            new PostClaim
-                            {
-                                Type = "role",
-                                Value = "administrator"
-                            }
-                        },
-                        Scopes = new List<string>
-                        {
-                            "read"
-                        }
+                        Type = "role",
+                        Value = "administrator"
                     }
+                },
+                IsResourceOwnerConsentNeeded = false,
+                Scopes = new List<string>
+                {
+                    "read"
                 },
                 ResourceSetIds = new List<string>
                 {
@@ -549,9 +483,9 @@ namespace SimpleIdServer.Uma.Host.Tests
             Assert.NotNull(response);
             Assert.False(string.IsNullOrWhiteSpace(response.Content.PolicyId));
             Assert.NotNull(information);
-            Assert.True(information.Content.Rules.Count() == 1);
+            Assert.True(information.Content != null);
             Assert.True(information.Content.ResourceSetIds.Count() == 1 && information.Content.ResourceSetIds.First() == addResponse.Content.Id);
-            var rule = information.Content.Rules.First();
+            var rule = information.Content;
             Assert.False(rule.IsResourceOwnerConsentNeeded);
             Assert.True(rule.Claims.Count() == 1);
             Assert.True(rule.Scopes.Count() == 1);
@@ -577,24 +511,18 @@ namespace SimpleIdServer.Uma.Host.Tests
             }, baseUrl + "/.well-known/uma2-configuration", "header");
             var addPolicy = await _policyClient.AddByResolution(new PostPolicy
             {
-                Rules = new List<PostPolicyRule>
+                IsResourceOwnerConsentNeeded = false,
+                Claims = new List<PostClaim>
                 {
-                    new PostPolicyRule
+                    new PostClaim
                     {
-                        IsResourceOwnerConsentNeeded = false,
-                        Claims = new List<PostClaim>
-                        {
-                            new PostClaim
-                            {
-                                Type = "role",
-                                Value = "administrator"
-                            }
-                        },
-                        Scopes = new List<string>
-                        {
-                            "read"
-                        }
+                        Type = "role",
+                        Value = "administrator"
                     }
+                },
+                Scopes = new List<string>
+                {
+                    "read"
                 },
                 ResourceSetIds = new List<string>
                 {
@@ -630,24 +558,18 @@ namespace SimpleIdServer.Uma.Host.Tests
             }, baseUrl + "/.well-known/uma2-configuration", "header");
             var addPolicy = await _policyClient.AddByResolution(new PostPolicy
             {
-                Rules = new List<PostPolicyRule>
+                IsResourceOwnerConsentNeeded = false,
+                Claims = new List<PostClaim>
                 {
-                    new PostPolicyRule
+                    new PostClaim
                     {
-                        IsResourceOwnerConsentNeeded = false,
-                        Claims = new List<PostClaim>
-                        {
-                            new PostClaim
-                            {
-                                Type = "role",
-                                Value = "administrator"
-                            }
-                        },
-                        Scopes = new List<string>
-                        {
-                            "read"
-                        }
+                        Type = "role",
+                        Value = "administrator"
                     }
+                },
+                Scopes = new List<string>
+                {
+                    "read"
                 },
                 ResourceSetIds = new List<string>
                 {
@@ -693,24 +615,18 @@ namespace SimpleIdServer.Uma.Host.Tests
             }, baseUrl + "/.well-known/uma2-configuration", "header");
             var addPolicy = await _policyClient.AddByResolution(new PostPolicy
             {
-                Rules = new List<PostPolicyRule>
+                IsResourceOwnerConsentNeeded = false,
+                Claims = new List<PostClaim>
                 {
-                    new PostPolicyRule
+                    new PostClaim
                     {
-                        IsResourceOwnerConsentNeeded = false,
-                        Claims = new List<PostClaim>
-                        {
-                            new PostClaim
-                            {
-                                Type = "role",
-                                Value = "administrator"
-                            }
-                        },
-                        Scopes = new List<string>
-                        {
-                            "read"
-                        }
+                        Type = "role",
+                        Value = "administrator"
                     }
+                },
+                Scopes = new List<string>
+                {
+                    "read"
                 },
                 ResourceSetIds = new List<string>
                 {
@@ -762,24 +678,18 @@ namespace SimpleIdServer.Uma.Host.Tests
             }, baseUrl + "/.well-known/uma2-configuration", "header");
             var addPolicy = await _policyClient.AddByResolution(new PostPolicy
             {
-                Rules = new List<PostPolicyRule>
+                IsResourceOwnerConsentNeeded = false,
+                Claims = new List<PostClaim>
                 {
-                    new PostPolicyRule
+                    new PostClaim
                     {
-                        IsResourceOwnerConsentNeeded = false,
-                        Claims = new List<PostClaim>
-                        {
-                            new PostClaim
-                            {
-                                Type = "role",
-                                Value = "administrator"
-                            }
-                        },
-                        Scopes = new List<string>
-                        {
-                            "read"
-                        }
+                        Type = "role",
+                        Value = "administrator"
                     }
+                },
+                Scopes = new List<string>
+                {
+                    "read"
                 },
                 ResourceSetIds = new List<string>
                 {
@@ -828,24 +738,18 @@ namespace SimpleIdServer.Uma.Host.Tests
             }, baseUrl + "/.well-known/uma2-configuration", "header");
             var addPolicy = await _policyClient.AddByResolution(new PostPolicy
             {
-                Rules = new List<PostPolicyRule>
+                IsResourceOwnerConsentNeeded = false,
+                Claims = new List<PostClaim>
                 {
-                    new PostPolicyRule
+                    new PostClaim
                     {
-                        IsResourceOwnerConsentNeeded = false,
-                        Claims = new List<PostClaim>
-                        {
-                            new PostClaim
-                            {
-                                Type = "role",
-                                Value = "administrator"
-                            }
-                        },
-                        Scopes = new List<string>
-                        {
-                            "read"
-                        }
+                        Type = "role",
+                        Value = "administrator"
                     }
+                },
+                Scopes = new List<string>
+                {
+                    "read"
                 },
                 ResourceSetIds = new List<string>
                 {
@@ -859,30 +763,23 @@ namespace SimpleIdServer.Uma.Host.Tests
             var isUpdated = await _policyClient.UpdateByResolution(new PutPolicy
             {
                 PolicyId = firstInfo.Content.Id,
-                Rules = new List<PutPolicyRule>
+                Claims = new List<PostClaim>
                 {
-                    new PutPolicyRule
+                    new PostClaim
                     {
-                       Id = firstInfo.Content.Rules.First().Id,
-                        Claims = new List<PostClaim>
-                        {
-                            new PostClaim
-                            {
-                                Type = "role",
-                                Value = "administrator"
-                            },
-                            new PostClaim
-                            {
-                                Type = "role",
-                                Value = "other"
-                            }
-                        },
-                        Scopes = new List<string>
-                        {
-                            "read",
-                            "write"
-                        }
+                        Type = "role",
+                        Value = "administrator"
+                    },
+                    new PostClaim
+                    {
+                        Type = "role",
+                        Value = "other"
                     }
+                },
+                Scopes = new List<string>
+                {
+                    "read",
+                    "write"
                 }
             }, baseUrl + "/.well-known/uma2-configuration", "header");
             var updatedInformation = await _policyClient.GetByResolution(addPolicy.Content.PolicyId, baseUrl + "/.well-known/uma2-configuration", "header");
@@ -891,10 +788,9 @@ namespace SimpleIdServer.Uma.Host.Tests
             // ASSERTS
             Assert.False(isUpdated.ContainsError);
             Assert.NotNull(updatedInformation);
-            Assert.True(updatedInformation.Content.Rules.Count() == 1);
-            var rule = updatedInformation.Content.Rules.First();
-            Assert.True(rule.Claims.Count() == 2);
-            Assert.True(rule.Scopes.Count() == 2);
+            Assert.True(updatedInformation.Content != null);
+            Assert.True(updatedInformation.Content.Claims.Count() == 2);
+            Assert.True(updatedInformation.Content.Scopes.Count() == 2);
         }
 
         #endregion

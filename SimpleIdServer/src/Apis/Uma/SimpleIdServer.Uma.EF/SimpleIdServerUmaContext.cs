@@ -34,6 +34,7 @@ namespace SimpleIdServer.Uma.EF
             modelBuilder.AddPolicyClaimMapping();
             modelBuilder.AddPolicyScopeMapping();
             modelBuilder.AddResourceScopeMapping();
+            modelBuilder.AddPolicyClientMapping();
             base.OnModelCreating(modelBuilder);
         }
 

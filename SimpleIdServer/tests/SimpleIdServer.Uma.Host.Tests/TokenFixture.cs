@@ -109,24 +109,19 @@ namespace SimpleIdServer.Uma.Host.Tests
             baseUrl + "/.well-known/uma2-configuration", result.Content.AccessToken);
             var addPolicy = await _policyClient.AddByResolution(new PostPolicy // Add an authorization policy.
             {
-                Rules = new List<PostPolicyRule>
+
+                IsResourceOwnerConsentNeeded = false,
+                Scopes = new List<string>
                 {
-                    new PostPolicyRule
-                    {
-                        IsResourceOwnerConsentNeeded = false,
-                        Scopes = new List<string>
-                        {
-                            "read"
-                        },
-                        ClientIdsAllowed = new List<string>
-                        {
-                            "resource_server"
-                        },
-                        Claims = new List<PostClaim>
-                        {
-                            new PostClaim { Type = "sub", Value = "248289761001" }
-                        }
-                    }
+                    "read"
+                },
+                ClientIdsAllowed = new List<string>
+                {
+                    "resource_server"
+                },
+                Claims = new List<PostClaim>
+                {
+                    new PostClaim { Type = "sub", Value = "248289761001" }
                 },
                 ResourceSetIds = new List<string>
                 {

@@ -88,7 +88,9 @@ namespace SimpleIdServer.Uma.Core.Api.PolicyController.Actions
                 }
             }
 
-            policy.ResourceSetIds.AddRange(addResourceSetParameter.ResourceSets);
+            var resourceSetIds = policy.ResourceSetIds.ToList();
+            resourceSetIds.AddRange(addResourceSetParameter.ResourceSets);
+            policy.ResourceSetIds = resourceSetIds;
             var result = await _repositoryExceptionHelper.HandleException(
                 ErrorDescriptions.ThePolicyCannotBeUpdated,
                 () => _policyRepository.Update(policy));

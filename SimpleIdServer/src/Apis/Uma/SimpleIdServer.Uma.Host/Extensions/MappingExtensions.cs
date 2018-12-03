@@ -150,27 +150,14 @@ namespace SimpleIdServer.Uma.Host.Extensions
 
         public static AddPolicyParameter ToParameter(this PostPolicy postPolicy)
         {
-            var rules = postPolicy.Rules == null ? new List<AddPolicyRuleParameter>()
-                : postPolicy.Rules.Select(r => r.ToParameter()).ToList();
             return new AddPolicyParameter
             {
-                Rules = rules,
-                ResourceSetIds = postPolicy.ResourceSetIds
-            };
-        }
-
-        public static AddPolicyRuleParameter ToParameter(this PostPolicyRule policyRule)
-        {
-            var claims = policyRule.Claims == null ? new List<AddClaimParameter>()
-                : policyRule.Claims.Select(p => p.ToParameter()).ToList();
-            return new AddPolicyRuleParameter
-            {
-                Claims = claims,
-                ClientIdsAllowed = policyRule.ClientIdsAllowed,
-                IsResourceOwnerConsentNeeded = policyRule.IsResourceOwnerConsentNeeded,
-                Scopes = policyRule.Scopes,
-                Script = policyRule.Script,
-                OpenIdProvider = policyRule.OpenIdProvider
+                Claims = postPolicy.Claims == null ? new List<AddClaimParameter>() : postPolicy.Claims.Select(c => c.ToParameter()).ToList(),
+                IsResourceOwnerConsentNeeded = postPolicy.IsResourceOwnerConsentNeeded,
+                Script = postPolicy.Script,
+                ResourceSetIds = postPolicy.ResourceSetIds,
+                Scopes = postPolicy.Scopes,
+                ClientIdsAllowed = postPolicy.ClientIdsAllowed
             };
         }
 
@@ -185,28 +172,14 @@ namespace SimpleIdServer.Uma.Host.Extensions
 
         public static UpdatePolicyParameter ToParameter(this PutPolicy putPolicy)
         {
-            var rules = putPolicy.Rules == null ? new List<UpdatePolicyRuleParameter>()
-                : putPolicy.Rules.Select(r => r.ToParameter()).ToList();
             return new UpdatePolicyParameter
             {
                 PolicyId = putPolicy.PolicyId,
-                Rules = rules
-            };
-        }
-
-        public static UpdatePolicyRuleParameter ToParameter(this PutPolicyRule policyRule)
-        {
-            var claims = policyRule.Claims == null ? new List<AddClaimParameter>()
-                : policyRule.Claims.Select(p => p.ToParameter()).ToList();
-            return new UpdatePolicyRuleParameter
-            {
-                Claims = claims,
-                ClientIdsAllowed = policyRule.ClientIdsAllowed,
-                Id = policyRule.Id,
-                IsResourceOwnerConsentNeeded = policyRule.IsResourceOwnerConsentNeeded,
-                Scopes = policyRule.Scopes,
-                Script = policyRule.Script,
-                OpenIdProvider = policyRule.OpenIdProvider
+                Claims = putPolicy.Claims == null ? new List<AddClaimParameter>() : putPolicy.Claims.Select(c => c.ToParameter()).ToList(),
+                IsResourceOwnerConsentNeeded = putPolicy.IsResourceOwnerConsentNeeded,
+                Script = putPolicy.Script,
+                Scopes = putPolicy.Scopes,
+                ClientIdsAllowed = putPolicy.ClientIdsAllowed
             };
         }
 
@@ -256,27 +229,18 @@ namespace SimpleIdServer.Uma.Host.Extensions
 
         public static PolicyResponse ToResponse(this Policy policy)
         {
-            var rules = policy.Rules == null ? new List<PolicyRuleResponse>()
-                : policy.Rules.Select(p => p.ToResponse()).ToList();
             return new PolicyResponse
             {
                 Id = policy.Id,
                 ResourceSetIds = policy.ResourceSetIds,
-                Rules = rules
-            };
-        }
-
-        public static PolicyRuleResponse ToResponse(this PolicyRule policyRule)
-        {
-            var claims = policyRule.Claims == null ? new List<PostClaim>()
-                : policyRule.Claims.Select(p => p.ToResponse()).ToList();
-            return new PolicyRuleResponse
-            {
-                Id = policyRule.Id,
-                Claims = claims,
-                IsResourceOwnerConsentNeeded = policyRule.IsResourceOwnerConsentNeeded,
-                Scopes = policyRule.Scopes,
-                Script = policyRule.Script
+                IsResourceOwnerConsentNeeded = policy.IsResourceOwnerConsentNeeded,
+                Script = policy.Script,
+                Scopes = policy.Scopes,
+                Claims = policy.Claims == null ? new List<PostClaim>() : policy.Claims.Select(c => new PostClaim
+                {
+                    Type = c.Type,
+                    Value = c.Value
+                })
             };
         }
 

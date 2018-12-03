@@ -13,6 +13,7 @@ namespace SimpleIdServer.Uma.Core.Models
         public string Id { get; set; }
         public bool IsResourceOwnerConsentNeeded { get; set; }
         public List<string> Scopes { get; set; }
+        public List<string> ClientIds { get; set; }
         public List<Claim> Claims { get; set; }
         public IEnumerable<string> ResourceSetIds { get; set; }
         public string Script { get; set; }

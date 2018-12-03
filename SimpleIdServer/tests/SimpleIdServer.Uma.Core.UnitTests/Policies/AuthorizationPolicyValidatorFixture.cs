@@ -102,7 +102,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
             var result = await _authorizationPolicyValidator.IsAuthorized("openid", ticket, null);
 
             // ASSERT
-            Assert.True(result.Type == AuthorizationPolicyResultEnum.Authorized);
+            Assert.True(result.IsValid);
         }
 
         [Fact]
@@ -125,26 +125,23 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                 {
                     Id = "1",
                     AuthorizationPolicyIds = new List<string> { "authorization_policy_id" },
-                    Policies = new List<Policy>
-                    {
-                        new Policy()
-                    }
+                    AuthPolicies = new List<Policy>()
                 }
             };
             InitializeFakeObjects();
             _resourceSetRepositoryStub.Setup(r => r.Get(It.IsAny<IEnumerable<string>>()))
                 .Returns(Task.FromResult(resourceSet));
-            _basicAuthorizationPolicyStub.Setup(b => b.Execute(It.IsAny<string>(), It.IsAny<TicketLineParameter>(), It.IsAny<Policy>(), It.IsAny<ClaimTokenParameter>()))
-                .Returns(Task.FromResult(new AuthorizationPolicyResult
+            _basicAuthorizationPolicyStub.Setup(b => b.Execute(It.IsAny<string>(), It.IsAny<TicketLineParameter>(), It.IsAny<IEnumerable<Policy>>(), It.IsAny<ClaimTokenParameter>()))
+                .Returns(Task.FromResult(new ResourceValidationResult
                 {
-                    Type = AuthorizationPolicyResultEnum.Authorized
+                    IsValid = true
                 }));
 
             // ACT
             var result = await _authorizationPolicyValidator.IsAuthorized("openid", ticket, null);
 
             // ASSERT
-            Assert.True(result.Type == AuthorizationPolicyResultEnum.Authorized);
+            Assert.True(result.IsValid);
         }
 
         private void InitializeFakeObjects()

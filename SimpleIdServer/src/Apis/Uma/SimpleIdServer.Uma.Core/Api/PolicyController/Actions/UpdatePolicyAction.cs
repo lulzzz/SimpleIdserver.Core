@@ -52,7 +52,6 @@ namespace SimpleIdServer.Uma.Core.Api.PolicyController.Actions
         
         public async Task<bool> Execute(UpdatePolicyParameter updatePolicyParameter)
         {
-            // Check the parameters
             if (updatePolicyParameter == null)
             {
                 throw new ArgumentNullException(nameof(updatePolicyParameter));
@@ -62,14 +61,8 @@ namespace SimpleIdServer.Uma.Core.Api.PolicyController.Actions
             {
                 throw new BaseUmaException(ErrorCodes.InvalidRequestCode, string.Format(ErrorDescriptions.TheParameterNeedsToBeSpecified, "id"));
             }
-
-            if (updatePolicyParameter.Rules == null || !updatePolicyParameter.Rules.Any())
-            {
-                throw new BaseUmaException(ErrorCodes.InvalidRequestCode, string.Format(ErrorDescriptions.TheParameterNeedsToBeSpecified, Constants.AddPolicyParameterNames.Rules));
-            }
             
             _umaServerEventSource.StartUpdateAuthorizationPolicy(JsonConvert.SerializeObject(updatePolicyParameter));
-            // Check the authorization policy exists.
             var policy = await _repositoryExceptionHelper.HandleException(
                 string.Format(ErrorDescriptions.TheAuthorizationPolicyCannotBeRetrieved, updatePolicyParameter.PolicyId),
                 () => _policyRepository.Get(updatePolicyParameter.PolicyId));
@@ -77,38 +70,27 @@ namespace SimpleIdServer.Uma.Core.Api.PolicyController.Actions
             {
                 return false;
             }
-
-            policy.Rules = new List<PolicyRule>();
-            // Check all the scopes are valid.
+            
             foreach (var resourceSetId in policy.ResourceSetIds)
             {
-                var resourceSet = await _resourceSetRepository.Get(resourceSetId);
-                if (updatePolicyParameter.Rules.Any(r => r.Scopes != null && !r.Scopes.All(s => resourceSet.Scopes.Contains(s))))
+                var resourceSet = await _resourceSetRepository.Get(resourceSetId).ConfigureAwait(false);
+                if (updatePolicyParameter.Scopes.Any(r => !resourceSet.Scopes.Contains(r)))
                 {
                     throw new BaseUmaException(ErrorCodes.InvalidScope, ErrorDescriptions.OneOrMoreScopesDontBelongToAResourceSet);
                 }
             }
 
-            // Update the authorization policy.
-            foreach (var ruleParameter in updatePolicyParameter.Rules)
+            policy.Scopes = updatePolicyParameter.Scopes;
+            policy.IsResourceOwnerConsentNeeded = updatePolicyParameter.IsResourceOwnerConsentNeeded;
+            policy.Claims = new List<Claim>();
+            policy.Script = updatePolicyParameter.Script;
+            if (updatePolicyParameter.Claims != null)
             {
-                var claims = new List<Claim>();
-                if (ruleParameter.Claims != null)
+                policy.Claims = updatePolicyParameter.Claims.Select(c => new Claim
                 {
-                    claims = ruleParameter.Claims.Select(c => new Claim
-                    {
-                        Type = c.Type,
-                        Value = c.Value
-                    }).ToList();
-                }
-
-                policy.Rules.Add(new PolicyRule
-                {
-                    Id = ruleParameter.Id,
-                    Scopes = ruleParameter.Scopes,
-                    Script = ruleParameter.Script,
-                    Claims = claims
-                });
+                    Type = c.Type,
+                    Value = c.Value
+                }).ToList();
             }
 
             var result = await _repositoryExceptionHelper.HandleException(

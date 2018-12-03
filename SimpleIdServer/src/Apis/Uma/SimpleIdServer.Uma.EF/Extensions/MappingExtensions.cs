@@ -1,5 +1,4 @@
 ﻿using SimpleIdServer.Uma.EF.Models;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Domain = SimpleIdServer.Uma.Core.Models;
@@ -63,6 +62,7 @@ namespace SimpleIdServer.Uma.EF.Extensions
             {
                 Id = policy.Id,
                 Claims = claims,
+                ClientIds = policy.Clients.Select(s => s.ClientId).ToList(),
                 Script = policy.Script,
                 IsResourceOwnerConsentNeeded = policy.IsResourceOwnerConsentNeeded,
                 Scopes = policy.Scopes.Select(s => s.Scope).ToList(),
@@ -135,6 +135,11 @@ namespace SimpleIdServer.Uma.EF.Extensions
             {
                 Id = policy.Id,
                 Claims = claims,
+                Clients = policy.ClientIds == null ? new List<PolicyClient>() : policy.ClientIds.Select(c => new PolicyClient
+                {
+                    ClientId = c,
+                    PolicyId =  policy.Id
+                }).ToList(),
                 IsResourceOwnerConsentNeeded = policy.IsResourceOwnerConsentNeeded,
                 Script = policy.Script,
                 Scopes = policy.Scopes == null ? new List<PolicyScope>() : policy.Scopes.Select(s =>

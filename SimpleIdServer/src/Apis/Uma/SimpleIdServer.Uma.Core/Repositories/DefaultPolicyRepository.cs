@@ -127,7 +127,10 @@ namespace SimpleIdServer.Uma.Core.Repositories
             }
 
             rec.ResourceSetIds = policy.ResourceSetIds;
-            rec.Rules = policy.Rules;
+            rec.Scopes = policy.Scopes;
+            rec.Script = policy.Script;
+            rec.IsResourceOwnerConsentNeeded = policy.IsResourceOwnerConsentNeeded;
+            rec.Claims = policy.Claims;
             return Task.FromResult(true);
         }
     }

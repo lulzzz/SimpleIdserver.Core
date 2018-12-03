@@ -10,5 +10,6 @@ namespace SimpleIdServer.Uma.EF.Models
         public virtual ICollection<PolicyScope> Scopes { get; set; }
         public virtual ICollection<PolicyClaim> Claims { get; set; }
         public virtual ICollection<ResourceSetPolicy> ResourceSetPolicies{ get; set; }
+        public virtual ICollection<PolicyClient> Clients { get; set; }
     }
 }

@@ -67,13 +67,7 @@ namespace SimpleIdServer.Uma.Core.Api.PolicyController.Actions
                 throw new BaseUmaException(ErrorCodes.InvalidRequestCode,
                         string.Format(ErrorDescriptions.TheParameterNeedsToBeSpecified, Constants.AddPolicyParameterNames.ResourceSetIds));
             }
-
-            if (addPolicyParameter.Rules == null || !addPolicyParameter.Rules.Any())
-            {
-                throw new BaseUmaException(ErrorCodes.InvalidRequestCode,
-                        string.Format(ErrorDescriptions.TheParameterNeedsToBeSpecified, Constants.AddPolicyParameterNames.Rules));
-            }
-
+            
             foreach (var resourceSetId in addPolicyParameter.ResourceSetIds)
             {
                 var resourceSet = await _repositoryExceptionHelper.HandleException(
@@ -81,50 +75,31 @@ namespace SimpleIdServer.Uma.Core.Api.PolicyController.Actions
                     () => _resourceSetRepository.Get(resourceSetId));
                 if (resourceSet == null)
                 {
-                    throw new BaseUmaException(ErrorCodes.InvalidResourceSetId,
-                        string.Format(ErrorDescriptions.TheResourceSetDoesntExist, resourceSetId));
+                    throw new BaseUmaException(ErrorCodes.InvalidResourceSetId, string.Format(ErrorDescriptions.TheResourceSetDoesntExist, resourceSetId));
                 }
 
-                if (addPolicyParameter.Rules.Any(r => r.Scopes != null && !r.Scopes.All(s => resourceSet.Scopes.Contains(s))))
+                if (addPolicyParameter.Scopes.Any(r => !resourceSet.Scopes.Contains(r)))
                 {
-                    throw new BaseUmaException(ErrorCodes.InvalidScope,
-                        ErrorDescriptions.OneOrMoreScopesDontBelongToAResourceSet);
+                    throw new BaseUmaException(ErrorCodes.InvalidScope, ErrorDescriptions.OneOrMoreScopesDontBelongToAResourceSet);
                 }
-            }
-
-            var rules = new List<PolicyRule>();
-            foreach(var ruleParameter in addPolicyParameter.Rules)
-            {
-                var claims = new List<Claim>();
-                if (ruleParameter.Claims != null)
-                {
-                    claims = ruleParameter.Claims.Select(c => new Claim
-                    {
-                        Type = c.Type,
-                        Value = c.Value
-                    }).ToList();
-                }
-
-                rules.Add(new PolicyRule
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    Scopes = ruleParameter.Scopes,
-                    Script = ruleParameter.Script,
-                    Claims = claims
-                });
             }
 
             // Insert policy
             var policy = new Policy
             {
                 Id = Guid.NewGuid().ToString(),
-                Rules = rules,
-                ResourceSetIds = addPolicyParameter.ResourceSetIds
+                ResourceSetIds = addPolicyParameter.ResourceSetIds,
+                IsResourceOwnerConsentNeeded = addPolicyParameter.IsResourceOwnerConsentNeeded,
+                Script = addPolicyParameter.Script,
+                Scopes = addPolicyParameter.Scopes,
+                Claims = addPolicyParameter.Claims == null ? new List<Claim>() : addPolicyParameter.Claims.Select(c => new Claim
+                {
+                    Type = c.Type,
+                    Value = c.Value
+                }).ToList()
             };
 
-            await _repositoryExceptionHelper.HandleException(
-                ErrorDescriptions.ThePolicyCannotBeInserted,
-                () => _policyRepository.Add(policy));
+            await _repositoryExceptionHelper.HandleException(ErrorDescriptions.ThePolicyCannotBeInserted, () => _policyRepository.Add(policy));
             _umaServerEventSource.FinishToAddAuthorizationPolicy(JsonConvert.SerializeObject(policy));
             return policy.Id;
         }

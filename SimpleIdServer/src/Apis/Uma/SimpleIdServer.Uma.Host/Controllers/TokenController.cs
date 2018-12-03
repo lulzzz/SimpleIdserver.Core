@@ -89,7 +89,7 @@ namespace SimpleIdServer.Uma.Host.Controllers
                     break;
                 case GrantTypes.uma_ticket:
                     var tokenIdParameter = tokenRequest.ToTokenIdGrantTypeParameter();
-                    var getTokenByTicketIdResponse = await _umaTokenActions.GetTokenByTicketId(tokenIdParameter, _authorizationServerOptions.OpenidWellKnwonConfiguration, issuerName);
+                    var getTokenByTicketIdResponse = await _umaTokenActions.GetTokenByTicketId(tokenIdParameter, _authorizationServerOptions.OpenidWellKnownConfiguration, issuerName);
                     if (!getTokenByTicketIdResponse.IsValid)
                     {
                         var jArr = new JArray();

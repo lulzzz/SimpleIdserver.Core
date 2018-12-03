@@ -10,5 +10,6 @@ namespace SimpleIdServer.Uma.Core.Policies
         }
 
         public IEnumerable<string> Scopes { get; set; }
+        public string ClientId { get; set; }
     }
 }

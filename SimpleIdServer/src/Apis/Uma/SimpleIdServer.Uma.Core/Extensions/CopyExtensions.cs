@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using SimpleIdServer.Uma.Core.Models;
+using System.Collections.Generic;
 using System.Linq;
-using SimpleIdServer.Uma.Core.Models;
 
 namespace SimpleIdServer.Uma.Core.Extensions
 {
@@ -17,7 +17,7 @@ namespace SimpleIdServer.Uma.Core.Extensions
                 Type = resourceSet.Type,
                 Owner = resourceSet.Owner,
                 Uri = resourceSet.Uri,
-                Policies = resourceSet.Policies == null ? new List<Policy>() : resourceSet.Policies.Select(p => p.Copy()).ToList(),
+                AuthPolicies = resourceSet.AuthPolicies == null ? new List<Policy>() : resourceSet.AuthPolicies.Select(p => p.Copy()).ToList(),
                 Scopes = resourceSet.Scopes == null ? new List<string>() : resourceSet.Scopes.ToList()
             };
         }
@@ -27,19 +27,9 @@ namespace SimpleIdServer.Uma.Core.Extensions
             return new Policy
             {
                 Id = policy.Id,
-                Rules = policy.Rules == null ? new List<PolicyRule>() : policy.Rules.Select(r => r.Copy()).ToList(),
-                ResourceSetIds = policy.ResourceSetIds == null ? new List<string>() : policy.ResourceSetIds.ToList()
-            };
-        }
-
-        public static PolicyRule Copy(this PolicyRule policyRule)
-        {
-            return new PolicyRule
-            {
-                Id = policyRule.Id,
-                Scopes = policyRule.Scopes == null ? new List<string>() : policyRule.Scopes.ToList(),
-                Script = policyRule.Script,
-                Claims = policyRule.Claims == null ? new List<Claim>() : policyRule.Claims.Select(c =>
+                Scopes = policy.Scopes == null ? new List<string>() : policy.Scopes.ToList(),
+                Script = policy.Script,
+                Claims = policy.Claims == null ? new List<Claim>() : policy.Claims.Select(c =>
                     new Claim
                     {
                         Type = c.Type,

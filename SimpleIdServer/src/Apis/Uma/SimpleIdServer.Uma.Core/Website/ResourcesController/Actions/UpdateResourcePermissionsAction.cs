@@ -48,29 +48,17 @@ namespace SimpleIdServer.Uma.Core.Website.ResourcesController.Actions
                 throw new UmaNotAuthorizedException();
             }
 
-            var policiesToBeUpdated = resource.Policies.ToList();
+            var policiesToBeUpdated = resource.AuthPolicies.ToList();
             var policiesToBeRemoved = new List<string>();
             var length = policiesToBeUpdated.Count();
             for(int i = length - 1; i >= 0; i--)
             {
                 var policy = policiesToBeUpdated.ElementAt(i);
-                var policyParameter = updateResourcePermissionsParameter.Policies.FirstOrDefault(p => p.PolicyId == policy.Id);
+                var policyParameter = updateResourcePermissionsParameter.PolicyIds.FirstOrDefault(p => p == policy.Id);
                 if (policyParameter == null)
                 {
                     policiesToBeUpdated.Remove(policy);
                     policiesToBeRemoved.Add(policy.Id);
-                }
-                else
-                {
-                    var rulesLength = policy.Rules.Count();
-                    for (int s = rulesLength - 1; s >= 0; s--)
-                    {
-                        var rule = policy.Rules[s];
-                        if (!policyParameter.RuleIds.Contains(rule.Id))
-                        {
-                            policy.Rules.Remove(rule);
-                        }
-                    }
                 }
             }
 
@@ -79,11 +67,6 @@ namespace SimpleIdServer.Uma.Core.Website.ResourcesController.Actions
                 try
                 {
                     var operations = new List<Task<bool>>();
-                    foreach(var policy in policiesToBeUpdated)
-                    {
-                        operations.Add(_policyRepository.Update(policy));
-                    }
-
                     foreach(var policyId in policiesToBeRemoved)
                     {
                         operations.Add(_policyRepository.Delete(policyId));

@@ -1,20 +1,4 @@
-﻿#region copyright
-// Copyright 2015 Habart Thierry
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-#endregion
-
-using Moq;
+﻿using Moq;
 using SimpleIdServer.Uma.Core.Api.PolicyController.Actions;
 using SimpleIdServer.Uma.Core.Errors;
 using SimpleIdServer.Uma.Core.Exceptions;
@@ -63,29 +47,6 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Api.PolicyController
         }
 
         [Fact]
-        public async Task When_Passing_No_Rules_Then_Exception_Is_Thrown()
-        {
-            // ARRANGE
-            InitializeFakeObjects();
-            const string resourceSetId = "resource_set_id";
-            var addPolicyParameter = new AddPolicyParameter
-            {
-                ResourceSetIds = new List<string>
-                {
-                    resourceSetId
-                }
-            };
-            _repositoryExceptionHelper.Setup(r => r.HandleException(string.Format(ErrorDescriptions.TheResourceSetCannotBeRetrieved, resourceSetId), It.IsAny<Func<Task<ResourceSet>>>()))
-                .Returns(Task.FromResult((ResourceSet)null));
-
-            // ACT & ASSERTS
-            var exception = await Assert.ThrowsAsync<BaseUmaException>(() => _addAuthorizationPolicyAction.Execute(addPolicyParameter));
-            Assert.NotNull(exception);
-            Assert.True(exception.Code == ErrorCodes.InvalidRequestCode);
-            Assert.True(exception.Message == string.Format(ErrorDescriptions.TheParameterNeedsToBeSpecified, Constants.AddPolicyParameterNames.Rules));
-        }
-
-        [Fact]
         public async Task When_ResourceSetId_Doesnt_Exist_Then_Exception_Is_Thrown()
         {
             // ARRANGE
@@ -97,19 +58,13 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Api.PolicyController
                 {
                     resourceSetId
                 },
-                Rules = new List<AddPolicyRuleParameter>
+                Scopes = new List<string>
                 {
-                    new AddPolicyRuleParameter
-                    {
-                        Scopes = new List<string>
-                        {
-                            "invalid_scope"
-                        },
-                        ClientIdsAllowed = new List<string>
-                        {
-                            "client_id"
-                        }
-                    }
+                    "invalid_scope"
+                },
+                ClientIdsAllowed = new List<string>
+                {
+                    "client_id"
                 }
             };
             _repositoryExceptionHelper.Setup(r => r.HandleException(string.Format(ErrorDescriptions.TheResourceSetCannotBeRetrieved, resourceSetId), It.IsAny<Func<Task<ResourceSet>>>()))
@@ -134,19 +89,13 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Api.PolicyController
                 {
                     resourceSetId
                 },
-                Rules = new List<AddPolicyRuleParameter>
+                Scopes = new List<string>
                 {
-                    new AddPolicyRuleParameter
-                    {
-                        Scopes = new List<string>
-                        {
-                            "invalid_scope"
-                        },
-                        ClientIdsAllowed = new List<string>
-                        {
-                            "client_id"
-                        }
-                    }
+                    "invalid_scope"
+                },
+                ClientIdsAllowed = new List<string>
+                {
+                    "client_id"
                 }
             };
             var resourceSet = new ResourceSet
@@ -178,26 +127,20 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Api.PolicyController
                 {
                     resourceSetId
                 },
-                Rules = new List<AddPolicyRuleParameter>
+                Scopes = new List<string>
                 {
-                    new AddPolicyRuleParameter
+                    "scope"
+                },
+                ClientIdsAllowed = new List<string>
+                {
+                    "client_id"
+                },
+                Claims = new List<AddClaimParameter>
+                {
+                    new AddClaimParameter
                     {
-                        Scopes = new List<string>
-                        {
-                            "scope"
-                        },
-                        ClientIdsAllowed = new List<string>
-                        {
-                            "client_id"
-                        },
-                        Claims = new List<AddClaimParameter>
-                        {
-                            new AddClaimParameter
-                            {
-                                Type = "type",
-                                Value = "value"
-                            }
-                        }
+                        Type = "type",
+                        Value = "value"
                     }
                 }
 

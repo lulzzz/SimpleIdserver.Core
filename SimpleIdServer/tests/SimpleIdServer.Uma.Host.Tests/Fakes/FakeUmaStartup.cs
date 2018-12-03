@@ -70,12 +70,22 @@ namespace SimpleIdServer.Uma.Host.Tests.Fakes
             .AddFakeCustomAuth(o => { });
             services.AddAuthorization(opts =>
             {
-                opts.AddPolicy("uma_protection", policy =>
+                opts.AddPolicy("permissions", policy =>
+                {
+                    policy.AddAuthenticationSchemes(DefaultSchema);
+                    policy.RequireAssertion(p => true);
+                });
+                opts.AddPolicy("policies", policy =>
                 {
                     policy.AddAuthenticationSchemes(DefaultSchema);
                     policy.RequireAssertion(p => true);
                 });
                 opts.AddPolicy("register_client", policy =>
+                {
+                    policy.AddAuthenticationSchemes(DefaultSchema);
+                    policy.RequireAssertion(p => true);
+                });
+                opts.AddPolicy("resources", policy =>
                 {
                     policy.AddAuthenticationSchemes(DefaultSchema);
                     policy.RequireAssertion(p => true);
@@ -140,6 +150,10 @@ namespace SimpleIdServer.Uma.Host.Tests.Fakes
                 .AddDefaultTokenStore();
 
             // 3. Enable logging.
+            services.AddSingleton(new AuthorizationServerOptions
+            {
+                OpenidWellKnownConfiguration = "http://localhost:60000/.well-known/openid-configuration"
+            });
             services.AddLogging();
             services.AddTechnicalLogging();
             services.AddOAuthLogging();

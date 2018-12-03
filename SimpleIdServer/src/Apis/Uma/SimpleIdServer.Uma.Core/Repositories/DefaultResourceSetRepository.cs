@@ -117,7 +117,7 @@ namespace SimpleIdServer.Uma.Core.Repositories
 
             if (parameter.Subjects != null && parameter.Subjects.Any())
             {
-                result = result.Where(r => r.Policies.Any(p => p.Rules != null && p.Rules.Any(ru => ru.Claims != null && ru.Claims.Any(c => c.Type == "sub" && parameter.Subjects.Contains(c.Value)))));
+                result = result.Where(r => r.AuthPolicies.Any(p => p.Claims != null && p.Claims.Any(c => c.Type == "sub" && parameter.Subjects.Contains(c.Value))));
             }
 
             var nbResult = result.Count();
@@ -156,18 +156,18 @@ namespace SimpleIdServer.Uma.Core.Repositories
             rec.AuthorizationPolicyIds = resourceSet.AuthorizationPolicyIds;
             rec.IconUri = resourceSet.IconUri;
             rec.Name = resourceSet.Name;
-            rec.Policies = resourceSet.Policies;
             rec.Scopes = resourceSet.Scopes;
             rec.Type = resourceSet.Type;
             rec.Uri = resourceSet.Uri;
             rec.Owner = resourceSet.Owner;
+            rec.Uri = resourceSet.Uri;
             return Task.FromResult(true);
         }
 
         private static ResourceSet Enrich(ResourceSet resourceSet)
         {
             var policies = DefaultPolicyRepository.Policies.Where(p => p.ResourceSetIds.Contains(resourceSet.Id));
-            resourceSet.Policies = policies.ToList();
+            resourceSet.AuthPolicies = policies.ToList();
             return resourceSet;
         }
     }

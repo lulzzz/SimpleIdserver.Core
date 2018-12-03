@@ -48,9 +48,9 @@ namespace SimpleIdServer.Uma.Core.Policies
 
             if (policies == null || !policies.Any())
             {
-                return new AuthorizationPolicyResult
+                return new ResourceValidationResult
                 {
-                    Type = AuthorizationPolicyResultEnum.Authorized
+                    IsValid = true
                 };
             }
 
@@ -63,6 +63,13 @@ namespace SimpleIdServer.Uma.Core.Policies
                     {
                         Type = AuthorizationPolicyResultEnum.NotAuthorized
                     });
+                    continue;
+                }
+
+                var clientAuthorizationResult = CheckClients(policy, ticketLineParameter);
+                if (clientAuthorizationResult != null && clientAuthorizationResult.Type != AuthorizationPolicyResultEnum.Authorized)
+                {
+                    validationsResult.Add(clientAuthorizationResult);
                     continue;
                 }
 
@@ -99,7 +106,7 @@ namespace SimpleIdServer.Uma.Core.Policies
                         {
                             new AuthorizationPolicyResult
                             {
-                                Type = AuthorizationPolicyResultEnum.RequestSubmitted,,
+                                Type = AuthorizationPolicyResultEnum.RequestSubmitted,
                                 Policy = vr.Policy
                             }
                         }
@@ -262,6 +269,27 @@ namespace SimpleIdServer.Uma.Core.Policies
                 Type = AuthorizationPolicyResultEnum.Authorized,
                 Subject = subject,
                 Policy = authorizationPolicy
+            };
+        }
+
+        private AuthorizationPolicyResult CheckClients(Policy authorizationPolicy, TicketLineParameter ticketLineParameter)
+        {
+            if (authorizationPolicy.ClientIds == null || !authorizationPolicy.ClientIds.Any())
+            {
+                return null;
+            }
+
+            if (!authorizationPolicy.ClientIds.Contains(ticketLineParameter.ClientId))
+            {
+                return new AuthorizationPolicyResult
+                {
+                    Type = AuthorizationPolicyResultEnum.NotAuthorized
+                };
+            }
+
+            return new AuthorizationPolicyResult
+            {
+                Type = AuthorizationPolicyResultEnum.Authorized
             };
         }
 

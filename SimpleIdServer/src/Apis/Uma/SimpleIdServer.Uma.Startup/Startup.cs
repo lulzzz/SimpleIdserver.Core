@@ -28,7 +28,8 @@ namespace SimpleIdServer.Uma.Startup
                     JsonWebKeys = DefaultConfiguration.GetJsonWebKeys(),
                     Resources = DefaultConfiguration.GetResources(),
                     Policies = DefaultConfiguration.GetPolicies()
-                }
+                },
+                OpenidWellKnownConfiguration = "http://localhost:60000/.well-known/openid-configuration"
             };
         }
 
