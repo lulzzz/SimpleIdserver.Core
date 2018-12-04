@@ -9,7 +9,6 @@ using SimpleIdServer.Core.Errors;
 using SimpleIdServer.Dtos.Requests;
 using SimpleIdServer.Lib;
 using SimpleIdServer.Uma.Core.Api.Token;
-using SimpleIdServer.Uma.Core.Policies;
 using SimpleIdServer.Uma.Host.Extensions;
 using System;
 using System.Collections.Generic;
@@ -92,26 +91,29 @@ namespace SimpleIdServer.Uma.Host.Controllers
                     var getTokenByTicketIdResponse = await _umaTokenActions.GetTokenByTicketId(tokenIdParameter, _authorizationServerOptions.OpenidWellKnownConfiguration, issuerName);
                     if (!getTokenByTicketIdResponse.IsValid)
                     {
-                        var jArr = new JArray();
+                        var errorResponse = new ErrorResponse
+                        {
+                            Error = Errors.ErrorCodes.NotAuthorized
+                        };
+
+                        var errorDetails = new List<object>();
                         foreach (var policyResult in getTokenByTicketIdResponse.ResourceValidationResult.AuthorizationPoliciesResult)
                         {
-                            if (policyResult.Type != AuthorizationPolicyResultEnum.Authorized)
+                            var dic = new Dictionary<string, object>
                             {
-                                continue;
+                                { "status", policyResult.Type.ToString() },
+                                { "details", policyResult.ErrorDetails }
+                            };
+                            if (policyResult.Policy != null)
+                            {
+                                dic.Add("policy_id", policyResult.Policy.Id);
                             }
 
-                            var record = new JObject();
-                            record.Add("policy_id", policyResult.Policy.Id);
-                            record.Add("status", policyResult.Type.ToString());
-                            if (policyResult.ErrorDetails != null)
-                            {
-                                record.Add("description", JObject.Parse(JsonConvert.SerializeObject(policyResult.ErrorDetails)));
-                            }
-
-                            jArr.Add(record);
+                            errorDetails.Add(dic);
                         }
 
-                        return new JsonResult(jArr)
+                        errorResponse.ErrorDetails = errorDetails;
+                        return new JsonResult(errorResponse)
                         {
                             StatusCode = (int)HttpStatusCode.InternalServerError
                         };

@@ -1,20 +1,4 @@
-﻿#region copyright
-// Copyright 2015 Habart Thierry
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-#endregion
-
-using Moq;
+﻿using Moq;
 using SimpleIdServer.Uma.Core.Errors;
 using SimpleIdServer.Uma.Core.Exceptions;
 using SimpleIdServer.Uma.Core.Models;
@@ -74,38 +58,6 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
         }
 
         [Fact]
-        public async Task When_Policy_Doesnt_Exist_Then_Authorized_Is_Returned()
-        {
-            // ARRANGE
-            var ticket = new Ticket
-            {
-                Lines = new List<TicketLine>
-                {
-                    new TicketLine
-                    {
-                        ResourceSetId = "1"
-                    }
-                }
-            };
-            IEnumerable<ResourceSet> resourceSet = new List<ResourceSet>
-            {
-                new ResourceSet
-                {
-                    Id = "1"
-                }
-            };
-            InitializeFakeObjects();
-            _resourceSetRepositoryStub.Setup(r => r.Get(It.IsAny<IEnumerable<string>>()))
-                .Returns(Task.FromResult(resourceSet));
-
-            // ACT
-            var result = await _authorizationPolicyValidator.IsAuthorized("openid", ticket, null);
-
-            // ASSERT
-            Assert.True(result.IsValid);
-        }
-
-        [Fact]
         public async Task When_AuthorizationPolicy_Is_Correct_Then_Authorized_Is_Returned()
         {
             // ARRANGE
@@ -131,7 +83,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
             InitializeFakeObjects();
             _resourceSetRepositoryStub.Setup(r => r.Get(It.IsAny<IEnumerable<string>>()))
                 .Returns(Task.FromResult(resourceSet));
-            _basicAuthorizationPolicyStub.Setup(b => b.Execute(It.IsAny<string>(), It.IsAny<TicketLineParameter>(), It.IsAny<IEnumerable<Policy>>(), It.IsAny<ClaimTokenParameter>()))
+            _basicAuthorizationPolicyStub.Setup(b => b.Execute(It.IsAny<string>(), It.IsAny<ResourceSet>(), It.IsAny<TicketLineParameter>(), It.IsAny<ClaimTokenParameter>()))
                 .Returns(Task.FromResult(new ResourceValidationResult
                 {
                     IsValid = true

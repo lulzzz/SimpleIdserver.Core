@@ -2,7 +2,7 @@
     ViewBag.Title = "My resources";
 }
 
-<h4>My Resources</h4>
+<h1>My Resources</h1>
 
 <div>
     <table id="my-resources" class="table table-striped table-bordered">
@@ -124,15 +124,10 @@
                     var index = 1;
                     if (policies && policies.length > 0) {
                         policies.forEach(function (policy) {
-                            var rulesHtml = "";
-                            if (policy.rules && policy.rules.length > 0) {
-                                policy.rules.forEach(function (rule) {
-                                    rulesHtml += "<div><label>Scopes : <b>"+rule.scopes.join(',')+"</b></label><div class='row'>" +
-                                        "<div class='col-md-10'><input type='text' class='rule' data-ruleid='" + rule.rule_id + "' value='" + rule.permissions.join(',') + "' /></div>" +
-                                        "<div class='col-md-2'><button class='btn btn-default remove'>Remove</button></div>" +
-                                    "</div></div> ";
-                                });
-                            }
+                            var rulesHtml = "<div><label>Scopes : <b>" + policy.scopes.join(',') + "</b></label><div class='row'>" +
+                                "<div class='col-md-10'><input type='text' class='rule' value='" + policy.permissions.join(',') + "' /></div>" +
+                                "<div class='col-md-2'><button class='btn btn-default remove'>Remove</button></div>" +
+                                "</div></div> ";
 
                             policyHtml += "<div class='policy' data-policyid='" + policy.policy_id + "'>" +
                                 rulesHtml +
@@ -148,7 +143,7 @@
                     var html = "<div class='resource' data-resourceid='" + resourceId +"'>"+ policyHtml +"</div>";
                     $("#permissions-modal").find('.perms').html(html);
                     $("#permissions-modal").find(".remove").click(function () {
-                        $(this).closest(".row").remove();
+                        $(this).closest(".policy").remove();
                     });
                     $("#permissions-modal").find(".messages").html("");
                     $("#permissions-modal").find("input[type='text']").selectize({
@@ -189,27 +184,11 @@
                 var policyElts = $("#permissions-modal").find(".policy");
                 var request = {
                     id: resourceId,
-                    policies: []
+                    policy_ids: []
                 };
                 policyElts.each(function () {
                     var policyId = $(this).data("policyid");
-                    var ruleElts = $(this).find("input.rule");
-                    var rules = [];
-                    ruleElts.each(function () {
-                        var ruleId = $(this).data('ruleid');
-                        if (!ruleId) {
-                            return;
-                        }
-
-                        rules.push(ruleId);
-                    });
-
-                    if (rules.length > 0) {
-                        request.policies.push({
-                            policy_id: policyId,
-                            rules: rules
-                        });
-                    }
+                    request.policy_ids.push(policyId);
                 });
 
                 $.ajax({
@@ -227,7 +206,6 @@
                         "<a href='#' class='close' data-dismiss='alert' aria-label='close' title='close'>×</a>" + e.responseJSON.error_description +"</b>" +
                         "</div > ");
                 });
-                console.log(request);
             });
         });
     </script>

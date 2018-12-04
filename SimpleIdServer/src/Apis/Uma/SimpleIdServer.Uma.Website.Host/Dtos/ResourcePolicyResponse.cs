@@ -8,7 +8,9 @@ namespace SimpleIdServer.Uma.Website.Host.Dtos
     {
         [DataMember(Name = "policy_id")]
         public string PolicyId { get; set; }
-        [DataMember(Name = "rules")]
-        public IEnumerable<ResourcePolicyRuleResponse> Rules { get; set; }
+        [DataMember(Name = "scopes")]
+        public IEnumerable<string> Scopes { get; set; }
+        [DataMember(Name = "permissions")]
+        public IEnumerable<string> Permissions { get; set; }
     }
 }

@@ -75,7 +75,8 @@ namespace SimpleIdServer.Uma.Host.Extensions
                 Scopes = postResourceSet.Scopes,
                 Type = postResourceSet.Type,
                 Uri = postResourceSet.Uri,
-                Owner = postResourceSet.Owner
+                Owner = postResourceSet.Owner,
+                AcceptPendingRequest = postResourceSet.AcceptPendingRequest
             };
         }
 
@@ -89,7 +90,8 @@ namespace SimpleIdServer.Uma.Host.Extensions
                 Scopes = putResourceSet.Scopes,
                 Type = putResourceSet.Type,
                 Uri = putResourceSet.Uri,
-                Owner = putResourceSet.Owner
+                Owner = putResourceSet.Owner,
+                AcceptPendingRequest = putResourceSet.AcceptPendingRequest
             };
         }
 
@@ -223,7 +225,8 @@ namespace SimpleIdServer.Uma.Host.Extensions
                 Scopes = resourceSet.Scopes,
                 Type = resourceSet.Type,
                 Uri = resourceSet.Uri ,
-                Owner = resourceSet.Owner
+                Owner = resourceSet.Owner,
+                AcceptPendingRequest = resourceSet.AcceptPendingRequest
             };
         }
 

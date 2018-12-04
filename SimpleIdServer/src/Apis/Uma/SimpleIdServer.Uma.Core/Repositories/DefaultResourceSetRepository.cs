@@ -10,6 +10,8 @@ namespace SimpleIdServer.Uma.Core.Repositories
 {
     internal sealed class DefaultResourceSetRepository : IResourceSetRepository
     {
+        private static object _obj = new object();
+
         public DefaultResourceSetRepository(ICollection<ResourceSet> resources)
         {
             Resources = resources == null ? new List<ResourceSet>() : resources;
@@ -19,19 +21,22 @@ namespace SimpleIdServer.Uma.Core.Repositories
 
         public Task<bool> Delete(string id)
         {
-            if (string.IsNullOrWhiteSpace(id))
+            lock(_obj)
             {
-                throw new ArgumentNullException(nameof(id));
-            }
+                if (string.IsNullOrWhiteSpace(id))
+                {
+                    throw new ArgumentNullException(nameof(id));
+                }
 
-            var policy = Resources.FirstOrDefault(p => p.Id == id);
-            if (policy == null)
-            {
-                return Task.FromResult(false);
-            }
+                var policy = Resources.FirstOrDefault(p => p.Id == id);
+                if (policy == null)
+                {
+                    return Task.FromResult(false);
+                }
 
-            Resources.Remove(policy);
-            return Task.FromResult(true);
+                Resources.Remove(policy);
+                return Task.FromResult(true);
+            }
         }
 
         public Task<ResourceSet> Get(string id)
@@ -94,7 +99,7 @@ namespace SimpleIdServer.Uma.Core.Repositories
                 throw new ArgumentNullException(nameof(parameter));
             }
 
-            IEnumerable<ResourceSet> result = Resources.Select(r => Enrich(r)).ToList();
+            IEnumerable<ResourceSet> result = Resources.Select(r => r.Copy()).Select(r => Enrich(r)).ToList();
             if (parameter.Ids != null && parameter.Ids.Any())
             {
                 result = result.Where(r => parameter.Ids.Contains(r.Id));
@@ -127,11 +132,7 @@ namespace SimpleIdServer.Uma.Core.Repositories
                 result = result.Skip(parameter.StartIndex).Take(parameter.Count);
             }
 
-            var content = result.Select(r => r.Copy()).ToList();
-            foreach(var r in content)
-            {
-                Enrich(r);
-            }
+            var content = result.ToList();
             return Task.FromResult(new SearchResourceSetResult
             {
                 Content = content,
@@ -161,6 +162,7 @@ namespace SimpleIdServer.Uma.Core.Repositories
             rec.Uri = resourceSet.Uri;
             rec.Owner = resourceSet.Owner;
             rec.Uri = resourceSet.Uri;
+            rec.AcceptPendingRequest = resourceSet.AcceptPendingRequest;
             return Task.FromResult(true);
         }
 

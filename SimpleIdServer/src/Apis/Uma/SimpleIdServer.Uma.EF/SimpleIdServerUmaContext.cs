@@ -20,6 +20,7 @@ namespace SimpleIdServer.Uma.EF
         public virtual DbSet<Policy> Policies { get; set; }
         public virtual DbSet<ShareResourceLink> ShareResourceLinks { get; set; }
         public virtual DbSet<ResourceSetPolicy> ResourceSetPolicies { get; set; }
+        public virtual DbSet<ResourcePendingRequest> PendingRequests { get; set; }
 
         #endregion
 
@@ -35,6 +36,8 @@ namespace SimpleIdServer.Uma.EF
             modelBuilder.AddPolicyScopeMapping();
             modelBuilder.AddResourceScopeMapping();
             modelBuilder.AddPolicyClientMapping();
+            modelBuilder.AddResourcePendingRequestMapping();
+            modelBuilder.AddPendingRequestScopeMapping();
             base.OnModelCreating(modelBuilder);
         }
 

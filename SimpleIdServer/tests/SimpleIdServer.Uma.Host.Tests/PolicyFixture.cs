@@ -49,29 +49,6 @@ namespace SimpleIdServer.Uma.Host.Tests
         }
 
         [Fact]
-        public async Task When_Add_Policy_And_Pass_No_Rules_Then_Error_Is_Returned()
-        {
-            // ARRANGE
-            InitializeFakeObjects();
-            _httpClientFactoryStub.Setup(h => h.GetHttpClient()).Returns(_server.Client);
-
-            // ACT
-            var response = await _policyClient.AddByResolution(new PostPolicy
-            {
-                ResourceSetIds = new List<string>
-                {
-                    "resource_id"
-                }
-            }, baseUrl + "/.well-known/uma2-configuration", "header");
-
-            // ASSERT
-            Assert.NotNull(response);
-            Assert.True(response.ContainsError);
-            Assert.Equal("invalid_request", response.Error.Error);
-            Assert.Equal("the parameter rules needs to be specified", response.Error.ErrorDescription);
-        }
-
-        [Fact]
         public async Task When_Add_Policy_And_ResourceOwner_Doesnt_Exists_Then_Error_Is_Returned()
         {
             // ARRANGE
@@ -172,26 +149,6 @@ namespace SimpleIdServer.Uma.Host.Tests
             Assert.True(response.ContainsError);
             Assert.Equal("invalid_request", response.Error.Error);
             Assert.Equal("the parameter id needs to be specified", response.Error.ErrorDescription);
-        }
-
-        [Fact]
-        public async Task When_Update_Policy_And_No_Rules_Is_Passed_Then_Error_Is_Returned()
-        {
-            // ARRANGE
-            InitializeFakeObjects();
-            _httpClientFactoryStub.Setup(h => h.GetHttpClient()).Returns(_server.Client);
-
-            // ACT
-            var response = await _policyClient.UpdateByResolution(new PutPolicy
-            {
-                PolicyId = "policy"
-            }, baseUrl + "/.well-known/uma2-configuration", "header");
-
-            // ASSERT
-            Assert.NotNull(response);
-            Assert.True(response.ContainsError);
-            Assert.Equal("invalid_request", response.Error.Error);
-            Assert.Equal("the parameter rules needs to be specified", response.Error.ErrorDescription);
         }
 
         [Fact]

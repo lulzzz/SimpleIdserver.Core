@@ -442,7 +442,8 @@ namespace SimpleIdServer.Uma.Host.Tests
                 IconUri = "http://localhost/picture.png",
                 Type = "type",
                 Uri = "http://localhost/r",
-                Owner = "owner"
+                Owner = "owner",
+                AcceptPendingRequest = true
             },
             baseUrl + "/.well-known/uma2-configuration", "header").ConfigureAwait(false);
             var firstResult = await _resourceSetClient.GetByResolution(resource.Content.Id, baseUrl + "/.well-known/uma2-configuration", "header").ConfigureAwait(false);
@@ -457,7 +458,8 @@ namespace SimpleIdServer.Uma.Host.Tests
                     "scope2"
                 },
                 Type = "type2",
-                Uri = "http://localhost/r2"
+                Uri = "http://localhost/r2",
+                AcceptPendingRequest = false
             }, baseUrl + "/.well-known/uma2-configuration", "header").ConfigureAwait(false);
             var secondResult = await _resourceSetClient.GetByResolution(resource.Content.Id, baseUrl + "/.well-known/uma2-configuration", "header").ConfigureAwait(false);
 
@@ -470,12 +472,14 @@ namespace SimpleIdServer.Uma.Host.Tests
             Assert.Equal("http://localhost/r", firstResult.Content.Uri);
             Assert.Equal("owner", firstResult.Content.Owner);
             Assert.True(firstResult.Content.Scopes.Contains("scope"));
+            Assert.True(firstResult.Content.AcceptPendingRequest);
             Assert.Equal("name2", secondResult.Content.Name);
             Assert.Equal("http://localhost/picture2.png", secondResult.Content.IconUri);
             Assert.Equal("type2", secondResult.Content.Type);
             Assert.Equal("http://localhost/r2", secondResult.Content.Uri);
             Assert.Equal("owner2", secondResult.Content.Owner);
             Assert.True(secondResult.Content.Scopes.Contains("scope2"));
+            Assert.False(secondResult.Content.AcceptPendingRequest);
         }
 
         #endregion

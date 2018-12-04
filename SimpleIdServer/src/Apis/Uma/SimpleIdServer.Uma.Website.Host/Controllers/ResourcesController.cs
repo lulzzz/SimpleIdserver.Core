@@ -63,13 +63,7 @@ namespace SimpleIdServer.Uma.Website.Host.Controllers
                 {
                     ResourceId = updateResourcePermissionsRequest.Id,
                     Subject = subject,
-                    Policies = updateResourcePermissionsRequest.Policies == null ? new List<UpdateResourcePermissionParameter>() :
-                        updateResourcePermissionsRequest.Policies.Select(p =>
-                        new UpdateResourcePermissionParameter
-                        {
-                            PolicyId = p.PolicyId,
-                            RuleIds = p.Rules
-                        })
+                    PolicyIds = updateResourcePermissionsRequest.PolicyIds
                 }).ConfigureAwait(false);
                 return new OkResult();
             }
@@ -216,19 +210,15 @@ namespace SimpleIdServer.Uma.Website.Host.Controllers
                     row.Add(resource.Scopes);
                     row.Add(resource.Id);
                     var policies = new List<ResourcePolicyResponse>();
-                    if (resource.Policies != null)
+                    if (resource.AuthPolicies != null)
                     {
-                        foreach(var policy in resource.Policies)
+                        foreach(var policy in resource.AuthPolicies)
                         {
                             policies.Add(new ResourcePolicyResponse
                             {
                                 PolicyId = policy.Id,
-                                Rules = policy.Rules.Select(r => new ResourcePolicyRuleResponse
-                                {
-                                    RuleId = r.Id,
-                                    Scopes = r.Scopes,
-                                    Permissions = r.Claims.Select(c => $"{c.Type} : {c.Value}")
-                                })
+                                Permissions = policy.Claims.Select(c => $"{c.Type} : {c.Value}"),
+                                Scopes = policy.Scopes
                             });
                         }
                     }

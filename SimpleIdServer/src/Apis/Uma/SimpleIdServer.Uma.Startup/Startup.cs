@@ -8,6 +8,8 @@ using SimpleIdServer.Lib;
 using SimpleIdServer.Module;
 using SimpleIdServer.Uma.Host;
 using SimpleIdServer.Uma.Host.Extensions;
+using SimpleIdServer.Uma.Host.Middlewares;
+using SimpleIdServer.Uma.Logging;
 using SimpleIdServer.Uma.Website.Host;
 using System.Collections.Generic;
 using System.IO;
@@ -75,6 +77,10 @@ namespace SimpleIdServer.Uma.Startup
             loggerFactory.AddDebug();
             app.UseAuthentication();
             app.UseUmaWebsiteStaticFiles();
+            app.UseUmaExceptionHandler(new ExceptionHandlerMiddlewareOptions
+            {
+                UmaEventSource = app.ApplicationServices.GetService<IUmaServerEventSource>()
+            });
             app.UseMvc(routes =>
             {
                 AspPipelineContext.Instance().ApplicationBuilderContext.ConfigureRoutes(routes);

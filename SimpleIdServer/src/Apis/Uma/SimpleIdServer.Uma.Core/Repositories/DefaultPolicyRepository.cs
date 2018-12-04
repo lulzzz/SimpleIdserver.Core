@@ -1,15 +1,17 @@
-﻿using System;
+﻿using SimpleIdServer.Uma.Core.Extensions;
+using SimpleIdServer.Uma.Core.Models;
+using SimpleIdServer.Uma.Core.Parameters;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using SimpleIdServer.Uma.Core.Extensions;
-using SimpleIdServer.Uma.Core.Models;
-using SimpleIdServer.Uma.Core.Parameters;
 
 namespace SimpleIdServer.Uma.Core.Repositories
 {
     internal sealed class DefaultPolicyRepository : IPolicyRepository
     {
+        private static object _obj = new object();
+
         public DefaultPolicyRepository(ICollection<Policy> policies)
         {
             Policies = policies == null ? new List<Policy>() : policies;
@@ -30,19 +32,22 @@ namespace SimpleIdServer.Uma.Core.Repositories
 
         public Task<bool> Delete(string id)
         {
-            if (string.IsNullOrWhiteSpace(id))
+            lock(_obj)
             {
-                throw new ArgumentNullException(nameof(id));
-            }
+                if (string.IsNullOrWhiteSpace(id))
+                {
+                    throw new ArgumentNullException(nameof(id));
+                }
 
-            var policy = Policies.FirstOrDefault(p => p.Id == id);
-            if (policy == null)
-            {
-                return Task.FromResult(false);
-            }
+                var policy = Policies.FirstOrDefault(p => p.Id == id);
+                if (policy == null)
+                {
+                    return Task.FromResult(false);
+                }
 
-            Policies.Remove(policy);
-            return Task.FromResult(true);
+                Policies.Remove(policy);
+                return Task.FromResult(true);
+            }
         }
 
         public Task<Policy> Get(string id)

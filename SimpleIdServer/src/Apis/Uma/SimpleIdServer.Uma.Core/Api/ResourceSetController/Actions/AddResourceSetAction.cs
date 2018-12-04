@@ -56,7 +56,7 @@ namespace SimpleIdServer.Uma.Core.Api.ResourceSetController.Actions
             {
                 throw new ArgumentNullException(nameof(addResourceSetParameter));
             }
-            
+
             var resourceSet = new ResourceSet
             {
                 Id = Guid.NewGuid().ToString(),
@@ -65,7 +65,8 @@ namespace SimpleIdServer.Uma.Core.Api.ResourceSetController.Actions
                 Type = addResourceSetParameter.Type,
                 Scopes = addResourceSetParameter.Scopes,
                 IconUri = addResourceSetParameter.IconUri,
-                Owner = addResourceSetParameter.Owner
+                Owner = addResourceSetParameter.Owner,
+                AcceptPendingRequest = addResourceSetParameter.AcceptPendingRequest
             };
 
             _resourceSetParameterValidator.CheckResourceSetParameter(resourceSet);

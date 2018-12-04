@@ -15,7 +15,7 @@ namespace SimpleIdServer.Uma.Host.Tests
 
         public TestUmaServerFixture()
         {
-            SharedCtx = new SharedContext();
+            SharedCtx = SharedContext.Instance;
             var startup = new FakeUmaStartup(SharedCtx);
             Server = new TestServer(new WebHostBuilder()
                 .UseUrls("http://localhost:5000")

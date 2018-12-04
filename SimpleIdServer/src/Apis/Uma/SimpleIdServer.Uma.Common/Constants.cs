@@ -46,6 +46,7 @@ namespace SimpleIdServer.Uma.Common
         public const string Scopes = "scopes";
         public const string IconUri = "icon_uri";
         public const string Owner = "owner";
+        public const string AcceptPendingRequest = "accept_pending_request";
     }
 
     public static class AddResourceSetResponseNames

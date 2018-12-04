@@ -8,6 +8,7 @@ namespace SimpleIdServer.Uma.Core.Repositories
     public class DefaultSharedLinkRepository : ISharedLinkRepository
     {
         public ICollection<SharedLink> _sharedLinks = null;
+        private static object _obj = new object();
 
         public DefaultSharedLinkRepository(ICollection<SharedLink> sharedLinks)
         {
@@ -16,13 +17,17 @@ namespace SimpleIdServer.Uma.Core.Repositories
 
         public Task<bool> Delete(string confirmationCode)
         {
-            var record = _sharedLinks.FirstOrDefault(s => s.ConfirmationCode == confirmationCode);
-            if (record == null)
+            lock(_obj)
             {
-                return Task.FromResult(false);
+                var record = _sharedLinks.FirstOrDefault(s => s.ConfirmationCode == confirmationCode);
+                if (record == null)
+                {
+                    return Task.FromResult(false);
+                }
+
+                _sharedLinks.Remove(record);
             }
 
-            _sharedLinks.Remove(record);
             return Task.FromResult(true);
         }
 

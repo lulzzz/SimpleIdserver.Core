@@ -17,6 +17,7 @@ namespace SimpleIdServer.Uma.Core.Extensions
                 Type = resourceSet.Type,
                 Owner = resourceSet.Owner,
                 Uri = resourceSet.Uri,
+                AcceptPendingRequest = resourceSet.AcceptPendingRequest,
                 AuthPolicies = resourceSet.AuthPolicies == null ? new List<Policy>() : resourceSet.AuthPolicies.Select(p => p.Copy()).ToList(),
                 Scopes = resourceSet.Scopes == null ? new List<string>() : resourceSet.Scopes.ToList()
             };
@@ -29,6 +30,9 @@ namespace SimpleIdServer.Uma.Core.Extensions
                 Id = policy.Id,
                 Scopes = policy.Scopes == null ? new List<string>() : policy.Scopes.ToList(),
                 Script = policy.Script,
+                ClientIds = policy.ClientIds == null ? new List<string>() : policy.ClientIds.ToList(),
+                IsResourceOwnerConsentNeeded = policy.IsResourceOwnerConsentNeeded,
+                ResourceSetIds = policy.ResourceSetIds.ToList(),
                 Claims = policy.Claims == null ? new List<Claim>() : policy.Claims.Select(c =>
                     new Claim
                     {

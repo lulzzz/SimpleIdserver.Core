@@ -61,6 +61,11 @@ namespace SimpleIdServer.Uma.Core.Policies
             foreach (var ticketLine in validTicket.Lines)
             {
                 var ticketLineParameter = new TicketLineParameter(ticketLine.Scopes);
+                if (validTicket.Audiences != null && validTicket.Audiences.Any())
+                {
+                    ticketLineParameter.ClientId = validTicket.Audiences.First();
+                }
+
                 var resource = resources.First(r => r.Id == ticketLine.ResourceSetId);
                 validationResult = await Validate(openidProvider, ticketLineParameter, resource, claimTokenParameter).ConfigureAwait(false);
                 if (!validationResult.IsValid)
@@ -79,15 +84,7 @@ namespace SimpleIdServer.Uma.Core.Policies
 
         private Task<ResourceValidationResult> Validate(string openidProvider, TicketLineParameter ticketLineParameter, ResourceSet resource, ClaimTokenParameter claimTokenParameter)
         {
-            if (resource.AuthPolicies == null || !resource.AuthPolicies.Any())
-            {
-                return Task.FromResult(new ResourceValidationResult
-                {
-                    IsValid = true
-                });
-            }
-
-            return _basicAuthorizationPolicy.Execute(openidProvider, ticketLineParameter, resource.AuthPolicies, claimTokenParameter);
+            return _basicAuthorizationPolicy.Execute(openidProvider, resource, ticketLineParameter, claimTokenParameter);
         }
 
         #endregion

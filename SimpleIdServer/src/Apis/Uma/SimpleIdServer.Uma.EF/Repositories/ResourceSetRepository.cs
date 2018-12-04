@@ -109,6 +109,7 @@ namespace SimpleIdServer.Uma.EF.Repositories
             record.Uri = resourceSet.Uri;
             record.IconUri = resourceSet.IconUri;
             record.Owner = resourceSet.Owner;
+            record.AcceptPendingRequest = resourceSet.AcceptPendingRequest;
             await _context.SaveChangesAsync().ConfigureAwait(false);
             return true;
         }

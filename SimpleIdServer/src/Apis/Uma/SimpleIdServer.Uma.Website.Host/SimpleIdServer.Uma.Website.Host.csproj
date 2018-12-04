@@ -35,6 +35,7 @@
     <ProjectReference Include="..\SimpleIdServer.Uma.Core\SimpleIdServer.Uma.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Views\PendingRequests\" />
     <Folder Include="wwwroot\lib\selectize\" />
   </ItemGroup>
 </Project>

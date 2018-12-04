@@ -29,6 +29,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
             // ACTS & ASSERTS
             await Assert.ThrowsAsync<ArgumentNullException>(() => _basicAuthorizationPolicy.Execute(null, null, null, null));
             await Assert.ThrowsAsync<ArgumentNullException>(() => _basicAuthorizationPolicy.Execute("openid", null, null, null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _basicAuthorizationPolicy.Execute("openid", new ResourceSet(), null, null));
         }
         
         [Fact]
@@ -58,7 +59,11 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
             };
 
             // ACT
-            var result = await _basicAuthorizationPolicy.Execute("openid", ticket, authorizationPolicies, null);
+            var result = await _basicAuthorizationPolicy.Execute("openid", new ResourceSet
+            {
+                Id = "resourceid",
+                AuthPolicies = authorizationPolicies
+            }, ticket, null);
 
             // ASSERT
             Assert.True(result.IsValid == false);
@@ -97,7 +102,11 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
             };
             
             // ACT
-            var result = await _basicAuthorizationPolicy.Execute("openid", ticket, authorizationPolicies, null);
+            var result = await _basicAuthorizationPolicy.Execute("openid", new ResourceSet
+            {
+                Id = "resourceid",
+                AuthPolicies = authorizationPolicies
+            }, ticket, null);
 
             // ASSERT
             Assert.False(result.IsValid);
@@ -150,7 +159,11 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
             };
 
             // ACT
-            var result = await _basicAuthorizationPolicy.Execute("openid", ticket, authorizationPolicies, claimTokenParameter);
+            var result = await _basicAuthorizationPolicy.Execute("openid", new ResourceSet
+            {
+                Id = "resourceid",
+                AuthPolicies = authorizationPolicies
+            }, ticket, claimTokenParameter);
 
             // ASSERT
             Assert.False(result.IsValid);
@@ -214,11 +227,15 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                 Format = "http://openid.net/specs/openid-connect-core-1_0.html#HybridIDToken",
                 Token = "token"
             };
-            _jwtTokenParserStub.Setup(j => j.UnSign(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Policy>()))
+            _jwtTokenParserStub.Setup(j => j.UnSign(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Task.FromResult((JwsPayload)null));
 
             // ACT
-            var result = await _basicAuthorizationPolicy.Execute("openid", ticket, authorizationPolicies, claimTokenParameters);
+            var result = await _basicAuthorizationPolicy.Execute("openid", new ResourceSet
+            {
+                Id = "resourceid",
+                AuthPolicies = authorizationPolicies
+            }, ticket, claimTokenParameters);
 
             // ASSERT
             Assert.False(result.IsValid);
@@ -272,7 +289,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                 Format = "http://openid.net/specs/openid-connect-core-1_0.html#HybridIDToken",
                 Token = "token"
             };
-            _jwtTokenParserStub.Setup(j => j.UnSign(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Policy>()))
+            _jwtTokenParserStub.Setup(j => j.UnSign(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Task.FromResult(new JwsPayload
                 {
                     {
@@ -281,7 +298,11 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                 }));
 
             // ACT
-            var result = await _basicAuthorizationPolicy.Execute("openid", ticket, authorizationPolicies, claimTokenParameter);
+            var result = await _basicAuthorizationPolicy.Execute("openid", new ResourceSet
+            {
+                Id = "resourceid",
+                AuthPolicies = authorizationPolicies
+            }, ticket, claimTokenParameter);
 
             // ASSERT
             Assert.False(result.IsValid);
@@ -334,11 +355,15 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                 Format = "http://openid.net/specs/openid-connect-core-1_0.html#HybridIDToken",
                 Token = "token"
             };
-            _jwtTokenParserStub.Setup(j => j.UnSign(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Policy>()))
+            _jwtTokenParserStub.Setup(j => j.UnSign(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Task.FromResult(new JwsPayload()));
 
             // ACT
-            var result = await _basicAuthorizationPolicy.Execute("openid", ticket, authorizationPolicies, claimTokenParameters);
+            var result = await _basicAuthorizationPolicy.Execute("openid", new ResourceSet
+            {
+                Id = "resourceid",
+                AuthPolicies = authorizationPolicies
+            }, ticket, claimTokenParameters);
 
             // ASSERT
             Assert.False(result.IsValid);
@@ -393,11 +418,15 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
             };
             var payload = new JwsPayload();
             payload.Add("role", new JArray("role3"));
-            _jwtTokenParserStub.Setup(j => j.UnSign(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Policy>()))
+            _jwtTokenParserStub.Setup(j => j.UnSign(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Task.FromResult(payload));
 
             // ACT
-            var result = await _basicAuthorizationPolicy.Execute("openid", ticket, authorizationPolicies, claimTokenParameters);
+            var result = await _basicAuthorizationPolicy.Execute("openid", new ResourceSet
+            {
+                Id = "resourceid",
+                AuthPolicies = authorizationPolicies
+            }, ticket, claimTokenParameters);
 
             // ASSERT
             Assert.False(result.IsValid);
@@ -452,11 +481,15 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
             };
             var payload = new JwsPayload();
             payload.Add("role", new string[] { "role3" });
-            _jwtTokenParserStub.Setup(j => j.UnSign(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Policy>()))
+            _jwtTokenParserStub.Setup(j => j.UnSign(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Task.FromResult(payload));
 
             // ACT
-            var result = await _basicAuthorizationPolicy.Execute("openid", ticket, authorizationPolicies, claimTokenParameter);
+            var result = await _basicAuthorizationPolicy.Execute("openid", new ResourceSet
+            {
+                Id = "resourceid",
+                AuthPolicies = authorizationPolicies
+            }, ticket, claimTokenParameter);
 
             // ASSERT
             Assert.False(result.IsValid);
@@ -479,7 +512,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                 }
             };
 
-            var authorizationPolicy = new List<Policy>
+            var authorizationPolicies = new List<Policy>
             {
                 new Policy
                 {
@@ -509,7 +542,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                 Format = "http://openid.net/specs/openid-connect-core-1_0.html#HybridIDToken",
                 Token = "token"
             };
-            _jwtTokenParserStub.Setup(j => j.UnSign(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Policy>()))
+            _jwtTokenParserStub.Setup(j => j.UnSign(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Task.FromResult(new JwsPayload
                 {
                     {
@@ -518,7 +551,11 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                 }));
 
             // ACT
-            var result = await _basicAuthorizationPolicy.Execute("openid", ticket, authorizationPolicy, claimTokenParameter);
+            var result = await _basicAuthorizationPolicy.Execute("openid", new ResourceSet
+            {
+                Id = "resourceid",
+                AuthPolicies = authorizationPolicies
+            }, ticket, claimTokenParameter);
 
             // ASSERT
             Assert.False(result.IsValid);
@@ -535,9 +572,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
             {
                 Scopes = new List<string>
                 {
-                    "read",
-                    "create",
-                    "update"
+                    "read"
                 }
             };
 
@@ -545,18 +580,45 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
             {
                 new Policy
                 {
-                    IsResourceOwnerConsentNeeded = true,
                     Scopes = new List<string>
                     {
-                        "read",
-                        "create",
-                        "update"
+                        "read"
+                    },
+                    Claims = new List<Claim>
+                    {
+                        new Claim
+                        {
+                            Type = "name",
+                            Value = "name"
+                        }
                     }
                 }
             };
+            _jwtTokenParserStub.Setup(j => j.UnSign(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(new JwsPayload
+                {
+                    { "sub", "subject" },
+                    { "name", "bad_name" }
+                }));
+            var claimTokenParameter = new ClaimTokenParameter
+            {
+                Format = "http://openid.net/specs/openid-connect-core-1_0.html#IDToken",
+                Token = "token"
+            };
+
+            _pendingRequestRepositorySub.Setup(v => v.Get(It.IsAny<string>(), It.IsAny<string>())).Returns(() =>
+            {
+                IEnumerable<PendingRequest> r = new List<PendingRequest>();
+                return Task.FromResult(r);
+            });
 
             // ACT
-            var result = await _basicAuthorizationPolicy.Execute("openid", ticket, authorizationPolicies, null);
+            var result = await _basicAuthorizationPolicy.Execute("openid", new ResourceSet
+            {
+                Id = "resourceid",
+                AuthPolicies = authorizationPolicies,
+                AcceptPendingRequest = true
+            }, ticket, claimTokenParameter);
 
             // ASSERT
             Assert.False(result.IsValid);
@@ -565,7 +627,7 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
         }
 
         [Fact]
-        public async Task When_AuthPolicy_Needs_ResourceConsent_Then_Request_Is_Submitted()
+        public async Task When_RequestAlreadyExists_Then_RequestNotConfirmed_Is_Returned()
         {
             // ARRANGE
             InitializeFakeObjects();
@@ -584,99 +646,38 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
                     IsResourceOwnerConsentNeeded = true,
                     Scopes = new List<string>
                     {
-                        "create"
+                        "bad_scope"
                     }
                 }
             };
-
-            _pendingRequestRepositorySub.Setup(v => v.Get(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(Task.FromResult((PendingRequest)null));
-
-            // ACT
-            var result = await _basicAuthorizationPolicy.Execute("openid", ticket, authorizationPolicies, null);
-
-            // ASSERT
-            Assert.False(result.IsValid);
-            var error = result.AuthorizationPoliciesResult.First();
-            Assert.Equal(AuthorizationPolicyResultEnum.RequestSubmitted, error.Type);
-        }
-
-        [Fact]
-        public async Task When_Request_NotConfirmed_By_ResourceOwner_Then_NotAuthorized()
-        {
-            // ARRANGE
-            InitializeFakeObjects();
-            var ticket = new TicketLineParameter
-            {
-                Scopes = new List<string>
+            _jwtTokenParserStub.Setup(j => j.UnSign(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(new JwsPayload
                 {
-                    "create"
-                }
-            };
-
-            var authorizationPolicies = new List<Policy>
-            {
-                new Policy
-                {
-                    IsResourceOwnerConsentNeeded = true,
-                    Scopes = new List<string>
-                    {
-                        "create"
-                    }
-                }
-            };
-
-            _pendingRequestRepositorySub.Setup(v => v.Get(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(Task.FromResult(new PendingRequest
-                {
-                    IsConfirmed = false
+                    { "sub", "subject" },
+                    { "name", "bad_name" }
                 }));
+            _pendingRequestRepositorySub.Setup(v => v.Get(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult((IEnumerable<PendingRequest>)new List<PendingRequest> { new PendingRequest
+                {
+                    IsConfirmed = true,
+                    Scopes = new List<string>
+                    {
+                        "create"
+                    }
+                } } ));
 
             // ACT
-            var result = await _basicAuthorizationPolicy.Execute("openid", ticket, authorizationPolicies, null);
+            var result = await _basicAuthorizationPolicy.Execute("openid", new ResourceSet
+            {
+                Id = "resourceid",
+                AuthPolicies = authorizationPolicies,
+                AcceptPendingRequest = true
+            }, ticket, null);
 
             // ASSERT
             Assert.False(result.IsValid);
             var error = result.AuthorizationPoliciesResult.First();
             Assert.Equal(AuthorizationPolicyResultEnum.RequestNotConfirmed, error.Type);
-        }
-
-        [Fact]
-        public async Task When_Request_Confirmed_By_ResourceOwner_Then_Authorized_Is_Returned()
-        {
-            // ARRANGE
-            InitializeFakeObjects();
-            var ticket = new TicketLineParameter
-            {
-                Scopes = new List<string>
-                {
-                    "create"
-                }
-            };
-
-            var authorizationPolicies = new List<Policy>
-            {
-                new Policy
-                {
-                    IsResourceOwnerConsentNeeded = true,
-                    Scopes = new List<string>
-                    {
-                        "create"
-                    }
-                }
-            };
-
-            _pendingRequestRepositorySub.Setup(v => v.Get(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(Task.FromResult(new PendingRequest
-                {
-                    IsConfirmed = true
-                }));
-
-            // ACT
-            var result = await _basicAuthorizationPolicy.Execute("openid", ticket, authorizationPolicies, null);
-
-            // ASSERT
-            Assert.True(result.IsValid);
         }
 
         [Fact]
@@ -705,7 +706,12 @@ namespace SimpleIdServer.Uma.Core.UnitTests.Policies
             };
 
             // ACT
-            var result = await _basicAuthorizationPolicy.Execute("openid", ticket, authorizationPolicies, null);
+            var result = await _basicAuthorizationPolicy.Execute("openid", new ResourceSet
+            {
+                Id = "resourceid",
+                AuthPolicies = authorizationPolicies,
+                AcceptPendingRequest = false
+            }, ticket, null);
 
             // ASSERT
             Assert.True(result.IsValid);

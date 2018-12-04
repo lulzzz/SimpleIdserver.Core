@@ -49,7 +49,8 @@ namespace SimpleIdServer.Uma.Core.Api.ResourceSetController.Actions
                 Type = udpateResourceSetParameter.Type,
                 Scopes = udpateResourceSetParameter.Scopes,
                 IconUri = udpateResourceSetParameter.IconUri,
-                Owner = udpateResourceSetParameter.Owner
+                Owner = udpateResourceSetParameter.Owner,
+                AcceptPendingRequest = udpateResourceSetParameter.AcceptPendingRequest
             };
 
             if (string.IsNullOrWhiteSpace(udpateResourceSetParameter.Id))

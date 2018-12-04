@@ -17,7 +17,7 @@ namespace SimpleIdServer.Uma.Core.JwtToken
         /// <param name="openidProvider"></param>
         /// <param name="policyRule"></param>
         /// <returns></returns>
-        Task<JwsPayload> UnSign(string jws, string openidProvider, Policy policyRule);
+        Task<JwsPayload> UnSign(string jws, string openidProvider);
     }
 
     internal class JwtTokenParser : IJwtTokenParser
@@ -33,7 +33,7 @@ namespace SimpleIdServer.Uma.Core.JwtToken
             _identityServerClientFactory = identityServerClientFactory;
         }
 
-        public async Task<JwsPayload> UnSign(string jws, string openidProvider, Policy policyRule)
+        public async Task<JwsPayload> UnSign(string jws, string openidProvider)
         {
             if (string.IsNullOrWhiteSpace(jws))
             {
@@ -43,11 +43,6 @@ namespace SimpleIdServer.Uma.Core.JwtToken
             if (string.IsNullOrWhiteSpace(openidProvider))
             {
                 throw new ArgumentNullException(nameof(openidProvider));
-            }
-
-            if (policyRule == null)
-            {
-                throw new ArgumentNullException(nameof(policyRule));
             }
 
             var protectedHeader = _jwsParser.GetHeader(jws);

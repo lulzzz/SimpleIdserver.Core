@@ -7,6 +7,19 @@ namespace SimpleIdServer.Uma.EF.Extensions
 {
     internal static class MappingExtensions
     {
+        public static Domain.PendingRequest ToDomain(this ResourcePendingRequest pendingRequest)
+        {
+            return new Domain.PendingRequest
+            {
+                ResourceId = pendingRequest.ResourceId,
+                CreateDateTime = pendingRequest.CreateDateTime,
+                IsConfirmed = pendingRequest.IsConfirmed,
+                RequesterSubject = pendingRequest.RequesterSubject,
+                Scopes = pendingRequest.Scopes == null ? new List<string>() : pendingRequest.Scopes.Select(s => s.Scope),
+                Resource = pendingRequest.Resource == null ? null : pendingRequest.Resource.ToDomain()
+            };
+        }
+
         public static Domain.SharedLink ToDomain(this ShareResourceLink shareResourceLink)
         {
             return new Domain.SharedLink
@@ -34,6 +47,7 @@ namespace SimpleIdServer.Uma.EF.Extensions
                 Uri = resourceSet.Uri,
                 Owner = resourceSet.Owner,
                 AuthorizationPolicyIds = policyIds,
+                AcceptPendingRequest = resourceSet.AcceptPendingRequest,
                 AuthPolicies = policies
             };
         }
@@ -70,6 +84,23 @@ namespace SimpleIdServer.Uma.EF.Extensions
             };
         }
 
+        public static ResourcePendingRequest ToModel(this Domain.PendingRequest pendingRequest)
+        {
+            return new ResourcePendingRequest
+            {
+                Id = pendingRequest.Id,
+                CreateDateTime = pendingRequest.CreateDateTime,
+                IsConfirmed = pendingRequest.IsConfirmed,
+                Scopes = pendingRequest.Scopes == null ? new List<PendingRequestScope>() : pendingRequest.Scopes.Select(s => new PendingRequestScope
+                {
+                    PendingRequestId = pendingRequest.Id,
+                    Scope = s
+                }).ToList(),
+                ResourceId = pendingRequest.ResourceId,
+                RequesterSubject = pendingRequest.RequesterSubject
+            };
+        }
+
         public static ShareResourceLink ToModel(this Domain.SharedLink shareResourceLink)
         {
             return new ShareResourceLink
@@ -102,6 +133,7 @@ namespace SimpleIdServer.Uma.EF.Extensions
                 }).ToList(),
                 Type = resourceSet.Type,
                 Uri = resourceSet.Uri,
+                AcceptPendingRequest = resourceSet.AcceptPendingRequest,
                 Owner = resourceSet.Owner,
                 ResourceSetPolicies = policyIds
             };

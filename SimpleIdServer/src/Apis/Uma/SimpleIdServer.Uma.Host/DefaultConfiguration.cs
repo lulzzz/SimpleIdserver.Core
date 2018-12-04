@@ -165,6 +165,38 @@ namespace SimpleIdServer.Uma.Host
                 {
                     ResponseType.token
                 }
+            },
+            new SimpleIdServer.Core.Common.Models.Client
+            {
+                ClientId = "resourceServer",
+                Secrets = new List<ClientSecret>
+                {
+                    new ClientSecret
+                    {
+                        Type = ClientSecretTypes.SharedSecret,
+                        Value = "resourceServerPassword"
+                    }
+                },
+                ClientName = "Resource server",
+                TokenEndPointAuthMethod = TokenEndPointAuthenticationMethods.client_secret_post,
+                ApplicationType = ApplicationTypes.native,
+                UpdateDateTime = DateTime.UtcNow,
+                CreateDateTime = DateTime.UtcNow,
+                AllowedScopes = new List<Scope>
+                {
+                    new Scope
+                    {
+                        Name = "uma_protection"
+                    }
+                },
+                GrantTypes = new List<GrantType>
+                {
+                    GrantType.client_credentials
+                },
+                ResponseTypes = new List<ResponseType>
+                {
+                    ResponseType.token
+                }
             }
         };
     }

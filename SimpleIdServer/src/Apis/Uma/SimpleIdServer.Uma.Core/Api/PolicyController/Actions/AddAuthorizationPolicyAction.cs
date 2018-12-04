@@ -88,6 +88,7 @@ namespace SimpleIdServer.Uma.Core.Api.PolicyController.Actions
             var policy = new Policy
             {
                 Id = Guid.NewGuid().ToString(),
+                ClientIds = addPolicyParameter.ClientIdsAllowed,
                 ResourceSetIds = addPolicyParameter.ResourceSetIds,
                 IsResourceOwnerConsentNeeded = addPolicyParameter.IsResourceOwnerConsentNeeded,
                 Script = addPolicyParameter.Script,

@@ -71,51 +71,45 @@ namespace SimpleIdServer.Uma.Startup
                  {
                      Id = Guid.NewGuid().ToString(),
                      ResourceSetIds = new List<string> { "1" },
-                     Rules = new List<PolicyRule>
+                     Claims = new List<Claim>
                      {
-                         new PolicyRule
+                         new Claim
                          {
-                             Id = Guid.NewGuid().ToString(),
-                             Claims = new List<Claim>
-                             {
-                                 new Claim
-                                 {
-                                     Type = "sub",
-                                     Value = "03"
-                                 },
-                                 new Claim
-                                 {
-                                     Type = "role",
-                                     Value = "user"
-                                 },
-                             },
-                             Scopes = new List<string>
-                             {
-                                 "read"
-                             }
+                             Type = "sub",
+                             Value = "03"
                          },
-                         new PolicyRule
+                         new Claim
                          {
-                             Id = Guid.NewGuid().ToString(),
-                             Claims = new List<Claim>
-                             {
-                                 new Claim
-                                 {
-                                     Type = "sub",
-                                     Value = "04"
-                                 },
-                                 new Claim
-                                 {
-                                     Type = "role",
-                                     Value = "user"
-                                 },
-                             },
-                             Scopes = new List<string>
-                             {
-                                 "write", "delete"
-                             }
-                         }
+                             Type = "role",
+                             Value = "user"
+                         },
+                     },
+                     Scopes = new List<string>
+                     {
+                         "read"
                      }
+                 },
+                 new Policy
+                 {
+                    Id = Guid.NewGuid().ToString(),
+                    ResourceSetIds = new List<string> { "1" },
+                    Claims = new List<Claim>
+                    {
+                        new Claim
+                        {
+                            Type = "sub",
+                            Value = "04"
+                        },
+                        new Claim
+                        {
+                            Type = "role",
+                            Value = "user"
+                        },
+                    },
+                    Scopes = new List<string>
+                    {
+                        "write", "delete"
+                    }
                  }
              };
         }

@@ -36,5 +36,7 @@ namespace SimpleIdServer.Uma.Common.DTOs
         public string IconUri { get; set; }
         [DataMember(Name = ResourceSetResponseNames.Owner)]
         public string Owner { get; set; }
+        [DataMember(Name = ResourceSetResponseNames.AcceptPendingRequest)]
+        public bool AcceptPendingRequest { get; set; }
     }
 }

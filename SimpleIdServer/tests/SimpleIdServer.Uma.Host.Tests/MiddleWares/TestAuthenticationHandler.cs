@@ -12,7 +12,7 @@ namespace SimpleIdServer.Uma.Host.Tests.MiddleWares
     public class UserStore
     {
         private static UserStore _instance;
-        private static string _defaultClient = "client";
+        private static string _defaultClient = "resource_server";
 
         private UserStore()
         {
@@ -49,7 +49,7 @@ namespace SimpleIdServer.Uma.Host.Tests.MiddleWares
             var claims = new List<Claim>();
             if (!string.IsNullOrWhiteSpace(UserStore.Instance().ClientId))
             {
-                claims.Add(new Claim("client_id", UserStore.Instance().ClientId));
+                claims.Add(new Claim("aud", UserStore.Instance().ClientId));
             }
 
             claims.Add(new Claim("scope", "uma_protection"));

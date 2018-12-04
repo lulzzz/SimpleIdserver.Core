@@ -27,5 +27,6 @@ namespace SimpleIdServer.Uma.Core.Parameters
         public List<string> Scopes { get; set; }
         public string IconUri { get; set; }
         public string Owner { get; set; }
+        public bool AcceptPendingRequest { get; set; }
     }
 }
