@@ -15,12 +15,12 @@ namespace SimpleIdServer.Uma.EF.Mappings
             modelBuilder.Entity<ResourceSet>()
                 .HasMany(p => p.ResourceSetPolicies)
                 .WithOne(p => p.ResourceSets)
-                .HasForeignKey(p => p.PolicyId)
+                .HasForeignKey(p => p.ResourceSetId)
                 .OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<ResourceSet>()
                 .HasMany(p => p.PendingRequests)
                 .WithOne(p => p.Resource)
-                .HasForeignKey(p => p.PolicyId)
+                .HasForeignKey(p => p.ResourceId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
 

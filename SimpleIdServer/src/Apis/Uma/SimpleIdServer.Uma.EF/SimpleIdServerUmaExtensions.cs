@@ -17,6 +17,7 @@ namespace SimpleIdServer.Uma.EF
             serviceCollection.AddTransient<IResourceSetRepository, ResourceSetRepository>();
             serviceCollection.AddTransient<IPolicyRepository, PolicyRepository>();
             serviceCollection.AddTransient<ISharedLinkRepository, SharedLinkRepository>();
+            serviceCollection.AddTransient<IPendingRequestRepository, PendingRequestRepository>();
             return serviceCollection;
         }
     }

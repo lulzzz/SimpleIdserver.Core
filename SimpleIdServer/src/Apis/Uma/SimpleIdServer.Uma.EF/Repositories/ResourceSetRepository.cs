@@ -26,8 +26,11 @@ namespace SimpleIdServer.Uma.EF.Repositories
                 throw new ArgumentNullException(nameof(parameter));
             }
 
-            IQueryable<Models.ResourceSet> resourceSet = _context.ResourceSets.Include(r => r.ResourceSetPolicies).ThenInclude(r => r.Policy)
-                .ThenInclude(r => r.Claims);
+            IQueryable<Models.ResourceSet> resourceSet = _context.ResourceSets
+                .Include(r => r.ResourceSetPolicies).ThenInclude(r => r.Policy).ThenInclude(r => r.Claims)
+                .Include(r => r.ResourceSetPolicies).ThenInclude(r => r.Policy).ThenInclude(r => r.Scopes)
+                .Include(r => r.ResourceSetPolicies).ThenInclude(r => r.Policy).ThenInclude(r => r.Clients)
+                .Include(r => r.Scopes);
             if (parameter.Ids != null && parameter.Ids.Any())
             {
                 resourceSet = resourceSet.Where(r => parameter.Ids.Contains(r.Id));
@@ -80,7 +83,10 @@ namespace SimpleIdServer.Uma.EF.Repositories
             try
             {
                 var resourceSet = await _context.ResourceSets
-                    .Include(r => r.ResourceSetPolicies).ThenInclude(p => p.Policy)
+                    .Include(r => r.ResourceSetPolicies).ThenInclude(r => r.Policy).ThenInclude(r => r.Scopes)
+                    .Include(r => r.ResourceSetPolicies).ThenInclude(r => r.Policy).ThenInclude(r => r.Claims)
+                    .Include(r => r.ResourceSetPolicies).ThenInclude(r => r.Policy).ThenInclude(r => r.Clients)
+                    .Include(r => r.Scopes)
                     .FirstOrDefaultAsync(r => r.Id == id)
                     .ConfigureAwait(false);
                 return resourceSet == null ? null : resourceSet.ToDomain();
@@ -137,7 +143,10 @@ namespace SimpleIdServer.Uma.EF.Repositories
         public async Task<IEnumerable<ResourceSet>> Get(IEnumerable<string> ids)
         {
              return await _context.ResourceSets
-                 .Include(r => r.ResourceSetPolicies).ThenInclude(p => p.Policy)
+                 .Include(r => r.ResourceSetPolicies).ThenInclude(r => r.Policy).ThenInclude(r => r.Scopes)
+                 .Include(r => r.ResourceSetPolicies).ThenInclude(r => r.Policy).ThenInclude(r => r.Claims)
+                 .Include(r => r.ResourceSetPolicies).ThenInclude(r => r.Policy).ThenInclude(r => r.Clients)
+                 .Include(r => r.Scopes)
                  .Where(r => ids.Contains(r.Id))
                  .Select(r => r.ToDomain())
                  .ToListAsync()

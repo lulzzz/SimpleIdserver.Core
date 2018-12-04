@@ -21,7 +21,9 @@ namespace SimpleIdServer.Uma.EF.Repositories
 
         public async Task<PendingRequest> Get(string id)
         {
-            var record = await _context.PendingRequests.FirstOrDefaultAsync(p => p.Id == id);
+            var record = await _context.PendingRequests.Include(p => p.Resource).ThenInclude(p => p.Scopes)
+                .Include(p => p.Scopes)
+                .FirstOrDefaultAsync(p => p.Id == id);
             if (record == null)
             {
                 return null;
@@ -53,7 +55,7 @@ namespace SimpleIdServer.Uma.EF.Repositories
         public async Task<IEnumerable<PendingRequest>> Get(string resourceId, string subject)
         {
             var pendingRequests = _context.PendingRequests
-                .Include(p => p.Resource)
+                .Include(p => p.Resource).ThenInclude(p => p.Scopes)
                 .Include(p => p.Scopes);
             var result = await pendingRequests.Where(c => c.RequesterSubject == subject && c.ResourceId == resourceId).ToListAsync().ConfigureAwait(false);
             return result.Select(r => r.ToDomain());
@@ -75,7 +77,9 @@ namespace SimpleIdServer.Uma.EF.Repositories
         public async Task<SearchPendingRequestResult> Search(SearchPendingRequestParameter parameter)
         {
             var result = new SearchPendingRequestResult();
-            IQueryable<ResourcePendingRequest> content = _context.PendingRequests.Include(p => p.Resource).Include(p => p.Scopes);
+            IQueryable<ResourcePendingRequest> content = _context.PendingRequests
+                .Include(p => p.Resource).ThenInclude(p => p.Scopes)
+                .Include(p => p.Scopes);
             if (parameter.Owners != null)
             {
                 content = content.Where(c => parameter.Owners.Contains(c.Resource.Owner));

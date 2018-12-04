@@ -11,6 +11,7 @@ namespace SimpleIdServer.Uma.EF.Extensions
         {
             return new Domain.PendingRequest
             {
+                Id = pendingRequest.Id,
                 ResourceId = pendingRequest.ResourceId,
                 CreateDateTime = pendingRequest.CreateDateTime,
                 IsConfirmed = pendingRequest.IsConfirmed,
