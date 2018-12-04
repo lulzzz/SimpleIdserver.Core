@@ -99,18 +99,45 @@ namespace SimpleIdServer.Uma.EF.Repositories
 
         public async Task<bool> Update(ResourceSet resourceSet)
         {
-            var record = await _context.ResourceSets.FirstOrDefaultAsync(r => r.Id == resourceSet.Id).ConfigureAwait(false);
+            var record = await _context.ResourceSets
+                 .Include(r => r.ResourceSetPolicies).ThenInclude(r => r.Policy).ThenInclude(r => r.Scopes)
+                 .Include(r => r.ResourceSetPolicies).ThenInclude(r => r.Policy).ThenInclude(r => r.Claims)
+                 .Include(r => r.ResourceSetPolicies).ThenInclude(r => r.Policy).ThenInclude(r => r.Clients)
+                 .Include(r => r.Scopes)
+                 .FirstOrDefaultAsync(r => r.Id == resourceSet.Id).ConfigureAwait(false);
             if (record == null)
             {
                 return false;
             }
             
-            record.Name = resourceSet.Name;
-            record.Scopes = resourceSet.Scopes == null ? new List<Models.ResourceScope>() : resourceSet.Scopes.Select(s => new Models.ResourceScope
+            var recordScopes = record.Scopes.Select(s => s.Scope);
+            var scopesNotToBeDeleted = new List<string>();
+            if (resourceSet.Scopes != null)
             {
-                ResourceId = resourceSet.Id,
-                Scope = s
-            }).ToList();
+                foreach (var scope in resourceSet.Scopes)
+                {
+                    var s = record.Scopes.FirstOrDefault(c => c.Scope == scope);
+                    if (s == null)
+                    {
+                        s = new Models.ResourceScope
+                        {
+                            ResourceId = record.Id,
+                            Scope = scope
+                        };
+                        record.Scopes.Add(s);
+                    }
+
+                    scopesNotToBeDeleted.Add(scope);
+                }
+            }
+
+            var scopeNames = record.Scopes.Select(o => o.Scope).ToList();
+            foreach (var scopeName in scopeNames.Where(id => !scopesNotToBeDeleted.Contains(id)))
+            {
+                record.Scopes.Remove(record.Scopes.First(s => s.Scope == scopeName));
+            }
+
+            record.Name = resourceSet.Name;
             record.Type = resourceSet.Type;
             record.Uri = resourceSet.Uri;
             record.IconUri = resourceSet.IconUri;

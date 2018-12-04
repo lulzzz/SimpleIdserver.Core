@@ -88,8 +88,14 @@ namespace SimpleIdServer.Uma.Host.Extensions
                         return false;
                     }
 
+                    var claimRoles = p.User.Claims.Where(c => c.Type == ClaimTypes.Role);
                     var claimScopes = p.User.Claims.Where(c => c.Type == "scope");
-                    return claimScopes.Any(s => s.Value == "uma_protection");
+                    if (!claimRoles.Any() && !claimScopes.Any())
+                    {
+                        return false;
+                    }
+
+                    return claimRoles.Any(s => s.Value == "administrator") || claimScopes.Any(s => s.Value == "uma_protection");
                 });
             });
             return authorizationOptions;

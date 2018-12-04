@@ -14,6 +14,8 @@ namespace SimpleIdServer.Uma.Common.DTOs
         public IEnumerable<string> Scopes { get; set; }
         [DataMember(Name = PolicyRuleNames.Claims)]
         public IEnumerable<PostClaim> Claims { get; set; }
+        [DataMember(Name = PolicyRuleNames.ClientIdsAllowed)]
+        public IEnumerable<string> Clients { get; set; }
         [DataMember(Name = PolicyRuleNames.IsResourceOwnerConsentNeeded)]
         public bool IsResourceOwnerConsentNeeded { get; set; }
         [DataMember(Name = PolicyRuleNames.Script)]

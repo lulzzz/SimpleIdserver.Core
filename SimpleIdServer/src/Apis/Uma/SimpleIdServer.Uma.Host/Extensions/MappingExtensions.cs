@@ -243,7 +243,8 @@ namespace SimpleIdServer.Uma.Host.Extensions
                 {
                     Type = c.Type,
                     Value = c.Value
-                })
+                }),
+                Clients = policy.ClientIds == null ? new List<string>() : policy.ClientIds
             };
         }
 
