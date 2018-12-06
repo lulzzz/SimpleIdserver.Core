@@ -21,19 +21,19 @@
                     @Html.AntiForgeryToken()
                     @Html.ValidationMessage("message_error")
                     <!-- Authorization request code -->
-                    @Html.TextBoxFor(i => i.AuthRequestCode, new { @type = "hidden" })
+                    <input type="hidden" value="@Model.AuthRequestCode" name="AuthRequestCode" />
                     <!-- Claim -->
-                    @Html.TextBoxFor(i => i.ClaimName, new { @type = "hidden" })
+                    <input type="hidden" value="@Model.ClaimName" name="ClaimName" />
                     <fieldset class="form-group">
                         <label class="control-label">@Model.ClaimName</label>
-                        @Html.TextBoxFor(i => i.ClaimValue, new { @type = "text", @class = "form-control" })
-                        @Html.ValidationMessageFor(m => m.ClaimValue, "", new { @class = "text-danger" })
+                        <input type="text" class="form-control" value="@Model.ClaimValue" name="ClaimValue" />
+                        @Html.ValidationMessage("ClaimValue")
                     </fieldset>
                     <!-- Confirmation code -->
                     <fieldset class="form-group">
                         <label class="control-label">@ViewBag.Translations["code"]</label>
-                        @Html.TextBoxFor(i => i.Code, new { @type = "number", @class = "form-control" })
-                        @Html.ValidationMessageFor(m => m.Code, "", new { @class = "text-danger" })
+                        <input type="text" class="form-control" value="@Model.Code" name="Code" />
+                        @Html.ValidationMessage("Code")
                     </fieldset>
                     <!-- Submit buttons code -->
                     <fieldset class="form-group">
