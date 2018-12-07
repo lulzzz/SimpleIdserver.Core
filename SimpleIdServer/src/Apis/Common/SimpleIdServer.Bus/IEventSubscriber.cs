@@ -1,6 +1,8 @@
-﻿namespace SimpleIdServer.Bus
+﻿using System;
+
+namespace SimpleIdServer.Bus
 {
-    public interface IEventSubscriber
+    public interface IEventSubscriber : IDisposable
     {
         void Listen();
         void AddHandler(IEventHandler eventHandler);
