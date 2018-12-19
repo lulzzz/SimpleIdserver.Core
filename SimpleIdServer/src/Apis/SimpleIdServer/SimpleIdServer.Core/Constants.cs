@@ -339,6 +339,12 @@ namespace SimpleIdServer.Core
             public const string ValidateConfirmationCode = "validate_confirmation_code";
             public const string NoTwoFactorAuthenticator = "no_two_factor_authenticator";
             public const string NoTwoFactorAuthenticatorSelected = "no_two_factor_authenticator_selected";
+            public const string ActualPassword = "actual_password";
+            public const string ConfirmActualPassword = "confirm_actual_password";
+            public const string NewPassword = "new_password";
+            public const string ConfirmNewPassword = "confirm_new_password";
+            public const string Update = "update";
+            public const string RenewPassword = "renew_password";
         }
 
         public static readonly Dictionary<List<ResponseType>, AuthorizationFlow> MappingResponseTypesToAuthorizationFlows = new Dictionary<List<ResponseType>, AuthorizationFlow>

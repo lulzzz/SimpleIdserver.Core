@@ -8,6 +8,16 @@ namespace SimpleIdServer.Host
 {
     internal static class DefaultConfiguration
     {
+        public static PasswordSettings DEFAULT_PASSWORD_SETTINGS = new PasswordSettings
+        {
+            IsBlockAccountPolicyEnabled = true,
+            NumberOfAuthenticationAttempts = 3,
+            AuthenticationIntervalsInSeconds = 10,
+            IsRegexEnabled = true,
+            RegularExpression = "",
+            PasswordExpiresIn = TimeSpan.FromDays(2).TotalSeconds
+        };
+
         public static List<Translation> DEFAULT_TRANSLATIONS = new List<Translation>
         {
             new Translation
@@ -318,6 +328,7 @@ namespace SimpleIdServer.Host
                 Id = "administrator",
                 CreateDateTime = DateTime.UtcNow,
                 UpdateDateTime =  DateTime.UtcNow,
+                PasswordExpirationDateTime = DateTime.UtcNow.AddDays(-1),
                 Password = PasswordHelper.ComputeHash("password"),
                 Claims = new List<Claim>
                 {

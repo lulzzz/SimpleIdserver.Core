@@ -1,24 +1,24 @@
-﻿using System;
-using System.Threading.Tasks;
-using SimpleIdServer.Core.Common.Models;
+﻿using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.Core.Services;
 using SimpleIdServer.Store;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SimpleIdServer.Authenticate.SMS.Services
 {
-    internal sealed class SmsAuthenticateResourceOwnerService : IAuthenticateResourceOwnerService
+    internal sealed class SmsAuthenticateResourceOwnerService : BaseAuthenticateResourceOwnerService
     {
-        private readonly IResourceOwnerRepository _resourceOwnerRepository;
         private readonly IConfirmationCodeStore _confirmationCodeStore;
 
-        public SmsAuthenticateResourceOwnerService(IResourceOwnerRepository resourceOwnerRepository, IConfirmationCodeStore confirmationCodeStore)
+        public SmsAuthenticateResourceOwnerService(IResourceOwnerRepository resourceOwnerRepository, IConfirmationCodeStore confirmationCodeStore,
+            IPasswordSettingsRepository passwordSettingsRepository) : base(passwordSettingsRepository, resourceOwnerRepository)
         {
-            _resourceOwnerRepository = resourceOwnerRepository;
             _confirmationCodeStore = confirmationCodeStore;
         }
 
-        public string Amr
+        public override string Amr
         {
             get
             {
@@ -26,36 +26,26 @@ namespace SimpleIdServer.Authenticate.SMS.Services
             }
         }
 
-        public async Task<ResourceOwner> AuthenticateResourceOwnerAsync(string login, string password)
+        public override async Task<bool> Authenticate(ResourceOwner user, string password)
         {
-            if (string.IsNullOrWhiteSpace(login))
+            var confirmationCode = await _confirmationCodeStore.Get(password).ConfigureAwait(false);
+            if (confirmationCode == null || confirmationCode.Subject != user.Claims.First(c => c.Type == Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber).Value)
             {
-                throw new ArgumentNullException(nameof(login));
-            }
-
-            if (string.IsNullOrWhiteSpace(password))
-            {
-                throw new ArgumentNullException(nameof(password));
-            }
-
-            var confirmationCode = await _confirmationCodeStore.Get(password);
-            if (confirmationCode == null || confirmationCode.Subject != login)
-            {
-                return null;
+                return false;
             }
 
             if (confirmationCode.IssueAt.AddSeconds(confirmationCode.ExpiresIn) <= DateTime.UtcNow)
             {
-                return null;
+                return false;
             }
 
-            var resourceOwner = await _resourceOwnerRepository.GetResourceOwnerByClaim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber, login);
-            if (resourceOwner != null)
-            {
-                await _confirmationCodeStore.Remove(password);
-            }
+            await _confirmationCodeStore.Remove(password).ConfigureAwait(false);
+            return true;
+        }
 
-            return resourceOwner;
+        public override Task<ResourceOwner> GetResourceOwner(string login)
+        {
+            return ResourceOwnerRepository.GetResourceOwnerByClaim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber, login);
         }
     }
 }

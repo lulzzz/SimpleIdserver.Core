@@ -1,22 +1,18 @@
-﻿using System;
-using System.Threading.Tasks;
-using SimpleIdServer.Core.Common.Models;
+﻿using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.Core.Helpers;
 using SimpleIdServer.Core.Services;
+using System.Threading.Tasks;
 
 namespace SimpleIdServer.Authenticate.LoginPassword.Services
 {
-    internal sealed class PasswordAuthenticateResourceOwnerService : IAuthenticateResourceOwnerService
+    internal sealed class PasswordAuthenticateResourceOwnerService : BaseAuthenticateResourceOwnerService
     {
-        private readonly IResourceOwnerRepository _resourceOwnerRepository;
-
-        public PasswordAuthenticateResourceOwnerService(IResourceOwnerRepository resourceOwnerRepository)
+        public PasswordAuthenticateResourceOwnerService(IResourceOwnerRepository resourceOwnerRepository, IPasswordSettingsRepository passwordSettingsRepository) : base(passwordSettingsRepository, resourceOwnerRepository)
         {
-            _resourceOwnerRepository = resourceOwnerRepository;
         }
 
-        public string Amr
+        public override string Amr
         {
             get
             {
@@ -24,19 +20,14 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Services
             }
         }
 
-        public Task<ResourceOwner> AuthenticateResourceOwnerAsync(string login, string password)
+        public override Task<bool> Authenticate(ResourceOwner user, string password)
         {
-            if (string.IsNullOrWhiteSpace(login))
-            {
-                throw new ArgumentNullException(nameof(login));
-            }
+            return Task.FromResult(user.Password == PasswordHelper.ComputeHash(password));
+        }
 
-            if (string.IsNullOrWhiteSpace(password))
-            {
-                throw new ArgumentNullException(nameof(password));
-            }
-
-            return _resourceOwnerRepository.GetAsync(login, PasswordHelper.ComputeHash(password));
+        public override Task<ResourceOwner> GetResourceOwner(string login)
+        {
+            return ResourceOwnerRepository.GetAsync(login);
         }
     }
 }

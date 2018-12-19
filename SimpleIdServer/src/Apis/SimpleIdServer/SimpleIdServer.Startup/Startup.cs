@@ -34,6 +34,8 @@ namespace SimpleIdServer.Startup
             AspPipelineContext.Instance().StartConfigureServices(services);
             services.AddAuthentication(Host.Constants.CookieNames.ExternalCookieName)
                 .AddCookie(Host.Constants.CookieNames.ExternalCookieName)
+                .AddCookie(Host.Constants.CookieNames.ChangePasswordCookieName)
+                .AddCookie(Host.Constants.CookieNames.TwoFactorCookieName)
                 .AddFacebook(opts =>
                 {
                     opts.ClientId = "569242033233529";

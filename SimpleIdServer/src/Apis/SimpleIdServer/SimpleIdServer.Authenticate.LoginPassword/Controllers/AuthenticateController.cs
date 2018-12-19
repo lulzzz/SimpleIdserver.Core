@@ -1,9 +1,5 @@
-﻿using System;
-using System.Globalization;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -15,7 +11,6 @@ using SimpleIdServer.Authenticate.LoginPassword.ViewModels;
 using SimpleIdServer.Bus;
 using SimpleIdServer.Core;
 using SimpleIdServer.Core.Api.Profile;
-using SimpleIdServer.Dtos.Requests;
 using SimpleIdServer.Core.Exceptions;
 using SimpleIdServer.Core.Extensions;
 using SimpleIdServer.Core.Helpers;
@@ -26,14 +21,23 @@ using SimpleIdServer.Core.Translation;
 using SimpleIdServer.Core.WebSite.Authenticate;
 using SimpleIdServer.Core.WebSite.Authenticate.Common;
 using SimpleIdServer.Core.WebSite.User;
+using SimpleIdServer.Dtos.Requests;
 using SimpleIdServer.Host.Extensions;
 using SimpleIdServer.OpenId.Logging;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
 {
     [Area(Constants.AMR)]
     public class AuthenticateController : BaseAuthenticateController
     {
+        private const string CHANGE_PASSWORD_COOKIE_NAME = "";
+
         private readonly IResourceOwnerAuthenticateHelper _resourceOwnerAuthenticateHelper;
 
         public AuthenticateController(
@@ -77,12 +81,10 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> LocalLogin(LocalAuthenticationViewModel authorizeViewModel)
+        public async Task<IActionResult> LocalLogin(LocalAuthenticationViewModel authorizeViewModel)
         {
-            var authenticatedUser = await SetUser();
-            if (authenticatedUser != null &&
-                authenticatedUser.Identity != null &&
-                authenticatedUser.Identity.IsAuthenticated)
+            var authenticatedUser = await SetUser().ConfigureAwait(false);
+            if (authenticatedUser != null && authenticatedUser.Identity != null && authenticatedUser.Identity.IsAuthenticated)
             {
                 return RedirectToAction("Index", "User", new { area = "UserManagement" });
             }
@@ -94,7 +96,7 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
 
             if (!ModelState.IsValid)
             {
-                await TranslateView(DefaultLanguage);
+                await TranslateView(DefaultLanguage).ConfigureAwait(false);
                 var viewModel = new AuthorizeViewModel();
                 await SetIdProviders(viewModel);
                 return View("Index", viewModel);
@@ -102,15 +104,19 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
 
             try
             {
-                var resourceOwner = await _resourceOwnerAuthenticateHelper.Authenticate(authorizeViewModel.Login, authorizeViewModel.Password, new[] { Constants.AMR });                if (resourceOwner == null)
+                var resourceOwner = await _resourceOwnerAuthenticateHelper.Authenticate(authorizeViewModel.Login, authorizeViewModel.Password, new[] { Constants.AMR }).ConfigureAwait(false);                if (resourceOwner == null)
                 {
                     throw new IdentityServerAuthenticationException("the resource owner credentials are not correct");
                 }
 
                 var claims = resourceOwner.Claims;
-                claims.Add(new Claim(ClaimTypes.AuthenticationInstant,
-                    DateTimeOffset.UtcNow.ConvertToUnixTimestamp().ToString(CultureInfo.InvariantCulture),
-                    ClaimValueTypes.Integer));
+                claims.Add(new Claim(ClaimTypes.AuthenticationInstant, DateTimeOffset.UtcNow.ConvertToUnixTimestamp().ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer));
+                if (resourceOwner.PasswordExpirationDateTime < DateTime.UtcNow)
+                {
+                    await SetChangePasswordCookie(claims).ConfigureAwait(false);
+                    return RedirectToAction("ChangePassword", "Authenticate", new { area = Constants.AMR });
+                }
+
                 var subject = claims.First(c => c.Type == Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject).Value;
                 if (string.IsNullOrWhiteSpace(resourceOwner.TwoFactorAuthentication))
                 {
@@ -120,7 +126,7 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
                 }
 
                 // 2.1 Store temporary information in cookie
-                await SetTwoFactorCookie(claims);
+                await SetTwoFactorCookie(claims).ConfigureAwait(false);
                 // 2.2. Send confirmation code
                 try
                 {
@@ -137,14 +143,25 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
                     throw new Exception("Two factor authenticator is not properly configured");
                 }
             }
+            catch(IdentityServerUserAccountDoesntExistException)
+            {
+                return await DisplayError("the account doesn't exist").ConfigureAwait(false);
+            }
+            catch(IdentityServerUserAccountBlockedException)
+            {
+                return await DisplayError("the account is blocked").ConfigureAwait(false);
+            }
+            catch(IdentityServerUserPasswordInvalidException)
+            {
+                return await DisplayError("the login / password is invalid").ConfigureAwait(false);
+            }
+            catch (IdentityServerUserTooManyRetryException ex)
+            {
+                return await DisplayError($"please try to connect in {ex.RetryInSeconds} seconds").ConfigureAwait(false);
+            }
             catch (Exception exception)
             {
-                _simpleIdentityServerEventSource.Failure(exception.Message);
-                await TranslateView(DefaultLanguage);
-                ModelState.AddModelError("invalid_credentials", exception.Message);
-                var viewModel = new AuthorizeViewModel();
-                await SetIdProviders(viewModel);
-                return View("Index", viewModel);
+                return await DisplayError(exception.Message).ConfigureAwait(false);
             }
         }
         
@@ -189,6 +206,11 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
                     request.ToParameter(),
                     viewModel.Code, issuerName);
                 var subject = actionResult.Claims.First(c => c.Type == Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject).Value;
+                if (actionResult.PasswordExpirationDateTime < DateTime.UtcNow)
+                {
+                    await SetChangePasswordCookie(actionResult.Claims).ConfigureAwait(false);
+                    return RedirectToAction("ChangePassword", "Authenticate", new { area = Constants.AMR, code = viewModel.Code });
+                }
 
                 // 5. Two factor authentication.
                 if (!string.IsNullOrWhiteSpace(actionResult.TwoFactor))
@@ -216,14 +238,33 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
                     _simpleIdentityServerEventSource.AuthenticateResourceOwner(subject);
 
                     // 7. Redirect the user agent
-                    var result = this.CreateRedirectionFromActionResult(actionResult.ActionResult,
-                        request);
+                    var result = this.CreateRedirectionFromActionResult(actionResult.ActionResult, request);
                     if (result != null)
                     {
                         LogAuthenticateUser(actionResult.ActionResult, request.ProcessId);
                         return result;
                     }
                 }
+            }
+            catch (IdentityServerUserAccountDoesntExistException)
+            {
+                _simpleIdentityServerEventSource.Failure("the account doesn't exist");
+                ModelState.AddModelError("invalid_credentials", "the account doesn't exist");
+            }
+            catch (IdentityServerUserAccountBlockedException)
+            {
+                _simpleIdentityServerEventSource.Failure("the account doesn't exist");
+                ModelState.AddModelError("invalid_credentials", "the account doesn't exist");
+            }
+            catch (IdentityServerUserPasswordInvalidException)
+            {
+                _simpleIdentityServerEventSource.Failure("the login / password is invalid");
+                ModelState.AddModelError("invalid_credentials", "the login / password is invalid");
+            }
+            catch (IdentityServerUserTooManyRetryException ex)
+            {
+                _simpleIdentityServerEventSource.Failure($"please try to connect in {ex.RetryInSeconds} seconds");
+                ModelState.AddModelError("invalid_credentials", $"please try to connect in {ex.RetryInSeconds} seconds");
             }
             catch (Exception ex)
             {
@@ -234,6 +275,55 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
             await TranslateView(uiLocales);
             await SetIdProviders(viewModel);
             return View("OpenId", viewModel);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ChangePassword(string code)
+        {
+            await SetUser().ConfigureAwait(false);
+            var authenticatedUser = await _authenticationService.GetAuthenticatedUser(this, Host.Constants.CookieNames.ChangePasswordCookieName).ConfigureAwait(false);
+            if (authenticatedUser == null)
+            {
+                return new UnauthorizedResult();
+            }
+
+            await TranslateView(DefaultLanguage).ConfigureAwait(false);
+            return View(new RenewPasswordViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(RenewPasswordViewModel viewModel)
+        {
+            if (!ModelState.IsValid)
+            {
+                await TranslateView(DefaultLanguage).ConfigureAwait(false);
+                return View(viewModel);
+            }
+
+
+            return View();
+        }
+
+        private async Task<IActionResult> DisplayError(string errorMessage)
+        {
+            _simpleIdentityServerEventSource.Failure(errorMessage);
+            await TranslateView(DefaultLanguage).ConfigureAwait(false);
+            ModelState.AddModelError("invalid_credentials", errorMessage);
+            var viewModel = new AuthorizeViewModel();
+            await SetIdProviders(viewModel);
+            return View("Index", viewModel);
+        }
+
+        private Task SetChangePasswordCookie(IEnumerable<Claim> claims)
+        {
+            var identity = new ClaimsIdentity(claims, Host.Constants.CookieNames.ChangePasswordCookieName);
+            var principal = new ClaimsPrincipal(identity);
+            return _authenticationService.SignInAsync(HttpContext, Host.Constants.CookieNames.ChangePasswordCookieName, principal, new AuthenticationProperties
+            {
+                ExpiresUtc = DateTime.UtcNow.AddMinutes(60),
+                IsPersistent = false
+            });
         }
     }
 }

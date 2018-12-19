@@ -180,11 +180,14 @@ namespace SimpleIdServer.EF.Repositories
                 {
                     Id = resourceOwner.Id,
                     Password = resourceOwner.Password,
-                    IsLocalAccount = resourceOwner.IsLocalAccount,
+                    BlockedDateTime = resourceOwner.BlockedDateTime,
+                    IsBlocked = resourceOwner.IsBlocked,
+                    PasswordExpirationDateTime = resourceOwner.PasswordExpirationDateTime,
                     TwoFactorAuthentication = resourceOwner.TwoFactorAuthentication,
                     Claims = new List<ResourceOwnerClaim>(),
                     CreateDateTime = DateTime.UtcNow,
-                    UpdateDateTime = DateTime.UtcNow
+                    UpdateDateTime = DateTime.UtcNow,
+                    NumberOfAttempts = resourceOwner.NumberOfAttempts
                 };
 
                 if (resourceOwner.Claims != null)
@@ -228,9 +231,12 @@ namespace SimpleIdServer.EF.Repositories
                     }
 
                     record.Password = resourceOwner.Password;
-                    record.IsLocalAccount = resourceOwner.IsLocalAccount;
+                    record.BlockedDateTime = resourceOwner.BlockedDateTime;
+                    record.IsBlocked = resourceOwner.IsBlocked;
+                    record.PasswordExpirationDateTime = resourceOwner.PasswordExpirationDateTime;
                     record.TwoFactorAuthentication = resourceOwner.TwoFactorAuthentication;
                     record.UpdateDateTime = DateTime.UtcNow;
+                    record.NumberOfAttempts = resourceOwner.NumberOfAttempts;
                     record.Claims = new List<ResourceOwnerClaim>();
                     _context.ResourceOwnerClaims.RemoveRange(record.Claims);
                     if (resourceOwner.Claims != null)

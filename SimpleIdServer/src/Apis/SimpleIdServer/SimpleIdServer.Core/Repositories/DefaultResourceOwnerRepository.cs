@@ -51,7 +51,7 @@ namespace SimpleIdServer.Core.Repositories
                 throw new ArgumentNullException(nameof(id));
             }
 
-            var user = _users.FirstOrDefault(u => u.Id == id);
+            var user = _users.FirstOrDefault(u => u.Claims.First(c => c.Type == SimpleIdServer.Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject).Value == id);
             if (user == null)
             {
                 return Task.FromResult((ResourceOwner)null);
@@ -189,7 +189,11 @@ namespace SimpleIdServer.Core.Repositories
                 return Task.FromResult(false);
             }
 
-            user.IsLocalAccount = resourceOwner.IsLocalAccount;
+            user.BlockedDateTime = resourceOwner.BlockedDateTime;
+            user.IsBlocked = resourceOwner.IsBlocked;
+            user.FirstAuthenticationFailureDateTime = resourceOwner.FirstAuthenticationFailureDateTime;
+            user.PasswordExpirationDateTime = resourceOwner.PasswordExpirationDateTime;
+            user.NumberOfAttempts = resourceOwner.NumberOfAttempts;
             user.Password = resourceOwner.Password;
             user.TwoFactorAuthentication = resourceOwner.TwoFactorAuthentication;
             user.UpdateDateTime = DateTime.UtcNow;

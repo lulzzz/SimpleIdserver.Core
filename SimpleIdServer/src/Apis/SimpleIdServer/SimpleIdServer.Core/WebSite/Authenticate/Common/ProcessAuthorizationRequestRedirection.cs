@@ -18,11 +18,7 @@ namespace SimpleIdServer.Core.WebSite.Authenticate.Common
 {
     public interface IAuthenticateHelper
     {
-        Task<ActionResult> ProcessRedirection(
-            AuthorizationParameter authorizationParameter,
-            string code,
-            string subject,
-            List<Claim> claims, string issuerName);
+        Task<ActionResult> ProcessRedirection(AuthorizationParameter authorizationParameter, string code, string subject, List<Claim> claims, string issuerName);
     }
 
     public sealed class AuthenticateHelper : IAuthenticateHelper

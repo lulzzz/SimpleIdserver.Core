@@ -1,24 +1,5 @@
-﻿#region copyright
-// Copyright 2015 Habart Thierry
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-#endregion
-
-using System;
-using System.Collections.Generic;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using SimpleIdServer.AccountFilter;
-using SimpleIdServer.Common.Client;
 using SimpleIdServer.Common.Client.Factories;
 using SimpleIdServer.Core.Api.Authorization;
 using SimpleIdServer.Core.Api.Authorization.Actions;
@@ -57,13 +38,15 @@ using SimpleIdServer.Core.WebSite.Consent;
 using SimpleIdServer.Core.WebSite.Consent.Actions;
 using SimpleIdServer.Core.WebSite.User;
 using SimpleIdServer.Core.WebSite.User.Actions;
+using System;
+using System.Collections.Generic;
 
 namespace SimpleIdServer.Core
 {
     public static class SimpleIdentityServerCoreExtensions
     {
         public static IServiceCollection AddSimpleIdentityServerCore(this IServiceCollection serviceCollection, OAuthConfigurationOptions configurationOptions = null, List<ClaimAggregate> claims = null, List<Common.Models.Client> clients = null, List<Consent> consents = null, List<JsonWebKey> jsonWebKeys = null,
-            List<ResourceOwnerProfile> profiles = null, List<ResourceOwner> resourceOwners = null, List<Scope> scopes = null, List<Common.Models.Translation> translations = null)
+            List<ResourceOwnerProfile> profiles = null, List<ResourceOwner> resourceOwners = null, List<Scope> scopes = null, List<Common.Models.Translation> translations = null, PasswordSettings passwordSettings = null)
         {
             if (serviceCollection == null)
             {
@@ -168,6 +151,7 @@ namespace SimpleIdServer.Core
             serviceCollection.AddSingleton<IAccountFilter>(new DefaultAccountFilter());
             serviceCollection.AddSingleton<IUserClaimsEnricher>(new DefaultUserClaimsEnricher());
             serviceCollection.AddSingleton<IClientInfoService>(new DefaultClientInfoService());
+            serviceCollection.AddSingleton<IPasswordSettingsRepository>(new DefaultPasswordSettingsRepository(passwordSettings));
             return serviceCollection;
         }
     }

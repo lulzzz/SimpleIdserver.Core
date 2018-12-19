@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -16,19 +10,26 @@ using SimpleIdServer.Authenticate.SMS.ViewModels;
 using SimpleIdServer.Bus;
 using SimpleIdServer.Core;
 using SimpleIdServer.Core.Api.Profile;
-using SimpleIdServer.Dtos.Requests;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Errors;
 using SimpleIdServer.Core.Exceptions;
 using SimpleIdServer.Core.Extensions;
+using SimpleIdServer.Core.Helpers;
 using SimpleIdServer.Core.Protector;
 using SimpleIdServer.Core.Services;
 using SimpleIdServer.Core.Translation;
 using SimpleIdServer.Core.WebSite.Authenticate;
 using SimpleIdServer.Core.WebSite.Authenticate.Common;
 using SimpleIdServer.Core.WebSite.User;
+using SimpleIdServer.Dtos.Requests;
 using SimpleIdServer.Host.Extensions;
 using SimpleIdServer.OpenId.Logging;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace SimpleIdServer.Authenticate.SMS.Controllers
 {
@@ -37,6 +38,7 @@ namespace SimpleIdServer.Authenticate.SMS.Controllers
     {
         private readonly ISmsAuthenticationOperation _smsAuthenticationOperation;
         private readonly IGenerateAndSendSmsCodeOperation _generateAndSendSmsCodeOperation;
+        private readonly IResourceOwnerAuthenticateHelper _resourceOwnerAuthenticateHelper;
 
         public AuthenticateController(
             IAuthenticateActions authenticateActions,
@@ -57,6 +59,7 @@ namespace SimpleIdServer.Authenticate.SMS.Controllers
             ITwoFactorAuthenticationHandler twoFactorAuthenticationHandler,
             ISmsAuthenticationOperation smsAuthenticationOperation,
             IGenerateAndSendSmsCodeOperation generateAndSendSmsCodeOperation,
+            IResourceOwnerAuthenticateHelper resourceOwnerAuthenticateHelper,
             SmsAuthenticationOptions basicAuthenticateOptions) : base(authenticateActions, profileActions, dataProtectionProvider, encoder,
                 translationManager, simpleIdentityServerEventSource, urlHelperFactory, actionContextAccessor, eventPublisher,
                 authenticationService, authenticationSchemeProvider, userActions, payloadSerializer, configurationService,
@@ -64,19 +67,20 @@ namespace SimpleIdServer.Authenticate.SMS.Controllers
         {
             _smsAuthenticationOperation = smsAuthenticationOperation;
             _generateAndSendSmsCodeOperation = generateAndSendSmsCodeOperation;
+            _resourceOwnerAuthenticateHelper = resourceOwnerAuthenticateHelper;
         }
 
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var authenticatedUser = await SetUser();
+            var authenticatedUser = await SetUser().ConfigureAwait(false);
             if (authenticatedUser == null ||
                 authenticatedUser.Identity == null ||
                 !authenticatedUser.Identity.IsAuthenticated)
             {
-                await TranslateView(DefaultLanguage);
+                await TranslateView(DefaultLanguage).ConfigureAwait(false);
                 var viewModel = new AuthorizeViewModel();
-                await SetIdProviders(viewModel);
+                await SetIdProviders(viewModel).ConfigureAwait(false);
                 return View(viewModel);
             }
 
@@ -86,7 +90,7 @@ namespace SimpleIdServer.Authenticate.SMS.Controllers
         [HttpPost]
         public async Task<IActionResult> LocalLogin(LocalAuthenticationViewModel localAuthenticationViewModel)
         {
-            var authenticatedUser = await SetUser();
+            var authenticatedUser = await SetUser().ConfigureAwait(false);
             if (authenticatedUser != null &&
                 authenticatedUser.Identity != null &&
                 authenticatedUser.Identity.IsAuthenticated)
@@ -104,7 +108,7 @@ namespace SimpleIdServer.Authenticate.SMS.Controllers
                 ResourceOwner resourceOwner = null;
                 try
                 {
-                    resourceOwner = await _smsAuthenticationOperation.Execute(localAuthenticationViewModel.PhoneNumber);
+                    resourceOwner = await _smsAuthenticationOperation.Execute(localAuthenticationViewModel.PhoneNumber).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -118,7 +122,7 @@ namespace SimpleIdServer.Authenticate.SMS.Controllers
                     claims.Add(new Claim(ClaimTypes.AuthenticationInstant,
                         DateTimeOffset.UtcNow.ConvertToUnixTimestamp().ToString(CultureInfo.InvariantCulture),
                         ClaimValueTypes.Integer));
-                    await SetPasswordLessCookie(claims);
+                    await SetPasswordLessCookie(claims).ConfigureAwait(false);
                     try
                     {
                         return RedirectToAction("ConfirmCode");
@@ -132,29 +136,27 @@ namespace SimpleIdServer.Authenticate.SMS.Controllers
             }
 
             var viewModel = new AuthorizeViewModel();
-            await SetIdProviders(viewModel);
-            await TranslateView(DefaultLanguage);
+            await SetIdProviders(viewModel).ConfigureAwait(false);
+            await TranslateView(DefaultLanguage).ConfigureAwait(false);
             return View("Index", viewModel);
         }
 
         [HttpGet]
         public async Task<IActionResult> ConfirmCode(string code)
         {
-            var user = await SetUser();
-            if (user != null &&
-                user.Identity != null &&
-                user.Identity.IsAuthenticated)
+            var user = await SetUser().ConfigureAwait(false);
+            if (user != null && user.Identity != null &&  user.Identity.IsAuthenticated)
             {
                 return RedirectToAction("Index", "User", new { area = "UserManagement" });
             }
 
-            var authenticatedUser = await _authenticationService.GetAuthenticatedUser(this, Host.Constants.CookieNames.PasswordLessCookieName);
+            var authenticatedUser = await _authenticationService.GetAuthenticatedUser(this, Host.Constants.CookieNames.PasswordLessCookieName).ConfigureAwait(false);
             if (authenticatedUser == null || authenticatedUser.Identity == null || !authenticatedUser.Identity.IsAuthenticated)
             {
                 throw new IdentityServerException(ErrorCodes.UnhandledExceptionCode, "SMS authentication cannot be performed");
             }
 
-            await TranslateView(DefaultLanguage);
+            await TranslateView(DefaultLanguage).ConfigureAwait(false);
             return View(new ConfirmCodeViewModel
             {
                 Code = code
@@ -170,15 +172,13 @@ namespace SimpleIdServer.Authenticate.SMS.Controllers
                 throw new ArgumentNullException(nameof(confirmCodeViewModel));
             }
 
-            var user = await SetUser();
-            if (user != null &&
-                user.Identity != null &&
-                user.Identity.IsAuthenticated)
+            var user = await SetUser().ConfigureAwait(false);
+            if (user != null && user.Identity != null &&  user.Identity.IsAuthenticated)
             {
                 return RedirectToAction("Index", "User", new { area = "UserManagement" });
             }
 
-            var authenticatedUser = await _authenticationService.GetAuthenticatedUser(this, Host.Constants.CookieNames.PasswordLessCookieName);
+            var authenticatedUser = await _authenticationService.GetAuthenticatedUser(this, Host.Constants.CookieNames.PasswordLessCookieName).ConfigureAwait(false);
             if (authenticatedUser == null || authenticatedUser.Identity == null || !authenticatedUser.Identity.IsAuthenticated)
             {
                 throw new IdentityServerException(ErrorCodes.UnhandledExceptionCode, "SMS authentication cannot be performed");
@@ -188,26 +188,30 @@ namespace SimpleIdServer.Authenticate.SMS.Controllers
             var phoneNumber = authenticatedUser.Claims.First(c => c.Type == Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber);
             if (confirmCodeViewModel.Action == "resend") // Resend the confirmation code.
             {
-                var code = await _generateAndSendSmsCodeOperation.Execute(phoneNumber.Value);
-                await TranslateView(DefaultLanguage);
+                var code = await _generateAndSendSmsCodeOperation.Execute(phoneNumber.Value).ConfigureAwait(false);
+                await TranslateView(DefaultLanguage).ConfigureAwait(false);
                 return View("ConfirmCode", confirmCodeViewModel);
             }
 
-            if (!await _authenticateActions.ValidateCode(confirmCodeViewModel.ConfirmationCode)) // Check the confirmation code.
+            ResourceOwner resourceOwner;
+            try
+            {
+                resourceOwner = await _resourceOwnerAuthenticateHelper.Authenticate(phoneNumber.Value, confirmCodeViewModel.ConfirmationCode, new[] { Constants.AMR }).ConfigureAwait(false);
+            }
+            catch(Exception)
             {
                 ModelState.AddModelError("message_error", "Confirmation code is not valid");
-                await TranslateView(DefaultLanguage);
+                await TranslateView(DefaultLanguage).ConfigureAwait(false);
                 return View("ConfirmCode", confirmCodeViewModel);
             }
 
-            await _authenticationService.SignOutAsync(HttpContext, Host.Constants.CookieNames.PasswordLessCookieName, new AuthenticationProperties());
-            var resourceOwner = await _userActions.GetUser(authenticatedUser);
+            await _authenticationService.SignOutAsync(HttpContext, Host.Constants.CookieNames.PasswordLessCookieName, new AuthenticationProperties()).ConfigureAwait(false);
             if (!string.IsNullOrWhiteSpace(resourceOwner.TwoFactorAuthentication)) // Execute TWO Factor authentication
             {
                 try
                 {
-                    await SetTwoFactorCookie(authenticatedUser.Claims);
-                    var code = await _generateAndSendSmsCodeOperation.Execute(phoneNumber.Value);
+                    await SetTwoFactorCookie(authenticatedUser.Claims).ConfigureAwait(false);
+                    var code = await _generateAndSendSmsCodeOperation.Execute(phoneNumber.Value).ConfigureAwait(false);
                     return RedirectToAction("SendCode", new { code = confirmCodeViewModel.Code });
                 }
                 catch (ClaimRequiredException)
@@ -217,7 +221,7 @@ namespace SimpleIdServer.Authenticate.SMS.Controllers
                 catch(Exception)
                 {
                     ModelState.AddModelError("message_error", "Two factor authenticator is not properly configured");
-                    await TranslateView(DefaultLanguage);
+                    await TranslateView(DefaultLanguage).ConfigureAwait(false);
                     return View("ConfirmCode", confirmCodeViewModel);
                 }
             }
@@ -226,9 +230,9 @@ namespace SimpleIdServer.Authenticate.SMS.Controllers
             if (!string.IsNullOrWhiteSpace(confirmCodeViewModel.Code)) // Execute OPENID workflow
             {
                 var request = _dataProtector.Unprotect<AuthorizationRequest>(confirmCodeViewModel.Code);
-                await SetLocalCookie(authenticatedUser.Claims, request.SessionId);
+                await SetLocalCookie(authenticatedUser.Claims, request.SessionId).ConfigureAwait(false);
                 var issuerName = Request.GetAbsoluteUriWithVirtualPath();
-                var actionResult = await _authenticateHelper.ProcessRedirection(request.ToParameter(), confirmCodeViewModel.Code, subject, authenticatedUser.Claims.ToList(), issuerName);
+                var actionResult = await _authenticateHelper.ProcessRedirection(request.ToParameter(), confirmCodeViewModel.Code, subject, authenticatedUser.Claims.ToList(), issuerName).ConfigureAwait(false);
                 var result = this.CreateRedirectionFromActionResult(actionResult, request);
                 if (result != null)
                 {
@@ -237,7 +241,7 @@ namespace SimpleIdServer.Authenticate.SMS.Controllers
                 }
             }
 
-            await SetLocalCookie(authenticatedUser.Claims, Guid.NewGuid().ToString()); // Authenticate the resource owner
+            await SetLocalCookie(authenticatedUser.Claims, Guid.NewGuid().ToString()).ConfigureAwait(false); // Authenticate the resource owner
             return RedirectToAction("Index", "User", new { area = "UserManagement" });
         }
         
@@ -254,7 +258,7 @@ namespace SimpleIdServer.Authenticate.SMS.Controllers
                 throw new ArgumentNullException(nameof(viewModel.Code));
             }
 
-            await SetUser();
+            await SetUser().ConfigureAwait(false);
             var uiLocales = DefaultLanguage;
             // 1. Decrypt the request
             var request = _dataProtector.Unprotect<AuthorizationRequest>(viewModel.Code);
@@ -265,7 +269,7 @@ namespace SimpleIdServer.Authenticate.SMS.Controllers
                 ResourceOwner resourceOwner = null;
                 try
                 {
-                    resourceOwner = await _smsAuthenticationOperation.Execute(viewModel.PhoneNumber);
+                    resourceOwner = await _smsAuthenticationOperation.Execute(viewModel.PhoneNumber).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -279,7 +283,7 @@ namespace SimpleIdServer.Authenticate.SMS.Controllers
                     claims.Add(new Claim(ClaimTypes.AuthenticationInstant,
                         DateTimeOffset.UtcNow.ConvertToUnixTimestamp().ToString(CultureInfo.InvariantCulture),
                         ClaimValueTypes.Integer));
-                    await SetPasswordLessCookie(claims);
+                    await SetPasswordLessCookie(claims).ConfigureAwait(false);
                     try
                     {
                         return RedirectToAction("ConfirmCode", new { code = viewModel.Code });
@@ -292,8 +296,8 @@ namespace SimpleIdServer.Authenticate.SMS.Controllers
                 }
             }
 
-            await TranslateView(uiLocales);
-            await SetIdProviders(viewModel);
+            await TranslateView(uiLocales).ConfigureAwait(false);
+            await SetIdProviders(viewModel).ConfigureAwait(false);
             return View("OpenId", viewModel);
         }
 
@@ -305,7 +309,7 @@ namespace SimpleIdServer.Authenticate.SMS.Controllers
             {
                 ExpiresUtc = DateTime.UtcNow.AddMinutes(20),
                 IsPersistent = false
-            });
+            }).ConfigureAwait(false);
         }
     }
 }

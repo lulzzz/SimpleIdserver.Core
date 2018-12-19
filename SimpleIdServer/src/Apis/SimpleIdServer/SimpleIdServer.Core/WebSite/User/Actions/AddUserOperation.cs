@@ -1,20 +1,4 @@
-﻿#region copyright
-// Copyright 2015 Habart Thierry
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-#endregion
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -45,6 +29,7 @@ namespace SimpleIdServer.Core.WebSite.User.Actions
         private readonly IOpenIdEventSource _openidEventSource;
         private readonly IEnumerable<IUserClaimsEnricher> _userClaimsEnricherLst;
         private readonly ISubjectBuilder _subjectBuilder;
+        private readonly IPasswordSettingsRepository _passwordSettingsRepository;
 
         public AddUserOperation(IResourceOwnerRepository resourceOwnerRepository, 
             IClaimRepository claimRepository,
@@ -52,7 +37,8 @@ namespace SimpleIdServer.Core.WebSite.User.Actions
             IAccountFilter accountFilter, 
             IOpenIdEventSource openIdEventSource,
             IEnumerable<IUserClaimsEnricher> userClaimsEnricherLst,
-            ISubjectBuilder subjectBuilder)
+            ISubjectBuilder subjectBuilder,
+            IPasswordSettingsRepository passwordSettingsRepository)
         {
             _resourceOwnerRepository = resourceOwnerRepository;
             _claimRepository = claimRepository;
@@ -61,6 +47,7 @@ namespace SimpleIdServer.Core.WebSite.User.Actions
             _openidEventSource = openIdEventSource;
             _userClaimsEnricherLst = userClaimsEnricherLst;
             _subjectBuilder = subjectBuilder;
+            _passwordSettingsRepository = passwordSettingsRepository;
         }
 
         public async Task<string> Execute(AddUserParameter addUserParameter, string issuer = null)
@@ -133,13 +120,20 @@ namespace SimpleIdServer.Core.WebSite.User.Actions
                 }
             }
 
+            var psettings = await _passwordSettingsRepository.Get().ConfigureAwait(false);
+            var expiresIn = DateTime.UtcNow.AddSeconds(psettings.PasswordExpiresIn);
+
             // 4. Add the resource owner.
             var newResourceOwner = new ResourceOwner
             {
                 Id = subject,
                 Claims = newClaims,
                 TwoFactorAuthentication = string.Empty,
-                IsLocalAccount = true,
+                CreateDateTime = DateTime.UtcNow,
+                NumberOfAttempts = 0,
+                UpdateDateTime = DateTime.UtcNow,
+                IsBlocked = false,
+                PasswordExpirationDateTime = expiresIn,
                 Password = PasswordHelper.ComputeHash(addUserParameter.Password)
             };                        
             if (!await _resourceOwnerRepository.InsertAsync(newResourceOwner))

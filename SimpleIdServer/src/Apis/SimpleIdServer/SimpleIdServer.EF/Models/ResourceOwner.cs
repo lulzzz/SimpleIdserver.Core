@@ -30,9 +30,13 @@ namespace SimpleIdServer.EF.Models
         /// </summary>
         public string Password { get; set; }
         /// <summary>
-        /// Gets or sets local account
+        /// Gets or sets the password expiration datetime.
         /// </summary>
-        public bool IsLocalAccount { get; set; }
+        public DateTime PasswordExpirationDateTime { get; set; }
+        /// <summary>
+        /// Gets or sets the blocked datetime.
+        /// </summary>
+        public DateTime BlockedDateTime { get; set; }
         /// <summary>
         /// Gets or sets the two factor authentication
         /// </summary>
@@ -57,5 +61,13 @@ namespace SimpleIdServer.EF.Models
         /// Gets or sets the update datetime.
         /// </summary>
         public DateTime UpdateDateTime { get; set; }
+        /// <summary>
+        /// Gets or sets is blocked.
+        /// </summary>
+        public bool IsBlocked { get; set; }
+        /// <summary>
+        /// Gets or sets the number of attemps.
+        /// </summary>
+        public int NumberOfAttempts { get; set; }
     }
 }

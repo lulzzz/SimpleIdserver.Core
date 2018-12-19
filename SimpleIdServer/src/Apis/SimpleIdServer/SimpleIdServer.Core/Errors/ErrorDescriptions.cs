@@ -140,5 +140,6 @@ namespace SimpleIdServer.Core.Errors
         public const string TheResourceOwnerCannotBeAdded = "An error occured while trying to insert the resource owner";
         public const string TheRefreshTokenCanBeUsedOnlyByTheSameIssuer = "the refresh token can be used only by the same issuer";
         public const string TheTokenIsNotAValidResourceOwnerToken = "not a valid resource owner token";
+        public const string ThePasswordMustRespects = "password must respects : {0}";
     }
 }

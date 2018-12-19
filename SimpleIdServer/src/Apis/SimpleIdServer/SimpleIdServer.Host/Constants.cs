@@ -14,9 +14,8 @@
 // limitations under the License.
 #endregion
 
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using SimpleIdServer.Core.Results;
+using System.Collections.Generic;
 
 namespace SimpleIdServer.Host
 {
@@ -28,6 +27,7 @@ namespace SimpleIdServer.Host
             public const string ExternalCookieName = "SimpleIdServer-External";
             public const string PasswordLessCookieName = "SimpleIdServer-PasswordLess";
             public const string TwoFactorCookieName = "SimpleIdServer-TwoFactorAuth";
+            public const string ChangePasswordCookieName = "SimpleIdServer-ChangePassword";
         }
 
         public static Dictionary<IdentityServerEndPoints, string> MappingIdentityServerEndPointToPartialUrl = new Dictionary<IdentityServerEndPoints, string>

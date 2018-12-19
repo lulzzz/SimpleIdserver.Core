@@ -88,12 +88,15 @@ namespace SimpleIdServer.EF.Extensions
             return new Domain.ResourceOwner
             {
                 Id = resourceOwner.Id,
-                IsLocalAccount = resourceOwner.IsLocalAccount,
+                BlockedDateTime = resourceOwner.BlockedDateTime,
+                IsBlocked = resourceOwner.IsBlocked,
+                PasswordExpirationDateTime = resourceOwner.PasswordExpirationDateTime,
                 TwoFactorAuthentication = resourceOwner.TwoFactorAuthentication,
                 Claims = claims,
                 Password = resourceOwner.Password,
                 CreateDateTime = resourceOwner.CreateDateTime,
-                UpdateDateTime = resourceOwner.UpdateDateTime
+                UpdateDateTime = resourceOwner.UpdateDateTime,
+                NumberOfAttempts = resourceOwner.NumberOfAttempts
             };
         }
 
