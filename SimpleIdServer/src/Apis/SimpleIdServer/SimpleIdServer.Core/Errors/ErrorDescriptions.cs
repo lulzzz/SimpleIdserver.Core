@@ -141,5 +141,6 @@ namespace SimpleIdServer.Core.Errors
         public const string TheRefreshTokenCanBeUsedOnlyByTheSameIssuer = "the refresh token can be used only by the same issuer";
         public const string TheTokenIsNotAValidResourceOwnerToken = "not a valid resource owner token";
         public const string ThePasswordMustRespects = "password must respects : {0}";
+        public const string ThePasswordIsNotCorrect = "password is not correct";
     }
 }

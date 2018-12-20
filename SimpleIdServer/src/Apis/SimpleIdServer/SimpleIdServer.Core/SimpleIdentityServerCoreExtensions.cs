@@ -137,6 +137,7 @@ namespace SimpleIdServer.Core
             serviceCollection.AddTransient<IResourceOwnerAuthenticateHelper, ResourceOwnerAuthenticateHelper>();
             serviceCollection.AddTransient<IAmrHelper, AmrHelper>();
             serviceCollection.AddTransient<IRevokeTokenParameterValidator, RevokeTokenParameterValidator>();
+            serviceCollection.AddTransient<IChangePasswordAction, ChangePasswordAction>();
             serviceCollection.AddSingleton<IClientPasswordService, DefaultClientPasswordService>();
             serviceCollection.AddSingleton<IConfigurationService>(new DefaultConfigurationService(configurationOptions));
             serviceCollection.AddSingleton<IClaimRepository>(new DefaultClaimRepository(claims));

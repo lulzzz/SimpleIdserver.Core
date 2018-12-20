@@ -45,7 +45,9 @@
         </div>
         <div>
             @Html.ValidationMessage("invalid_credentials")
-            <form name="form" method="POST" action="@Url.Action("LocalLogin", "Authenticate", new { area = "pwd" })">
+            @using (Html.BeginForm("LocalLogin", "Authenticate", new { area = "pwd" }, FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
                 <fieldset>
                     @if (loginState != null && loginState.Errors.Any())
                     {
@@ -89,7 +91,7 @@
                         <button type="submit" class="btn btn-primary">@ViewBag.Translations["login"]</button>
                     </div>
                 </fieldset>
-            </form>
+             }
         </div>
     </div>
 </div>

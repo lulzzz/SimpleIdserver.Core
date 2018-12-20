@@ -37,6 +37,11 @@ namespace SimpleIdServer.Core.WebSite.Authenticate.Actions
                 throw new IdentityServerException(Errors.ErrorCodes.InternalError, Errors.ErrorDescriptions.TheResourceOwnerDoesntExist);
             }
 
+            if (resourceOwner.Password != PasswordHelper.ComputeHash(changePasswordParameter.ActualPassword))
+            {
+                throw new IdentityServerException(Errors.ErrorCodes.InternalError, Errors.ErrorDescriptions.ThePasswordIsNotCorrect);
+            }
+
             var passwordSettings = await _passwordSettingsRepository.Get().ConfigureAwait(false);
             if (passwordSettings.IsRegexEnabled)
             {
@@ -48,6 +53,7 @@ namespace SimpleIdServer.Core.WebSite.Authenticate.Actions
             }
 
             resourceOwner.Password = PasswordHelper.ComputeHash(changePasswordParameter.NewPassword);
+            resourceOwner.PasswordExpirationDateTime = DateTime.UtcNow.AddSeconds(passwordSettings.PasswordExpiresIn);
             await _resourceOwnerRepository.UpdateAsync(resourceOwner).ConfigureAwait(false);
             return true;
         }

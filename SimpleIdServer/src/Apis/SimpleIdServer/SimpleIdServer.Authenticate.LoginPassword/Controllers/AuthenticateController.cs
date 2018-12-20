@@ -36,8 +36,6 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
     [Area(Constants.AMR)]
     public class AuthenticateController : BaseAuthenticateController
     {
-        private const string CHANGE_PASSWORD_COOKIE_NAME = "";
-
         private readonly IResourceOwnerAuthenticateHelper _resourceOwnerAuthenticateHelper;
 
         public AuthenticateController(
@@ -81,6 +79,7 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> LocalLogin(LocalAuthenticationViewModel authorizeViewModel)
         {
             var authenticatedUser = await SetUser().ConfigureAwait(false);
@@ -98,7 +97,7 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
             {
                 await TranslateView(DefaultLanguage).ConfigureAwait(false);
                 var viewModel = new AuthorizeViewModel();
-                await SetIdProviders(viewModel);
+                await SetIdProviders(viewModel).ConfigureAwait(false);
                 return View("Index", viewModel);
             }
 
@@ -120,7 +119,7 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
                 var subject = claims.First(c => c.Type == Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject).Value;
                 if (string.IsNullOrWhiteSpace(resourceOwner.TwoFactorAuthentication))
                 {
-                    await SetLocalCookie(claims, Guid.NewGuid().ToString());
+                    await SetLocalCookie(claims, Guid.NewGuid().ToString()).ConfigureAwait(false);
                     _simpleIdentityServerEventSource.AuthenticateResourceOwner(subject);
                     return RedirectToAction("Index", "User", new { area = "UserManagement" });
                 }
@@ -130,7 +129,7 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
                 // 2.2. Send confirmation code
                 try
                 {
-                    var code = await _authenticateActions.GenerateAndSendCode(subject);
+                    var code = await _authenticateActions.GenerateAndSendCode(subject).ConfigureAwait(false);
                     _simpleIdentityServerEventSource.GetConfirmationCode(code);
                     return RedirectToAction("SendCode");
                 }
@@ -166,6 +165,7 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
         }
         
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> LocalLoginOpenId(OpenidLocalAuthenticationViewModel viewModel)
         {
             if (viewModel == null)
@@ -288,21 +288,63 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
             }
 
             await TranslateView(DefaultLanguage).ConfigureAwait(false);
-            return View(new RenewPasswordViewModel());
+            return View(new RenewPasswordViewModel
+            {
+                Code = code
+            });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangePassword(RenewPasswordViewModel viewModel)
         {
+            await SetUser().ConfigureAwait(false);
+            await TranslateView(DefaultLanguage).ConfigureAwait(false);
+            var authenticatedUser = await _authenticationService.GetAuthenticatedUser(this, Host.Constants.CookieNames.ChangePasswordCookieName).ConfigureAwait(false);
+            if (authenticatedUser == null)
+            {
+                return new UnauthorizedResult();
+            }
+
             if (!ModelState.IsValid)
             {
-                await TranslateView(DefaultLanguage).ConfigureAwait(false);
                 return View(viewModel);
             }
 
+            try
+            {
+                var claims = authenticatedUser.Claims.ToList();
+                var subject = authenticatedUser.GetSubject();
+                var sessionId = Guid.NewGuid().ToString();
+                // 1. Change the password.
+                await _authenticateActions.ChangePassword(new ChangePasswordParameter
+                {
+                    NewPassword = viewModel.NewPassword,
+                    ActualPassword = viewModel.ActualPassword,
+                    Subject = authenticatedUser.GetSubject()
+                }).ConfigureAwait(false);
+                // 2. Remove the temporary cookie and authenticate the user.
+                await _authenticationService.SignOutAsync(HttpContext, Host.Constants.CookieNames.ChangePasswordCookieName, new AuthenticationProperties()).ConfigureAwait(false);
+                await SetLocalCookie(claims, sessionId).ConfigureAwait(false);
+                _simpleIdentityServerEventSource.AuthenticateResourceOwner(subject);
 
-            return View();
+                // 3. Redirect to the user profile if no code is passed.
+                if (string.IsNullOrWhiteSpace(viewModel.Code))
+                {
+                    return RedirectToAction("Index", "User", new { area = "UserManagement" });
+                }
+
+                // 4. Continue the OPENID redirection process.
+                var request = _dataProtector.Unprotect<AuthorizationRequest>(viewModel.Code);
+                var issuerName = Request.GetAbsoluteUriWithVirtualPath();
+                var actionResult = await _authenticateHelper.ProcessRedirection(request.ToParameter(), viewModel.Code, authenticatedUser.GetSubject(), authenticatedUser.Claims.ToList(),  issuerName).ConfigureAwait(false);
+                return this.CreateRedirectionFromActionResult(actionResult, request);
+            }
+            catch(Exception ex)
+            {
+                ModelState.AddModelError("error_message", ex.Message);
+                return View(viewModel);
+            }
         }
 
         private async Task<IActionResult> DisplayError(string errorMessage)
