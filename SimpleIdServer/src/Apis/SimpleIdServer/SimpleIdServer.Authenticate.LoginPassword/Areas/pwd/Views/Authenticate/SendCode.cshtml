@@ -19,7 +19,7 @@
                 @using (Html.BeginForm("SendCode", "Authenticate", new { area = "pwd" }, FormMethod.Post))
                 {
                     @Html.AntiForgeryToken()
-                    @Html.ValidationMessage("message_error")
+                    @Html.ValidationMessage("message_error", new { @class = "text-danger" })
                     <!-- Authorization request code -->
                     <input type="hidden" value="@Model.AuthRequestCode" name="AuthRequestCode" />
                     <!-- Claim -->
@@ -27,13 +27,13 @@
                     <fieldset class="form-group">
                         <label class="control-label">@Model.ClaimName</label>
                         <input type="text" class="form-control" value="@Model.ClaimValue" name="ClaimValue" />
-                        @Html.ValidationMessage("ClaimValue")
+                        @Html.ValidationMessage("ClaimValue", new { @class = "text-danger" })
                     </fieldset>
                     <!-- Confirmation code -->
                     <fieldset class="form-group">
                         <label class="control-label">@ViewBag.Translations["code"]</label>
                         <input type="text" class="form-control" value="@Model.Code" name="Code" />
-                        @Html.ValidationMessage("Code")
+                        @Html.ValidationMessage("Code", new { @class = "text-danger" })
                     </fieldset>
                     <!-- Submit buttons code -->
                     <fieldset class="form-group">

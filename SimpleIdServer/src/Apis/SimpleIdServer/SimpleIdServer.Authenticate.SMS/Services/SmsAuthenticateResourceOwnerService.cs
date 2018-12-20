@@ -47,5 +47,10 @@ namespace SimpleIdServer.Authenticate.SMS.Services
         {
             return ResourceOwnerRepository.GetResourceOwnerByClaim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber, login);
         }
+
+        public override Task Validate(ResourceOwner user)
+        {
+            return Task.FromResult(0);
+        }
     }
 }

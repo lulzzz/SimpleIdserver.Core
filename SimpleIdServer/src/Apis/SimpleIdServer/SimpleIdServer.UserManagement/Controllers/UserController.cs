@@ -100,21 +100,33 @@ namespace SimpleIdServer.UserManagement.Controllers
             }
             
             // 1. Validate the view model.
-            await TranslateUserEditView(DefaultLanguage);
-            var authenticatedUser = await SetUser();
+            await TranslateUserEditView(DefaultLanguage).ConfigureAwait(false);
+            var authenticatedUser = await SetUser().ConfigureAwait(false);
             ViewBag.IsUpdated = false;
-            viewModel.Validate(ModelState);
             if (!ModelState.IsValid)
             {
-                return await GetEditView(authenticatedUser);
+                return await GetEditView(authenticatedUser).ConfigureAwait(false);
             }
 
-            // 2. Create a new user if he doesn't exist or update the credentials.
-            var resourceOwner = await _userActions.GetUser(authenticatedUser);
-            var subject = authenticatedUser.GetSubject();
-            await _userActions.UpdateCredentials(subject, viewModel.Password);
-            ViewBag.IsUpdated = true;
-            return await GetEditView(authenticatedUser);
+            // 2. Update the credentials
+            try
+            {
+                var resourceOwner = await _userActions.GetUser(authenticatedUser).ConfigureAwait(false);
+                var subject = authenticatedUser.GetSubject();
+                await _userActions.UpdateCredentials(new Core.Parameters.ChangePasswordParameter
+                {
+                    ActualPassword = viewModel.ActualPassword,
+                    NewPassword = viewModel.NewPassword,
+                    Subject = subject
+                }).ConfigureAwait(false);
+                ViewBag.IsUpdated = true;
+                return await GetEditView(authenticatedUser).ConfigureAwait(false);
+            }
+            catch(Exception ex)
+            {
+                ModelState.AddModelError("error_message", ex.Message);
+                return await GetEditView(authenticatedUser).ConfigureAwait(false);
+            }
         }
 
         [HttpPost]
@@ -368,7 +380,11 @@ namespace SimpleIdServer.UserManagement.Controllers
                 Core.Constants.StandardTranslationCodes.UserIsCreated,
                 Core.Constants.StandardTranslationCodes.TwoFactor,
                 Core.Constants.StandardTranslationCodes.NoTwoFactorAuthenticator,
-                Core.Constants.StandardTranslationCodes.NoTwoFactorAuthenticatorSelected
+                Core.Constants.StandardTranslationCodes.NoTwoFactorAuthenticatorSelected,
+                Core.Constants.StandardTranslationCodes.ActualPassword,
+                Core.Constants.StandardTranslationCodes.ConfirmActualPassword,
+                Core.Constants.StandardTranslationCodes.NewPassword,
+                Core.Constants.StandardTranslationCodes.ConfirmNewPassword
             });
 
             ViewBag.Translations = translations;

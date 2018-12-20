@@ -1,20 +1,4 @@
-﻿#region copyright
-// Copyright 2015 Habart Thierry
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-#endregion
-
-using Moq;
+﻿using Moq;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -42,6 +26,7 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.User
         private Mock<ISubjectBuilder> _subjectBuilderStub;
         private Mock<IAccountFilter> _accountFilterStub;
         private Mock<IUserClaimsEnricher> _userClaimsEnricherStub;
+        private Mock<IPasswordSettingsRepository> _passwordSettingsRepositoryStub;
         private IAddUserOperation _addResourceOwnerAction;
         
         [Fact]
@@ -84,6 +69,10 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.User
                 IsValid = true
             }));
             _resourceOwnerRepositoryStub.Setup(r => r.InsertAsync(It.IsAny<ResourceOwner>())).Returns(Task.FromResult(false));
+            _passwordSettingsRepositoryStub.Setup(p => p.Get()).Returns(Task.FromResult(new PasswordSettings
+            {
+                PasswordExpiresIn = 200
+            }));
             var parameter = new AddUserParameter("password");
 
             // ACT
@@ -109,6 +98,10 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.User
             _resourceOwnerRepositoryStub.Setup(r => r.GetAsync(It.IsAny<string>()))
                 .Returns(Task.FromResult((ResourceOwner)null));
             _resourceOwnerRepositoryStub.Setup(r => r.InsertAsync(It.IsAny<ResourceOwner>())).Returns(Task.FromResult(true));
+            _passwordSettingsRepositoryStub.Setup(p => p.Get()).Returns(Task.FromResult(new PasswordSettings
+            {
+                PasswordExpiresIn = 200
+            }));
 
             // ACT
             await _addResourceOwnerAction.Execute(parameter, null);
@@ -127,6 +120,8 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.User
             _subjectBuilderStub = new Mock<ISubjectBuilder>();
             _accountFilterStub = new Mock<IAccountFilter>();
             _userClaimsEnricherStub = new Mock<IUserClaimsEnricher>();
+            _passwordSettingsRepositoryStub = new Mock<IPasswordSettingsRepository>();
+
             _addResourceOwnerAction = new AddUserOperation(
                 _resourceOwnerRepositoryStub.Object,
                 _claimsRepositoryStub.Object,
@@ -134,7 +129,8 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.User
                 _accountFilterStub.Object,
                 _openidEventSourceStub.Object,
                 new List<IUserClaimsEnricher> { _userClaimsEnricherStub.Object },
-                _subjectBuilderStub.Object);
+                _subjectBuilderStub.Object,
+                _passwordSettingsRepositoryStub.Object);
         }
     }
 }

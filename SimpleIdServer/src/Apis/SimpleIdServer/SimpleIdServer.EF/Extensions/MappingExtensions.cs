@@ -12,6 +12,25 @@ namespace SimpleIdServer.EF.Extensions
     {
         #region To Domain Objects
 
+        public static Domain.PasswordSettings ToDomain(this Model.PasswordSettings passwordSettings)
+        {
+            if (passwordSettings == null)
+            {
+                throw new ArgumentNullException(nameof(passwordSettings));
+            }
+
+            return new Domain.PasswordSettings
+            {
+                AuthenticationIntervalsInSeconds = passwordSettings.AuthenticationIntervalsInSeconds,
+                IsBlockAccountPolicyEnabled = passwordSettings.IsBlockAccountPolicyEnabled,
+                IsRegexEnabled = passwordSettings.IsRegexEnabled,
+                NumberOfAuthenticationAttempts = passwordSettings.NumberOfAuthenticationAttempts,
+                PasswordDescription =  passwordSettings.PasswordDescription,
+                PasswordExpiresIn = passwordSettings.PasswordExpiresIn,
+                RegularExpression = passwordSettings.RegularExpression
+            };
+        }
+
         public static Domain.ResourceOwnerProfile ToDomain(this Model.Profile profile)
         {
             if (profile == null)

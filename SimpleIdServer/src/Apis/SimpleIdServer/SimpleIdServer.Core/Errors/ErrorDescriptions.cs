@@ -142,5 +142,8 @@ namespace SimpleIdServer.Core.Errors
         public const string TheTokenIsNotAValidResourceOwnerToken = "not a valid resource owner token";
         public const string ThePasswordMustRespects = "password must respects : {0}";
         public const string ThePasswordIsNotCorrect = "password is not correct";
+        public const string TheUserAccountIsBlocked = "the user account is blocked";
+        public const string TooManyAuthAttemps = "too many authentication attemps";
+        public const string PasswordHasExpired = "password has expired";
     }
 }

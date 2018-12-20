@@ -164,6 +164,72 @@ namespace SimpleIdServer.Host
                 LanguageTag = "en",
                 Code = Core.Constants.StandardTranslationCodes.HashedPassword,
                 Value = "Hashed password"
+            },
+            new Translation
+            {
+                LanguageTag = "en",
+                Code = Core.Constants.StandardTranslationCodes.ActualPassword,
+                Value = "Current password"
+            },
+            new Translation
+            {
+                LanguageTag = "en",
+                Code = Core.Constants.StandardTranslationCodes.ConfirmActualPassword,
+                Value = "Confirm current password"
+            },
+            new Translation
+            {
+                LanguageTag = "en",
+                Code = Core.Constants.StandardTranslationCodes.NewPassword,
+                Value = "New password"
+            },
+            new Translation
+            {
+                LanguageTag = "en",
+                Code = Core.Constants.StandardTranslationCodes.ConfirmNewPassword,
+                Value = "Confirm new password"
+            },
+            new Translation
+            {
+                LanguageTag = "en",
+                Code = Core.Constants.StandardTranslationCodes.Update,
+                Value = "Update"
+            },
+            new Translation
+            {
+                LanguageTag = "en",
+                Code = Core.Constants.StandardTranslationCodes.RenewPassword,
+                Value = "Refresh password"
+            },
+            new Translation
+            {
+                LanguageTag = "en",
+                Code = Core.Constants.StandardTranslationCodes.Credentials,
+                Value = "Credentials"
+            },
+            new Translation
+            {
+                LanguageTag = "en",
+                Code = Core.Constants.StandardTranslationCodes.TwoFactor,
+                Value = "Two factor"
+            },
+            new Translation
+            {
+                LanguageTag = "en",
+                Code = Core.Constants.StandardTranslationCodes.NoTwoFactorAuthenticator,
+                Value = "No two factor authentication"
+            },
+            new Translation
+            {
+                LanguageTag = "en",
+                Code = Core.Constants.StandardTranslationCodes.NoTwoFactorAuthenticatorSelected,
+                Value = "No two factor authentication selected"
+            },
+            new Translation
+            {
+                LanguageTag = "en",
+                Code = Core.Constants.StandardTranslationCodes.RememberMyLoginCode,
+                Value = "Remember credentials"
             }
         };
 

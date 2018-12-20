@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -110,12 +109,6 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
 
                 var claims = resourceOwner.Claims;
                 claims.Add(new Claim(ClaimTypes.AuthenticationInstant, DateTimeOffset.UtcNow.ConvertToUnixTimestamp().ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer));
-                if (resourceOwner.PasswordExpirationDateTime < DateTime.UtcNow)
-                {
-                    await SetChangePasswordCookie(claims).ConfigureAwait(false);
-                    return RedirectToAction("ChangePassword", "Authenticate", new { area = Constants.AMR });
-                }
-
                 var subject = claims.First(c => c.Type == Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject).Value;
                 if (string.IsNullOrWhiteSpace(resourceOwner.TwoFactorAuthentication))
                 {
@@ -153,6 +146,11 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
             catch(IdentityServerUserPasswordInvalidException)
             {
                 return await DisplayError("the login / password is invalid").ConfigureAwait(false);
+            }
+            catch (IdentityServerPasswordExpiredException ex)
+            {
+                await SetChangePasswordCookie(ex.ResourceOwner.Claims).ConfigureAwait(false);
+                return RedirectToAction("ChangePassword", "Authenticate", new { area = Constants.AMR });
             }
             catch (IdentityServerUserTooManyRetryException ex)
             {
@@ -206,12 +204,6 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
                     request.ToParameter(),
                     viewModel.Code, issuerName);
                 var subject = actionResult.Claims.First(c => c.Type == Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject).Value;
-                if (actionResult.PasswordExpirationDateTime < DateTime.UtcNow)
-                {
-                    await SetChangePasswordCookie(actionResult.Claims).ConfigureAwait(false);
-                    return RedirectToAction("ChangePassword", "Authenticate", new { area = Constants.AMR, code = viewModel.Code });
-                }
-
                 // 5. Two factor authentication.
                 if (!string.IsNullOrWhiteSpace(actionResult.TwoFactor))
                 {
@@ -260,6 +252,11 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
             {
                 _simpleIdentityServerEventSource.Failure("the login / password is invalid");
                 ModelState.AddModelError("invalid_credentials", "the login / password is invalid");
+            }
+            catch (IdentityServerPasswordExpiredException ex)
+            {
+                await SetChangePasswordCookie(ex.ResourceOwner.Claims).ConfigureAwait(false);
+                return RedirectToAction("ChangePassword", "Authenticate", new { area = Constants.AMR, code = viewModel.Code });
             }
             catch (IdentityServerUserTooManyRetryException ex)
             {

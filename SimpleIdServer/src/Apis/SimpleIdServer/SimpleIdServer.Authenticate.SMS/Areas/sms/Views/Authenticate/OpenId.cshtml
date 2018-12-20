@@ -40,30 +40,22 @@
             </h2>
         </div>
         <div>
-            @Html.ValidationMessage("message_error")
-            <form name="form" method="POST" action="@Url.Action("LocalLoginOpenId", "Authenticate", new { area = "sms" })">
+            @Html.ValidationMessage("message_error", new { @class = "text-danger" })
+            @using (Html.BeginForm("LocalLoginOpenId", "Authenticate", new { area = "sms" }, FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
                 <fieldset>
                     <input type="hidden" value="@Model.Code" name="Code" />
-                    @if (phoneNumberState != null && phoneNumberState.Errors.Any())
-                    {
-                        <div class="form-group has-error">
-                            <label class="control-label">@ViewBag.Translations["phone"]</label>
-                            <span class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-placement="right" title="@string.Join(",", phoneNumberState.Errors.Select(e => e.ErrorMessage))"></span>
-                            <input maxlength="100" class="form-control" name="PhoneNumber" type="text" />
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="form-group">
-                            <label class="control-label">@ViewBag.Translations["phone"]</label>
-                            <input maxlength="100" class="form-control" name="PhoneNumber" type="text" />
-                        </div>
-                    }
+                    <div class="form-group">
+                        <label class="control-label">@ViewBag.Translations["phone"]</label>
+                        <input maxlength="100" class="form-control" name="PhoneNumber" type="text" />
+                        @Html.ValidationMessage("PhoneNumber", new { @class = "text-danger" })
+                    </div>
                     <div class="form-group">
                         <button type="submit" class="btn btn-primary">@ViewBag.Translations["login"]</button>
                     </div>
                 </fieldset>
-            </form>
+            }
         </div>
     </div>
 </div>

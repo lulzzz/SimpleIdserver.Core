@@ -19,6 +19,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Parameters;
+using SimpleIdServer.Core.WebSite.Authenticate.Actions;
 using SimpleIdServer.Core.WebSite.User.Actions;
 
 namespace SimpleIdServer.Core.WebSite.User
@@ -28,7 +29,7 @@ namespace SimpleIdServer.Core.WebSite.User
         Task<IEnumerable<Common.Models.Consent>> GetConsents(ClaimsPrincipal claimsPrincipal);
         Task<bool> DeleteConsent(string consentId);
         Task<ResourceOwner> GetUser(ClaimsPrincipal claimsPrincipal);
-        Task<bool> UpdateCredentials(string subject, string newPassword);
+        Task<bool> UpdateCredentials(ChangePasswordParameter changePasswordParameter);
         Task<bool> UpdateClaims(string subject, IEnumerable<ClaimAggregate> claims);
         Task<bool> UpdateTwoFactor(string subject, string twoFactorAuth);
         Task<string> AddUser(AddUserParameter addUserParameter, string issuer = null);
@@ -39,27 +40,27 @@ namespace SimpleIdServer.Core.WebSite.User
         private readonly IGetConsentsOperation _getConsentsOperation;
         private readonly IRemoveConsentOperation _removeConsentOperation;
         private readonly IGetUserOperation _getUserOperation;
-        private readonly IUpdateUserCredentialsOperation _updateUserCredentialsOperation;
         private readonly IUpdateUserClaimsOperation _updateUserClaimsOperation;
         private readonly IAddUserOperation _addUserOperation;
         private readonly IUpdateUserTwoFactorAuthenticatorOperation _updateUserTwoFactorAuthenticatorOperation;
+        private readonly IChangePasswordAction _changePasswordAction;
 
         public UserActions(
             IGetConsentsOperation getConsentsOperation,
             IRemoveConsentOperation removeConsentOperation,
             IGetUserOperation getUserOperation,
-            IUpdateUserCredentialsOperation updateUserCredentialsOperation,
             IUpdateUserClaimsOperation updateUserClaimsOperation,
             IAddUserOperation addUserOperation,
-            IUpdateUserTwoFactorAuthenticatorOperation updateUserTwoFactorAuthenticatorOperation)
+            IUpdateUserTwoFactorAuthenticatorOperation updateUserTwoFactorAuthenticatorOperation,
+            IChangePasswordAction changePasswordAction)
         {
             _getConsentsOperation = getConsentsOperation;
             _removeConsentOperation = removeConsentOperation;
             _getUserOperation = getUserOperation;
-            _updateUserCredentialsOperation = updateUserCredentialsOperation;
             _updateUserClaimsOperation = updateUserClaimsOperation;
             _addUserOperation = addUserOperation;
             _updateUserTwoFactorAuthenticatorOperation = updateUserTwoFactorAuthenticatorOperation;
+            _changePasswordAction = changePasswordAction;
         }
 
         public Task<IEnumerable<Common.Models.Consent>> GetConsents(ClaimsPrincipal claimsPrincipal)
@@ -77,9 +78,9 @@ namespace SimpleIdServer.Core.WebSite.User
             return _getUserOperation.Execute(claimsPrincipal);
         }
 
-        public Task<bool> UpdateCredentials(string subject, string newPassword)
+        public Task<bool> UpdateCredentials(ChangePasswordParameter changePasswordParameter)
         {
-            return _updateUserCredentialsOperation.Execute(subject, newPassword);
+            return _changePasswordAction.Execute(changePasswordParameter);
         }
 
         public Task<bool> UpdateClaims(string subject, IEnumerable<ClaimAggregate> claims)

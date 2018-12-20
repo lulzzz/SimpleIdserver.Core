@@ -1,7 +1,5 @@
 @{
     ViewBag.Title = "Authenticate";
-    var loginState = ViewData.ModelState["Login"];
-    var passwordState = ViewData.ModelState["Password"];
 }
 
 @model SimpleIdServer.Authenticate.Basic.ViewModels.AuthorizeOpenIdViewModel
@@ -44,44 +42,22 @@
             </h2>
         </div>
         <div>
-            @Html.ValidationMessage("invalid_credentials")
+            @Html.ValidationMessage("invalid_credentials", new { @class = "text-danger" })
             @using (Html.BeginForm("LocalLoginOpenId", "Authenticate", new { area = "pwd" }, FormMethod.Post))
             {
                 @Html.AntiForgeryToken()
                 <fieldset>
                     <input type="hidden" value="@Model.Code" name="Code" />
-                    @if (loginState != null && loginState.Errors.Any())
-                    {
-                        <div class="form-group has-error">
-                            <label class="control-label">@ViewBag.Translations["username"]</label>
-                            <span class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-placement="right" title="@string.Join(",", loginState.Errors.Select(e => e.ErrorMessage))"></span>
-                            <input maxlength="100" class="form-control" name="Login" type="text" />
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="form-group">
-                            <label>@ViewBag.Translations["username"]</label>
-                            <input maxlength="100" class="form-control" name="Login" type="text" />
-                        </div>
-                    }
-
-                    @if (passwordState != null && passwordState.Errors.Any())
-                    {
-                        <div class="form-group has-error">
-                            <label class="control-label">@ViewBag.Translations["password"]</label>
-                            <span class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-placement="right" title="@string.Join(",", passwordState.Errors.Select(e => e.ErrorMessage))"></span>
-                            <input maxlength="100" class="form-control" name="Password" type="password" />
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="form-group">
-                            <label>@ViewBag.Translations["password"]</label>
-                            <input maxlength="100" class="form-control" name="Password" type="password" />
-                        </div>
-                    }
-
+                    <div class="form-group">
+                        <label class="control-label">@ViewBag.Translations["username"]</label>
+                        <input maxlength="100" class="form-control" name="Login" type="text" />
+                        @Html.ValidationMessage("Login", new { @class = "text-danger" })
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">@ViewBag.Translations["password"]</label>
+                        <input maxlength="100" class="form-control" name="Password" type="password" />
+                        @Html.ValidationMessage("Password", new { @class = "text-danger" })
+                    </div>
                     <div class="form-group">
                         <label>
                             <input type="checkbox" name="IsChecked" />

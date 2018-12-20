@@ -17,14 +17,14 @@
             <div class="panel-body">
                 @using (Html.BeginForm("ConfirmCode", "Authenticate", new { area = "sms" }, FormMethod.Post))
                 {
-                    @Html.ValidationMessage("message_error")
+                    @Html.ValidationMessage("message_error", new { @class = "text-danger" })
                     @Html.AntiForgeryToken()
                     @Html.HiddenFor(i => i.Code)
                     <!-- Confirmation code -->
                     <fieldset class="form-group">
                         <label class="control-label">@ViewBag.Translations["code"]</label>
-                        @Html.TextBoxFor(i => i.ConfirmationCode, new { @type = "number", @class = "form-control" })
-                        @Html.ValidationMessageFor(m => m.Code, "", new { @class = "text-danger" })
+                        <input type="number" class="form-control" name="ConfirmationCode" />
+                        @Html.ValidationMessage("ConfirmationCode", new { @class = "text-danger" })
                     </fieldset>
                     <!-- Submit buttons code -->
                     <fieldset class="form-group">

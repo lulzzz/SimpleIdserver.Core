@@ -4,14 +4,6 @@
     ViewBag.IsConsentDisplayed = false;
     ViewBag.IsIndexDisplayed = false;
     ViewBag.IsProfileDisplayed = false;
-    var errors = new List<string>();
-    foreach(var node in ViewData.ModelState)
-    {
-        foreach(var error in node.Value.Errors)
-        {
-            errors.Add(error.ErrorMessage);
-        }
-    }
 }
 
 @model SimpleIdServer.UserManagement.ViewModels.UpdateResourceOwnerViewModel
@@ -20,18 +12,6 @@
     <h1>
         @ViewBag.Translations["edit_resource_owner"]
     </h1>
-
-    @if (errors.Count > 0)
-    {
-        <div class="alert alert-danger">
-            <ul>
-                @foreach (var error in errors)
-                {
-                    <li>@error</li>
-                }
-            </ul>
-        </div>
-    }
 
     @if (ViewBag.IsUpdated)
     {
@@ -44,20 +24,35 @@
         <div class="panel panel-default">
             <div class="panel-heading">@ViewBag.Translations["credentials"]</div>
             <div class="panel-body">
+                @Html.ValidationMessage("error_message", new { @class = "text-danger" })
                 <!-- Login -->
                 <fieldset class="form-group">
                     <label class="control-label">@ViewBag.Translations["login"]</label>
                     <input type="text" class="form-control" value="@Model.Credentials.Login" readonly />
                 </fieldset>
-                <!-- Password -->
+                <!-- Actual password -->
                 <fieldset class="form-group">
-                    <label class="control-label">@ViewBag.Translations["password"]</label>
-                    <input type="password" class="form-control" value="@Model.Credentials.Password" name="Password" placeholder="@ViewBag.Translations["your_password"]" />
+                    <label class="control-label">@ViewBag.Translations["actual_password"]</label>
+                    <input type="password" class="form-control" name="ActualPassword" />
+                    @Html.ValidationMessage("ActualPassword", new { @class = "text-danger" })
+                </fieldset>
+                <!-- Confirm actual password -->
+                <fieldset class="form-group">
+                    <label class="control-label">@ViewBag.Translations["confirm_actual_password"]</label>
+                    <input type="password" class="form-control" name="ConfirmActualPassword" />
+                    @Html.ValidationMessage("ConfirmActualPassword", new { @class = "text-danger" })
+                </fieldset>
+                <!-- New password -->
+                <fieldset class="form-group">
+                    <label class="control-label">@ViewBag.Translations["new_password"]</label>
+                    <input type="password" class="form-control" name="NewPassword" />
+                    @Html.ValidationMessage("NewPassword", new { @class = "text-danger" })
                 </fieldset>
                 <!-- Repeat password -->
                 <fieldset class="form-group">
-                    <label class="control-label">@ViewBag.Translations["repeat_password"]</label>
-                    <input type="password" class="form-control" value="@Model.Credentials.RepeatPassword" name="RepeatPassword" placeholder="@ViewBag.Translations["repeat_password"]" />
+                    <label class="control-label">@ViewBag.Translations["confirm_new_password"]</label>
+                    <input type="password" class="form-control" name="ConfirmNewPassword" />
+                    @Html.ValidationMessage("ConfirmNewPassword", new { @class = "text-danger" })
                 </fieldset>
                 <!-- Submit -->
                 <fieldset class="form-group">

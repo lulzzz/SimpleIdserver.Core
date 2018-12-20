@@ -120,7 +120,6 @@ namespace SimpleIdServer.Core
             serviceCollection.AddTransient<IRemoveConsentOperation, RemoveConsentOperation>();
             serviceCollection.AddTransient<IRevokeTokenAction, RevokeTokenAction>();
             serviceCollection.AddTransient<IGetUserOperation, GetUserOperation>();
-            serviceCollection.AddTransient<IUpdateUserCredentialsOperation, UpdateUserCredentialsOperation>();
             serviceCollection.AddTransient<IUpdateUserClaimsOperation, UpdateUserClaimsOperation>();
             serviceCollection.AddTransient<IAddUserOperation, AddUserOperation>();
             serviceCollection.AddTransient<IGenerateAndSendCodeAction, GenerateAndSendCodeAction>();

@@ -1,7 +1,9 @@
 ﻿using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Common.Repositories;
+using SimpleIdServer.Core.Exceptions;
 using SimpleIdServer.Core.Helpers;
 using SimpleIdServer.Core.Services;
+using System;
 using System.Threading.Tasks;
 
 namespace SimpleIdServer.Authenticate.LoginPassword.Services
@@ -28,6 +30,16 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Services
         public override Task<ResourceOwner> GetResourceOwner(string login)
         {
             return ResourceOwnerRepository.GetAsync(login);
+        }
+
+        public override Task Validate(ResourceOwner user)
+        {
+            if (user.PasswordExpirationDateTime < DateTime.UtcNow)
+            {
+                throw new IdentityServerPasswordExpiredException(user);
+            }
+
+            return Task.FromResult(0);
         }
     }
 }

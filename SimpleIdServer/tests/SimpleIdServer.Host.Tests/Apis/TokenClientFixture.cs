@@ -1,20 +1,4 @@
-﻿#region copyright
-// Copyright 2015 Habart Thierry
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-#endregion
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
@@ -303,6 +287,105 @@ namespace SimpleIdServer.Host.Tests.Apis
             Assert.Equal(HttpStatusCode.BadRequest, httpResult.StatusCode);
             Assert.Equal((string) "invalid_scope", (string) error.Error);
             Assert.Equal((string) "the scopes invalid are not allowed or invalid", (string) error.ErrorDescription);
+        }
+
+        [Fact]
+        public async Task When_Use_Password_GrantType_And_Account_Is_Blocked_Then_Exception_Is_Returned()
+        {
+            // ARRANGE
+            InitializeFakeObjects();
+            var request = new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("grant_type", "password"),
+                new KeyValuePair<string, string>("username", "blockeduser"),
+                new KeyValuePair<string, string>("password", "password"),
+                new KeyValuePair<string, string>("client_id", "client"),
+                new KeyValuePair<string, string>("scope", "role"),
+                new KeyValuePair<string, string>("client_secret", "client")
+            };
+            var body = new FormUrlEncodedContent(request);
+            var httpRequest = new HttpRequestMessage
+            {
+                Method = HttpMethod.Post,
+                Content = body,
+                RequestUri = new Uri($"{baseUrl}/token")
+            };
+
+            // ACT
+            var httpResult = await _server.Client.SendAsync(httpRequest);
+            var json = await httpResult.Content.ReadAsStringAsync().ConfigureAwait(false);
+            var error = JsonConvert.DeserializeObject<ErrorResponseWithState>(json);
+
+            // ASSERTS
+            Assert.Equal(HttpStatusCode.BadRequest, httpResult.StatusCode);
+            Assert.Equal((string)"invalid_grant", (string)error.Error);
+            Assert.Equal((string)"the user account is blocked", (string)error.ErrorDescription);
+        }
+
+        [Fact]
+        public async Task When_Use_Password_GrantType_And_TooManyAuthenticationAttemps_Then_Exception_Is_Returned()
+        {
+            // ARRANGE
+            InitializeFakeObjects();
+            var request = new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("grant_type", "password"),
+                new KeyValuePair<string, string>("username", "toomanyattemps"),
+                new KeyValuePair<string, string>("password", "password"),
+                new KeyValuePair<string, string>("client_id", "client"),
+                new KeyValuePair<string, string>("scope", "role"),
+                new KeyValuePair<string, string>("client_secret", "client")
+            };
+            var body = new FormUrlEncodedContent(request);
+            var httpRequest = new HttpRequestMessage
+            {
+                Method = HttpMethod.Post,
+                Content = body,
+                RequestUri = new Uri($"{baseUrl}/token")
+            };
+
+            // ACT
+            var httpResult = await _server.Client.SendAsync(httpRequest);
+            var json = await httpResult.Content.ReadAsStringAsync().ConfigureAwait(false);
+            var error = JsonConvert.DeserializeObject<ErrorResponseWithState>(json);
+
+            // ASSERTS
+            Assert.Equal(HttpStatusCode.BadRequest, httpResult.StatusCode);
+            Assert.Equal((string)"invalid_grant", (string)error.Error);
+            Assert.Equal((string)"too many authentication attemps", (string)error.ErrorDescription);
+        }
+
+        [Fact]
+        public async Task When_Use_Password_GrantType_And_PasswordIsExpired_Then_Exception_Is_Returned()
+        {
+            // ARRANGE
+            InitializeFakeObjects();
+            var request = new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("grant_type", "password"),
+                new KeyValuePair<string, string>("username", "expired"),
+                new KeyValuePair<string, string>("password", "password"),
+                new KeyValuePair<string, string>("client_id", "client"),
+                new KeyValuePair<string, string>("scope", "role"),
+                new KeyValuePair<string, string>("client_secret", "client")
+            };
+            var body = new FormUrlEncodedContent(request);
+            var httpRequest = new HttpRequestMessage
+            {
+                Method = HttpMethod.Post,
+                Content = body,
+                RequestUri = new Uri($"{baseUrl}/token")
+            };
+
+            // ACT
+            var httpResult = await _server.Client.SendAsync(httpRequest);
+            var json = await httpResult.Content.ReadAsStringAsync().ConfigureAwait(false);
+            var error = JsonConvert.DeserializeObject<ErrorResponseWithState>(json);
+
+            // ASSERTS
+            Assert.Equal(HttpStatusCode.BadRequest, httpResult.StatusCode);
+            Assert.Equal((string)"invalid_grant", (string)error.Error);
+            Assert.Equal((string)"password has expired", (string)error.ErrorDescription);
         }
 
         #endregion

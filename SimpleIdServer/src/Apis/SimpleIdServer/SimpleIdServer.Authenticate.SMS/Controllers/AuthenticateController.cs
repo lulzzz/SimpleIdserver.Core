@@ -88,6 +88,7 @@ namespace SimpleIdServer.Authenticate.SMS.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> LocalLogin(LocalAuthenticationViewModel localAuthenticationViewModel)
         {
             var authenticatedUser = await SetUser().ConfigureAwait(false);
@@ -246,6 +247,7 @@ namespace SimpleIdServer.Authenticate.SMS.Controllers
         }
         
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> LocalLoginOpenId(OpenidLocalAuthenticationViewModel viewModel)
         {
             if (viewModel == null)

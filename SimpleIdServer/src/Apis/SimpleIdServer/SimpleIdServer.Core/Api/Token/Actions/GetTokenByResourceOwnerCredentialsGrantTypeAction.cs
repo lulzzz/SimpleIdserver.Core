@@ -99,7 +99,24 @@ namespace SimpleIdServer.Core.Api.Token.Actions
                     resourceOwnerGrantTypeParameter.Password,
                     resourceOwnerGrantTypeParameter.AmrValues).ConfigureAwait(false);
             }
+            catch(IdentityServerUserAccountBlockedException)
+            {
+                throw new IdentityServerException(ErrorCodes.InvalidGrant, ErrorDescriptions.TheUserAccountIsBlocked);
+            }
+            catch (IdentityServerUserTooManyRetryException)
+            {
+                throw new IdentityServerException(ErrorCodes.InvalidGrant, ErrorDescriptions.TooManyAuthAttemps);
+            }
+            catch(IdentityServerPasswordExpiredException)
+            {
+                throw new IdentityServerException(ErrorCodes.InvalidGrant, ErrorDescriptions.PasswordHasExpired);
+            }
             catch
+            {
+                throw new IdentityServerException(ErrorCodes.InvalidGrant, ErrorDescriptions.ResourceOwnerCredentialsAreNotValid);
+            }
+
+            if (resourceOwner == null)
             {
                 throw new IdentityServerException(ErrorCodes.InvalidGrant, ErrorDescriptions.ResourceOwnerCredentialsAreNotValid);
             }

@@ -73,10 +73,12 @@ namespace SimpleIdServer.Core.Services
                 throw new IdentityServerUserPasswordInvalidException();
             }
 
+            await Validate(resourceOwner).ConfigureAwait(false);
             return resourceOwner;
         }
 
         public abstract Task<ResourceOwner> GetResourceOwner(string login);
         public abstract Task<bool> Authenticate(ResourceOwner user, string password);
+        public abstract Task Validate(ResourceOwner user);
     }
 }
