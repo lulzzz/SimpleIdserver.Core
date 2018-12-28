@@ -69,5 +69,9 @@ namespace SimpleIdServer.EF.Models
         /// Gets or sets the number of attemps.
         /// </summary>
         public int NumberOfAttempts { get; set; }
+        /// <summary>
+        /// Gets or sets the first authentication failure datetime.
+        /// </summary>
+        public DateTime? FirstAuthenticationFailureDateTime { get; set; }
     }
 }

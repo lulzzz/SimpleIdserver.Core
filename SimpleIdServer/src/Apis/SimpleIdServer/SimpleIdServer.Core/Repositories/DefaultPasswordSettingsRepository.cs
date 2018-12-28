@@ -17,5 +17,17 @@ namespace SimpleIdServer.Core.Repositories
         {
             return Task.FromResult(_passwordSettings);
         }
+
+        public Task<bool> Update(PasswordSettings passwordSettings)
+        {
+            _passwordSettings.AuthenticationIntervalsInSeconds = passwordSettings.AuthenticationIntervalsInSeconds;
+            _passwordSettings.IsBlockAccountPolicyEnabled = passwordSettings.IsBlockAccountPolicyEnabled;
+            _passwordSettings.IsRegexEnabled = passwordSettings.IsRegexEnabled;
+            _passwordSettings.NumberOfAuthenticationAttempts = passwordSettings.NumberOfAuthenticationAttempts;
+            _passwordSettings.PasswordDescription = passwordSettings.PasswordDescription;
+            _passwordSettings.PasswordExpiresIn = passwordSettings.PasswordExpiresIn;
+            _passwordSettings.RegularExpression = passwordSettings.RegularExpression;
+            return Task.FromResult(true);
+        }
     }
 }

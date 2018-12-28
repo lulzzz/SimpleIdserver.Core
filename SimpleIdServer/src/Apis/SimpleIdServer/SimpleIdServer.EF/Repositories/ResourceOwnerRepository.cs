@@ -187,7 +187,8 @@ namespace SimpleIdServer.EF.Repositories
                     Claims = new List<ResourceOwnerClaim>(),
                     CreateDateTime = DateTime.UtcNow,
                     UpdateDateTime = DateTime.UtcNow,
-                    NumberOfAttempts = resourceOwner.NumberOfAttempts
+                    NumberOfAttempts = resourceOwner.NumberOfAttempts,
+                    FirstAuthenticationFailureDateTime = resourceOwner.FirstAuthenticationFailureDateTime
                 };
 
                 if (resourceOwner.Claims != null)
@@ -237,6 +238,7 @@ namespace SimpleIdServer.EF.Repositories
                     record.TwoFactorAuthentication = resourceOwner.TwoFactorAuthentication;
                     record.UpdateDateTime = DateTime.UtcNow;
                     record.NumberOfAttempts = resourceOwner.NumberOfAttempts;
+                    record.FirstAuthenticationFailureDateTime = resourceOwner.FirstAuthenticationFailureDateTime;
                     record.Claims = new List<ResourceOwnerClaim>();
                     _context.ResourceOwnerClaims.RemoveRange(record.Claims);
                     if (resourceOwner.Claims != null)

@@ -6,5 +6,6 @@ namespace SimpleIdServer.Core.Common.Repositories
     public interface IPasswordSettingsRepository
     {
         Task<PasswordSettings> Get();
+        Task<bool> Update(PasswordSettings passwordSettings);
     }
 }

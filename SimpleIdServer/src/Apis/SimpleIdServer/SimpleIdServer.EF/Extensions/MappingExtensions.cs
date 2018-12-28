@@ -115,7 +115,8 @@ namespace SimpleIdServer.EF.Extensions
                 Password = resourceOwner.Password,
                 CreateDateTime = resourceOwner.CreateDateTime,
                 UpdateDateTime = resourceOwner.UpdateDateTime,
-                NumberOfAttempts = resourceOwner.NumberOfAttempts
+                NumberOfAttempts = resourceOwner.NumberOfAttempts,
+                FirstAuthenticationFailureDateTime = resourceOwner.FirstAuthenticationFailureDateTime
             };
         }
 
