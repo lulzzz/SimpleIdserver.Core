@@ -176,7 +176,7 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
                 throw new ArgumentNullException(nameof(viewModel.Code));
             }
 
-            await SetUser();
+            await SetUser().ConfigureAwait(false);
             var uiLocales = DefaultLanguage;
             try
             {
@@ -202,7 +202,7 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
                         Password = viewModel.Password
                     },
                     request.ToParameter(),
-                    viewModel.Code, issuerName);
+                    viewModel.Code, issuerName).ConfigureAwait(false);
                 var subject = actionResult.Claims.First(c => c.Type == Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject).Value;
                 // 5. Two factor authentication.
                 if (!string.IsNullOrWhiteSpace(actionResult.TwoFactor))
@@ -226,7 +226,7 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
                 else
                 {
                     // 6. Authenticate the user by adding a cookie
-                    await SetLocalCookie(actionResult.Claims, request.SessionId);
+                    await SetLocalCookie(actionResult.Claims, request.SessionId).ConfigureAwait(false);
                     _simpleIdentityServerEventSource.AuthenticateResourceOwner(subject);
 
                     // 7. Redirect the user agent
@@ -312,7 +312,6 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
             {
                 var claims = authenticatedUser.Claims.ToList();
                 var subject = authenticatedUser.GetSubject();
-                var sessionId = Guid.NewGuid().ToString();
                 // 1. Change the password.
                 await _authenticateActions.ChangePassword(new ChangePasswordParameter
                 {
@@ -322,17 +321,18 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
                 }).ConfigureAwait(false);
                 // 2. Remove the temporary cookie and authenticate the user.
                 await _authenticationService.SignOutAsync(HttpContext, Host.Constants.CookieNames.ChangePasswordCookieName, new AuthenticationProperties()).ConfigureAwait(false);
-                await SetLocalCookie(claims, sessionId).ConfigureAwait(false);
                 _simpleIdentityServerEventSource.AuthenticateResourceOwner(subject);
 
                 // 3. Redirect to the user profile if no code is passed.
                 if (string.IsNullOrWhiteSpace(viewModel.Code))
                 {
+                    await SetLocalCookie(claims, Guid.NewGuid().ToString()).ConfigureAwait(false);
                     return RedirectToAction("Index", "User", new { area = "UserManagement" });
                 }
 
                 // 4. Continue the OPENID redirection process.
                 var request = _dataProtector.Unprotect<AuthorizationRequest>(viewModel.Code);
+                await SetLocalCookie(claims, request.SessionId).ConfigureAwait(false);
                 var issuerName = Request.GetAbsoluteUriWithVirtualPath();
                 var actionResult = await _authenticateHelper.ProcessRedirection(request.ToParameter(), viewModel.Code, authenticatedUser.GetSubject(), authenticatedUser.Claims.ToList(),  issuerName).ConfigureAwait(false);
                 return this.CreateRedirectionFromActionResult(actionResult, request);
