@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using SimpleIdServer.Core.Common.Models;
+﻿using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Common.Parameters;
 using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.Core.Common.Results;
 using SimpleIdServer.Core.Extensions;
-using SimpleIdServer.Core.Helpers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace SimpleIdServer.Core.Repositories
 {
@@ -28,7 +27,7 @@ namespace SimpleIdServer.Core.Repositories
                 throw new ArgumentNullException(nameof(subject));
             }
 
-            var user = _users.FirstOrDefault(u => u.Id == subject);
+            var user = _users.FirstOrDefault(u => u.Claims.First(c => c.Type == SimpleIdServer.Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject).Value == subject);
             if (user == null)
             {
                 return Task.FromResult(false);
@@ -72,7 +71,7 @@ namespace SimpleIdServer.Core.Repositories
                 throw new ArgumentNullException(nameof(password));
             }
 
-            var user = _users.FirstOrDefault(u => u.Id == id && u.Password == password);
+            var user = _users.FirstOrDefault(u => u.Claims.First(c => c.Type == SimpleIdServer.Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject).Value == id && u.Password == password);
             if (user == null)
             {
                 return Task.FromResult((ResourceOwner)null);

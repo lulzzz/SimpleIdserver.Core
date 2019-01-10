@@ -152,10 +152,16 @@ namespace SimpleIdServer.EF.Repositories
         {
             try
             {
+                var claimIdentifier = await _context.Claims.FirstOrDefaultAsync(c => c.IsIdentifier).ConfigureAwait(false);
+                if (claimIdentifier == null)
+                {
+                    throw new InvalidOperationException("no claim can be used to uniquely identified the resource owner");
+                }
+
                 var record = await _context.ResourceOwners
                    .Include(r => r.Claims)
                    .Include(r => r.Consents)
-                   .FirstOrDefaultAsync(r => r.Id == id).ConfigureAwait(false);
+                   .FirstOrDefaultAsync(r => r.Claims.Any(c => c.ClaimCode == claimIdentifier.Code && c.Value == id));
                 if (record == null)
                 {
                     return false;
