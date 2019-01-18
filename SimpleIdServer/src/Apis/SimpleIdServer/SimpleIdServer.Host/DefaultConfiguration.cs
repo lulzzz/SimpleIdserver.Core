@@ -395,12 +395,25 @@ namespace SimpleIdServer.Host
                 Id = "administrator",
                 CreateDateTime = DateTime.UtcNow,
                 UpdateDateTime =  DateTime.UtcNow,
-                PasswordExpirationDateTime = DateTime.UtcNow.AddDays(-1),
+                PasswordExpirationDateTime = DateTime.UtcNow.AddDays(10),
                 Password = PasswordHelper.ComputeHash("password"),
                 Claims = new List<Claim>
                 {
                     new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject, "administrator"),
+                    new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Email, "habarthierry@hotmail.fr"),
                     new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Role, "['administrator']")
+                }
+            },
+            new ResourceOwner
+            {
+                Id = "user",
+                CreateDateTime = DateTime.UtcNow,
+                UpdateDateTime =  DateTime.UtcNow,
+                PasswordExpirationDateTime = DateTime.UtcNow.AddDays(10),
+                Password = PasswordHelper.ComputeHash("password"),
+                Claims = new List<Claim>
+                {
+                    new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject, "user")
                 }
             }
         };
@@ -559,6 +572,70 @@ namespace SimpleIdServer.Host
                 {
                     "http://localhost:60004/Authenticate/Callback",
                     "https://localhost:60014/Authenticate/Callback"
+                }
+            },
+            new Client
+            {
+                ClientId = "jobOrchestrator",
+                Secrets = new List<ClientSecret>
+                {
+                    new ClientSecret
+                    {
+                        Type = ClientSecretTypes.SharedSecret,
+                        Value = "jobOrchestratorSecret"
+                    }
+                },
+                ClientName = "Job orchestrator",
+                TokenEndPointAuthMethod = TokenEndPointAuthenticationMethods.client_secret_post,
+                ApplicationType = ApplicationTypes.web,
+                UpdateDateTime = DateTime.UtcNow,
+                CreateDateTime = DateTime.UtcNow,
+                AllowedScopes = new List<Scope>
+                {
+                    new Scope
+                    {
+                        Name = "openid"
+                    },
+                    new Scope
+                    {
+                        Name = "role"
+                    },
+                    new Scope
+                    {
+                        Name = "email"
+                    },
+                    new Scope
+                    {
+                        Name = "profile"
+                    },
+                    new Scope
+                    {
+                        Name = "scim"
+                    },
+                    new Scope
+                    {
+                        Name = "phone"
+                    },
+                    new Scope
+                    {
+                        Name = "address"
+                    }
+                },
+                GrantTypes = new List<GrantType>
+                {
+					GrantType.password,
+                    GrantType.authorization_code
+                },
+                ResponseTypes = new List<ResponseType>
+                {
+                    ResponseType.token,
+                    ResponseType.id_token,
+                    ResponseType.code
+                },
+                RedirectionUrls = new List<string>
+                {
+                    "http://localhost:60021/Authenticate/Callback",
+                    "https://localhost:60031/Authenticate/Callback"
                 }
             }
         };

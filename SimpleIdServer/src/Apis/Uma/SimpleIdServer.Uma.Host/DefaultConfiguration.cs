@@ -197,6 +197,42 @@ namespace SimpleIdServer.Uma.Host
                 {
                     ResponseType.token
                 }
+            },
+            new SimpleIdServer.Core.Common.Models.Client
+            {
+                ClientId = "jobOrchestrator",
+                Secrets = new List<ClientSecret>
+                {
+                    new ClientSecret
+                    {
+                        Type = ClientSecretTypes.SharedSecret,
+                        Value = "jobOrchestratorPassword"
+                    }
+                },
+                ClientName = "Job orchestrator",
+                TokenEndPointAuthMethod = TokenEndPointAuthenticationMethods.client_secret_post,
+                ApplicationType = ApplicationTypes.native,
+                UpdateDateTime = DateTime.UtcNow,
+                CreateDateTime = DateTime.UtcNow,
+                AllowedScopes = new List<Scope>
+                {
+                    new Scope
+                    {
+                        Name = "uma_protection"
+                    },
+                    new Scope
+                    {
+                        Name = "adminapi"
+                    }
+                },
+                GrantTypes = new List<GrantType>
+                {
+                    GrantType.client_credentials
+                },
+                ResponseTypes = new List<ResponseType>
+                {
+                    ResponseType.token
+                }
             }
         };
     }
