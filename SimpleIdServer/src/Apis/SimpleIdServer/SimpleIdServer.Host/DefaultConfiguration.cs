@@ -395,7 +395,7 @@ namespace SimpleIdServer.Host
                 Id = "administrator",
                 CreateDateTime = DateTime.UtcNow,
                 UpdateDateTime =  DateTime.UtcNow,
-                PasswordExpirationDateTime = DateTime.UtcNow.AddDays(-1),
+                PasswordExpirationDateTime = DateTime.UtcNow.AddDays(10),
                 Password = PasswordHelper.ComputeHash("password"),
                 Claims = new List<Claim>
                 {
