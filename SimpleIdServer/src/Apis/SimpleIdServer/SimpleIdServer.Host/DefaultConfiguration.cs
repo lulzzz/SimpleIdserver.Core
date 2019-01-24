@@ -13,7 +13,7 @@ namespace SimpleIdServer.Host
             IsBlockAccountPolicyEnabled = true,
             NumberOfAuthenticationAttempts = 3,
             AuthenticationIntervalsInSeconds = 10,
-            IsRegexEnabled = true,
+            IsRegexEnabled = false,
             RegularExpression = @"^(?=(.*\d){2})(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z\d]).{8,}$",
             PasswordDescription = "at least 8 characters, 2 letters, 2 digits, 1 upper case, 1 lower case and 1 symbol",
             PasswordExpiresIn = TimeSpan.FromDays(2).TotalSeconds
