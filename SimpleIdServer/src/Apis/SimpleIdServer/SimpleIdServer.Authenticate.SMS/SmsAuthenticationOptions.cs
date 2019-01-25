@@ -9,9 +9,11 @@ namespace SimpleIdServer.Authenticate.SMS
         {
             Message = "The confirmation code is {0}";
             TwilioSmsCredentials = new TwilioSmsCredentials();
+			IsSelfProvisioningEnabled = false;
         }
 
         public TwilioSmsCredentials TwilioSmsCredentials { get; set; }
         public string Message { get; set; }
+		public bool IsSelfProvisioningEnabled { get; set; }
     }
 }

@@ -26,8 +26,7 @@
                     <input type="hidden" value="@Model.ClaimName" name="ClaimName" />
                     <fieldset class="form-group">
                         <label class="control-label">@Model.ClaimName</label>
-                        <input type="text" class="form-control" value="@Model.ClaimValue" name="ClaimValue" />
-                        @Html.ValidationMessage("ClaimValue", new { @class = "text-danger" })
+                        <input type="text" class="form-control" value="@Model.ClaimValue" name="ClaimValue" disabled />
                     </fieldset>
                     <!-- Confirmation code -->
                     <fieldset class="form-group">

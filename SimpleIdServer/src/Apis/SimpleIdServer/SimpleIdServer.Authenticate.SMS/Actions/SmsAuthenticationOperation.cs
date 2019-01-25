@@ -20,13 +20,15 @@ namespace SimpleIdServer.Authenticate.SMS.Actions
         private readonly IGenerateAndSendSmsCodeOperation _generateAndSendSmsCodeOperation;
         private readonly IResourceOwnerRepository _resourceOwnerRepository;
         private readonly IUserActions _userActions; 
-
+		private readonly SmsAuthenticationOptions _smsAuthenticationOptions;
+		
         public SmsAuthenticationOperation(IGenerateAndSendSmsCodeOperation generateAndSendSmsCodeOperation, IResourceOwnerRepository resourceOwnerRepository, IUserActions userActions, ISubjectBuilder subjectBuilder,
             SmsAuthenticationOptions smsAuthenticationOptions)
         {
             _generateAndSendSmsCodeOperation = generateAndSendSmsCodeOperation;
             _resourceOwnerRepository = resourceOwnerRepository;
             _userActions = userActions;
+			_smsAuthenticationOptions = smsAuthenticationOptions;
         }
 
         public async Task<ResourceOwner> Execute(string phoneNumber)
@@ -35,11 +37,16 @@ namespace SimpleIdServer.Authenticate.SMS.Actions
             {
                 throw new ArgumentNullException(nameof(phoneNumber));
             }
-
-            // 1. Send the confirmation code (SMS).
+			
+			// 1. Check user exists
+			var resourceOwner = await _resourceOwnerRepository.GetResourceOwnerByClaim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber, phoneNumber);
+			if (!_smsAuthenticationOptions.IsSelfProvisioningEnabled && resourceOwner == null)
+			{
+				throw new InvalidOperationException("the user doesn't exist");
+			}
+			
+            // 2. Send the confirmation code (SMS).
             await _generateAndSendSmsCodeOperation.Execute(phoneNumber);
-            // 2. Try to get the resource owner.
-            var resourceOwner = await _resourceOwnerRepository.GetResourceOwnerByClaim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber, phoneNumber);
             if (resourceOwner != null)
             {
                 return resourceOwner;

@@ -212,7 +212,8 @@ namespace SimpleIdServer.Authenticate.SMS.Controllers
                 try
                 {
                     await SetTwoFactorCookie(authenticatedUser.Claims).ConfigureAwait(false);
-                    var code = await _generateAndSendSmsCodeOperation.Execute(phoneNumber.Value).ConfigureAwait(false);
+					var code = await _authenticateActions.GenerateAndSendCode(subject).ConfigureAwait(false);
+					_simpleIdentityServerEventSource.GetConfirmationCode(code);
                     return RedirectToAction("SendCode", new { code = confirmCodeViewModel.Code });
                 }
                 catch (ClaimRequiredException)

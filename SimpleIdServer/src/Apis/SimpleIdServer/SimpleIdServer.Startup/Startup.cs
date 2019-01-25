@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SimpleIdServer.Authenticate.LoginPassword;
+using SimpleIdServer.Authenticate.SMS;
 using SimpleIdServer.Host;
 using SimpleIdServer.Module;
 using SimpleIdServer.Shell;
@@ -16,11 +17,13 @@ namespace SimpleIdServer.Startup
         {
             var simpleIdServerModule = new SimpleIdentityServerHostModule();
             var shellModule = new ShellModule();
-            var loginPasswordModule = new LoginPasswordModule();
+            // var loginPasswordModule = new LoginPasswordModule();
+            var smsModule = new SmsModule();
             var userManagementModule = new UserManagementModule();
             simpleIdServerModule.Init(null);
             shellModule.Init(null);
-            loginPasswordModule.Init(null);
+            // loginPasswordModule.Init(null);
+            smsModule.Init(null);
             userManagementModule.Init(null);
         }
 
@@ -36,6 +39,7 @@ namespace SimpleIdServer.Startup
                 .AddCookie(Host.Constants.CookieNames.ExternalCookieName)
                 .AddCookie(Host.Constants.CookieNames.ChangePasswordCookieName)
                 .AddCookie(Host.Constants.CookieNames.TwoFactorCookieName)
+                .AddCookie(Host.Constants.CookieNames.PasswordLessCookieName)
                 .AddFacebook(opts =>
                 {
                     opts.ClientId = "569242033233529";

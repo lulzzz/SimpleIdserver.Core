@@ -32,6 +32,26 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Actions
         }
 
         [Fact]
+        public async Task When_SelfProvisioningIsDisabled_And_ResourceOwner_Doesnt_Exist_Then_Exception_Is_Thrown()
+        {
+            // ARRANGE
+            const string phone = "phone";
+            var resourceOwner = new ResourceOwner
+            {
+                Id = "id"
+            };
+            InitializeFakeObjects();
+            _smsAuthenticationOptions.IsSelfProvisioningEnabled = false;
+            _resourceOwnerRepositoryStub.Setup(p => p.GetResourceOwnerByClaim("phone_number", phone)).Returns(() => Task.FromResult((ResourceOwner)null));
+
+            // ACT 
+            var result = await Assert.ThrowsAsync<InvalidOperationException>(() => _smsAuthenticationOperation.Execute(phone));
+
+            // ASSERT
+            Assert.NotNull(result);
+        }
+
+        [Fact]
         public async Task When_ResourceOwner_Exists_Then_ResourceOwner_Is_Returned()
         {
             // ARRANGE
@@ -53,11 +73,12 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Actions
         }
 
         [Fact]
-        public async Task When_ResourceOwnerDoesntExist_Then_NewOne_Is_Created()
+        public async Task When_SelfProvisioningIsEnabled_And_ResourceOwnerDoesntExist_Then_NewOne_Is_Created()
         {
             // ARRANGE
             const string phone = "phone";
             InitializeFakeObjects();
+            _smsAuthenticationOptions.IsSelfProvisioningEnabled = true;
             _resourceOwnerRepositoryStub.Setup(p => p.GetResourceOwnerByClaim("phone", phone)).Returns(() => Task.FromResult((ResourceOwner)null));
             
             // ACT
