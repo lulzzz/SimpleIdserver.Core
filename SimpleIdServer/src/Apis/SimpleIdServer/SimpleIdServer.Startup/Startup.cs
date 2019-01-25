@@ -8,6 +8,7 @@ using SimpleIdServer.Host;
 using SimpleIdServer.Module;
 using SimpleIdServer.Shell;
 using SimpleIdServer.UserManagement;
+using System.Collections.Generic;
 
 namespace SimpleIdServer.Startup
 {
@@ -23,7 +24,10 @@ namespace SimpleIdServer.Startup
             simpleIdServerModule.Init(null);
             shellModule.Init(null);
             // loginPasswordModule.Init(null);
-            smsModule.Init(null);
+            smsModule.Init(new Dictionary<string, string>
+            {
+                { "IsSelfProvisioningEnabled", "true" }
+            });
             userManagementModule.Init(null);
         }
 

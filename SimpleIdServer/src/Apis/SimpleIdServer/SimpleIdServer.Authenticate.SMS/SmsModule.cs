@@ -35,6 +35,7 @@ namespace SimpleIdServer.Authenticate.SMS
                 var accountSid = string.Empty;
                 var authToken = string.Empty;
                 var fromNumber = string.Empty;
+                bool isSelfProvisioningEnabled = false;
                 if (_properties.TryGetValue("Message", out message))
                 {
                     result.Message = message;
@@ -53,6 +54,11 @@ namespace SimpleIdServer.Authenticate.SMS
                 if(_properties.TryGetValue("FromNumber", out fromNumber))
                 {
                     result.TwilioSmsCredentials.FromNumber = fromNumber;
+                }
+
+                if (_properties.TryGetValue("IsSelfProvisioningEnabled", out isSelfProvisioningEnabled))
+                {
+                    result.IsSelfProvisioningEnabled = isSelfProvisioningEnabled;
                 }
 
                 result.ClaimsIncludedInUserCreation = _properties.TryGetArr("ClaimsIncludedInUserCreation");

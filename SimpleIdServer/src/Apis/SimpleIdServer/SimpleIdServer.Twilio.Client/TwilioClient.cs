@@ -33,7 +33,7 @@ namespace SimpleIdServer.Twilio.Client
             {
                 throw new ArgumentException(nameof(message));
             }
-
+            
             var client = _httpClientFactory.GetHttpClient();
             var keyValues = new List<KeyValuePair<string, string>>();
             keyValues.Add(new KeyValuePair<string, string>("To", toPhoneNumber));
