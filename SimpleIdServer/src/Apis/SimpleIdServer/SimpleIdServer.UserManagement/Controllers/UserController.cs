@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -18,7 +13,13 @@ using SimpleIdServer.Core.WebSite.User;
 using SimpleIdServer.Host;
 using SimpleIdServer.Host.Controllers.Website;
 using SimpleIdServer.Host.Extensions;
+using SimpleIdServer.Module;
 using SimpleIdServer.UserManagement.ViewModels;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace SimpleIdServer.UserManagement.Controllers
 {
@@ -33,12 +34,14 @@ namespace SimpleIdServer.UserManagement.Controllers
         private readonly IAuthenticationSchemeProvider _authenticationSchemeProvider;
         private readonly IUrlHelper _urlHelper;
         private readonly ITwoFactorAuthenticationHandler _twoFactorAuthenticationHandler;
+        private readonly IEnumerable<IEditCredentialView> _editCredentialViews;
 
         #region Constructor
 
         public UserController(IUserActions userActions, IProfileActions profileActions, ITranslationManager translationManager, 
             IAuthenticationService authenticationService, IAuthenticationSchemeProvider authenticationSchemeProvider,
-            IUrlHelperFactory urlHelperFactory, IActionContextAccessor actionContextAccessor, ITwoFactorAuthenticationHandler twoFactorAuthenticationHandler) : base(authenticationService)
+            IUrlHelperFactory urlHelperFactory, IActionContextAccessor actionContextAccessor, ITwoFactorAuthenticationHandler twoFactorAuthenticationHandler, 
+            IEnumerable<IEditCredentialView> editCredentialViews) : base(authenticationService)
         {
             _userActions = userActions;
             _profileActions = profileActions;
@@ -46,6 +49,7 @@ namespace SimpleIdServer.UserManagement.Controllers
             _authenticationSchemeProvider = authenticationSchemeProvider;
             _urlHelper = urlHelperFactory.GetUrlHelper(actionContextAccessor.ActionContext);
             _twoFactorAuthenticationHandler = twoFactorAuthenticationHandler;
+            _editCredentialViews = editCredentialViews;
         }
 
         #endregion
@@ -55,21 +59,21 @@ namespace SimpleIdServer.UserManagement.Controllers
         [HttpGet]
         public async Task<ActionResult> Index()
         {
-            await SetUser();
+            await SetUser().ConfigureAwait(false);
             return View();
         }
 
         [HttpGet]
         public async Task<ActionResult> Consent()
         {
-            await SetUser();
+            await SetUser().ConfigureAwait(false);
             return await GetConsents();
         }
 
         [HttpPost]
         public async Task<ActionResult> Consent(string id)
         {
-            if (!await _userActions.DeleteConsent(id))
+            if (!await _userActions.DeleteConsent(id).ConfigureAwait(false))
             {
                 ViewBag.ErrorMessage = "the consent cannot be deleted";
                 return await GetConsents();
@@ -77,19 +81,26 @@ namespace SimpleIdServer.UserManagement.Controllers
 
             return RedirectToAction("Consent");
         }
-
-        [HttpGet("User/Edit")]
-        [HttpGet("User/UpdateCredentials")]
-        [HttpGet("User/UpdateTwoFactor")]
+        
+        [HttpGet]
         public async Task<IActionResult> Edit()
         {
-            var authenticatedUser = await SetUser();
-            await TranslateUserEditView(DefaultLanguage);
-            ViewBag.IsUpdated = false;
-            ViewBag.IsCreated = false;
-            return await GetEditView(authenticatedUser);
+            var authenticatedUser = await SetUser().ConfigureAwait(false);
+            var viewModel = new EditCredentialViewModel();
+            if (_editCredentialViews != null)
+            {
+                viewModel.Links = _editCredentialViews.Where(e => e.IsEnabled).Select(e => {
+                    return new EditCredentialLinkViewModel
+                    {
+                        DisplayName = e.DisplayName,
+                        Href = e.Href
+                    };
+                }).ToList();
+            }
+            return View(viewModel);
         }
 
+        /*
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateCredentials(UpdateResourceOwnerCredentialsViewModel viewModel)
@@ -146,6 +157,7 @@ namespace SimpleIdServer.UserManagement.Controllers
             ViewBag.IsUpdated = true;
             return await GetEditView(authenticatedUser);
         }
+        */
 
         /// <summary>
         /// Display the profiles linked to the user account.
@@ -309,6 +321,7 @@ namespace SimpleIdServer.UserManagement.Controllers
 
         #region Private methods
 
+        /*
         private async Task<IActionResult> GetEditView(ClaimsPrincipal authenticatedUser)
         {
             var resourceOwner = await _userActions.GetUser(authenticatedUser);
@@ -323,6 +336,7 @@ namespace SimpleIdServer.UserManagement.Controllers
             viewModel.IsLocalAccount = true;
             return View("Edit", viewModel);
         }
+        */
 
         private async Task<ActionResult> GetConsents()
         {
@@ -356,6 +370,7 @@ namespace SimpleIdServer.UserManagement.Controllers
             return View(result);
         }
 
+        /*
         private async Task TranslateUserEditView(string uiLocales)
         {
             var translations = await _translationManager.GetTranslationsAsync(uiLocales, new List<string>
@@ -411,6 +426,7 @@ namespace SimpleIdServer.UserManagement.Controllers
             result.TwoFactorAuthTypes = _twoFactorAuthenticationHandler.GetAll().Select(s => s.Name).ToList();
             return result;
         }
+        */
 
         #endregion
     }

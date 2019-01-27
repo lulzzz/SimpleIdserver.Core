@@ -17,6 +17,10 @@ namespace SimpleIdServer.Authenticate.LoginPassword
                 "Authenticate/{action}/{id?}",
                 new { controller = "Authenticate", action = "Index", area = Constants.AMR },
                 constraints: new { area = Constants.AMR });
+            routeBuilder.MapRoute("EditCredential",
+                "EditCredential/{action}/{id?}",
+                new { controller = "EditCredential", action = "Index", area = Constants.AMR },
+                constraints: new { area = Constants.AMR });
             return routeBuilder;
         }
     }

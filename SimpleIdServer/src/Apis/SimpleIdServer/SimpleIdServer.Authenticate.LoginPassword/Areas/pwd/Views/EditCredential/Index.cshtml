@@ -1,0 +1,57 @@
+﻿@{
+    ViewBag.Title = "Edit user";
+}
+
+@model SimpleIdServer.Authenticate.LoginPassword.ViewModels.UpdateResourceOwnerViewModel
+    <h1>
+        @ViewBag.Translations["edit_resource_owner"]
+    </h1>
+
+@if (ViewBag.IsUpdated)
+{
+    <div class="alert alert-success">@ViewBag.Translations["user_is_updated"]</div>
+}
+
+@using (Html.BeginForm("UpdateCredentials", "Edit", null, FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    <div class="panel panel-default">
+        <div class="panel-heading">@ViewBag.Translations["credentials"]</div>
+        <div class="panel-body">
+            @Html.ValidationMessage("error_message", new { @class = "text-danger" })
+            <!-- Login -->
+            <fieldset class="form-group">
+                <label class="control-label">@ViewBag.Translations["login"]</label>
+                <input type="text" class="form-control" readonly />
+            </fieldset>
+            <!-- Actual password -->
+            <fieldset class="form-group">
+                <label class="control-label">@ViewBag.Translations["actual_password"]</label>
+                <input type="password" class="form-control" name="ActualPassword" />
+                @Html.ValidationMessage("ActualPassword", new { @class = "text-danger" })
+            </fieldset>
+            <!-- Confirm actual password -->
+            <fieldset class="form-group">
+                <label class="control-label">@ViewBag.Translations["confirm_actual_password"]</label>
+                <input type="password" class="form-control" name="ConfirmActualPassword" />
+                @Html.ValidationMessage("ConfirmActualPassword", new { @class = "text-danger" })
+            </fieldset>
+            <!-- New password -->
+            <fieldset class="form-group">
+                <label class="control-label">@ViewBag.Translations["new_password"]</label>
+                <input type="password" class="form-control" name="NewPassword" />
+                @Html.ValidationMessage("NewPassword", new { @class = "text-danger" })
+            </fieldset>
+            <!-- Repeat password -->
+            <fieldset class="form-group">
+                <label class="control-label">@ViewBag.Translations["confirm_new_password"]</label>
+                <input type="password" class="form-control" name="ConfirmNewPassword" />
+                @Html.ValidationMessage("ConfirmNewPassword", new { @class = "text-danger" })
+            </fieldset>
+            <!-- Submit -->
+            <fieldset class="form-group">
+                <button type="submit" class="btn btn-primary">@ViewBag.Translations["confirm"]</button>
+            </fieldset>
+        </div>
+    </div>
+}

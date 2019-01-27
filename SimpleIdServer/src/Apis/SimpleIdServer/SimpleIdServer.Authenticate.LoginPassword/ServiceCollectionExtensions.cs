@@ -1,6 +1,4 @@
-﻿using System;
-using System.Reflection;
-using Microsoft.AspNetCore.Mvc.Razor;
+﻿using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
@@ -8,6 +6,9 @@ using SimpleIdServer.Authenticate.Basic;
 using SimpleIdServer.Authenticate.LoginPassword.Controllers;
 using SimpleIdServer.Authenticate.LoginPassword.Services;
 using SimpleIdServer.Core.Services;
+using SimpleIdServer.Module;
+using System;
+using System.Reflection;
 
 namespace SimpleIdServer.Authenticate.LoginPassword
 {
@@ -43,8 +44,29 @@ namespace SimpleIdServer.Authenticate.LoginPassword
             });
             services.AddSingleton(basicAuthenticateOptions);
             services.AddTransient<IAuthenticateResourceOwnerService, PasswordAuthenticateResourceOwnerService>();
+            services.AddSingleton<IEditCredentialView>(new EditCredentialView(basicAuthenticateOptions.IsEditCredentialEnabled));
             mvcBuilder.AddApplicationPart(assembly);
             return services;
+        }
+
+        private class EditCredentialView : IEditCredentialView
+        {
+            private readonly bool _isEnabled;
+
+            public EditCredentialView(bool isEnabled)
+            {
+                _isEnabled = isEnabled;
+            }
+
+            public string DisplayName { get => "Edit login & password credential"; }
+            public RedirectUrl Href { get => new RedirectUrl
+                {
+                    ActionName = "Index",
+                    ControllerName = "EditCredential",
+                    Area = Constants.AMR
+                };
+            }
+            public bool IsEnabled { get => _isEnabled; }
         }
     }
 }

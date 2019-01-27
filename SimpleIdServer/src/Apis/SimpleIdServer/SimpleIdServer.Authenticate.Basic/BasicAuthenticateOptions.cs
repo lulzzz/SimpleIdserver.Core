@@ -7,6 +7,7 @@ namespace SimpleIdServer.Authenticate.Basic
         public BasicAuthenticateOptions()
         {
             ClaimsIncludedInUserCreation = new List<string>();
+            IsEditCredentialEnabled = false;
         }
 
         /// <summary>
@@ -14,5 +15,9 @@ namespace SimpleIdServer.Authenticate.Basic
         /// If the list is empty then all the claims are included.
         /// </summary>
         public IEnumerable<string> ClaimsIncludedInUserCreation { get; set; }
+        /// <summary>
+        /// Can edit the password
+        /// </summary>
+        public bool IsEditCredentialEnabled { get; set; }
     }
 }

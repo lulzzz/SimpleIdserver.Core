@@ -1,99 +1,26 @@
+@model SimpleIdServer.UserManagement.ViewModels.EditCredentialViewModel
+
 @{
-    ViewBag.Title = "Edit user";
     ViewBag.IsEditDisplayed = true;
     ViewBag.IsConsentDisplayed = false;
     ViewBag.IsIndexDisplayed = false;
     ViewBag.IsProfileDisplayed = false;
 }
 
-@model SimpleIdServer.UserManagement.ViewModels.UpdateResourceOwnerViewModel
-
-<div class="tab-pane active" id="edit-ro">
-    <h1>
-        @ViewBag.Translations["edit_resource_owner"]
-    </h1>
-
-    @if (ViewBag.IsUpdated)
-    {
-        <div class="alert alert-success">@ViewBag.Translations["user_is_updated"]</div>
-    }
-
-    @using (Html.BeginForm("UpdateCredentials", "User", null, FormMethod.Post))
-    {
-        @Html.AntiForgeryToken()
-        <div class="panel panel-default">
-            <div class="panel-heading">@ViewBag.Translations["credentials"]</div>
-            <div class="panel-body">
-                @Html.ValidationMessage("error_message", new { @class = "text-danger" })
-                <!-- Login -->
-                <fieldset class="form-group">
-                    <label class="control-label">@ViewBag.Translations["login"]</label>
-                    <input type="text" class="form-control" value="@Model.Credentials.Login" readonly />
-                </fieldset>
-                <!-- Actual password -->
-                <fieldset class="form-group">
-                    <label class="control-label">@ViewBag.Translations["actual_password"]</label>
-                    <input type="password" class="form-control" name="ActualPassword" />
-                    @Html.ValidationMessage("ActualPassword", new { @class = "text-danger" })
-                </fieldset>
-                <!-- Confirm actual password -->
-                <fieldset class="form-group">
-                    <label class="control-label">@ViewBag.Translations["confirm_actual_password"]</label>
-                    <input type="password" class="form-control" name="ConfirmActualPassword" />
-                    @Html.ValidationMessage("ConfirmActualPassword", new { @class = "text-danger" })
-                </fieldset>
-                <!-- New password -->
-                <fieldset class="form-group">
-                    <label class="control-label">@ViewBag.Translations["new_password"]</label>
-                    <input type="password" class="form-control" name="NewPassword" />
-                    @Html.ValidationMessage("NewPassword", new { @class = "text-danger" })
-                </fieldset>
-                <!-- Repeat password -->
-                <fieldset class="form-group">
-                    <label class="control-label">@ViewBag.Translations["confirm_new_password"]</label>
-                    <input type="password" class="form-control" name="ConfirmNewPassword" />
-                    @Html.ValidationMessage("ConfirmNewPassword", new { @class = "text-danger" })
-                </fieldset>
-                <!-- Submit -->
-                <fieldset class="form-group">
-                    <button type="submit" class="btn btn-primary">@ViewBag.Translations["confirm"]</button>
-                </fieldset>
-            </div>
-        </div>
-    }
-
-    @using (Html.BeginForm("UpdateTwoFactor", "User", null, FormMethod.Post))
-    {
-        @Html.AntiForgeryToken()
-        <div class="panel panel-default">
-            <div class="panel-heading">@ViewBag.Translations["two_factor"]</div>
-            <div class="panel-body">
-                @if (Model.TwoFactorAuthTypes == null || !Model.TwoFactorAuthTypes.Any())
-                {
-                    <i>@ViewBag.Translations["no_two_factor_authenticator"]</i>
-                }
-                else
-                {
-                    <select class="form-control" value="@Model.SelectedTwoFactorAuthType" name="SelectedTwoFactorAuthType">
-                        <option value="">@ViewBag.Translations["no_two_factor_authenticator_selected"]</option>
-                        @foreach (var twoFactorAuthType in Model.TwoFactorAuthTypes)
-                        {
-                            @if (twoFactorAuthType == Model.SelectedTwoFactorAuthType)
-                            {
-                                <option value="@twoFactorAuthType" selected>@twoFactorAuthType</option>
-                            }
-                            else
-                            {
-                                <option value="@twoFactorAuthType">@twoFactorAuthType</option>
-                            }
-                        }
-                    </select>
-                }
-                <!-- Submit -->
-                <fieldset class="form-group">
-                    <button type="submit" class="btn btn-primary">@ViewBag.Translations["confirm"]</button>
-                </fieldset>
-            </div>
-        </div>
-    }
+<div class="tab-pane active" id="information">
+    <div>
+        @if(Model.Links == null)
+        {
+    
+        }
+        else
+        {
+            foreach(var link in Model.Links)
+            {
+                <div style="padding-top: 10px">
+                    <a href="@Url.Action(link.Href.ActionName, link.Href.ControllerName, new { area = link.Href.Area })" class="btn btn-default">@link.DisplayName</a>
+                </div>
+            }
+        }
+    </div>
 </div>

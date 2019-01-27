@@ -11,4 +11,7 @@
   <ItemGroup>  
     <EmbeddedResource Include="Areas\**\*.cshtml" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="Areas\UserManagement\Views\User\Edit.cshtml" />
+  </ItemGroup>
 </Project>

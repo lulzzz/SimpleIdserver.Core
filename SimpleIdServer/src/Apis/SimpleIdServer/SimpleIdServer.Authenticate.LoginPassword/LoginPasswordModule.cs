@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using SimpleIdServer.Authenticate.Basic;
+﻿using SimpleIdServer.Authenticate.Basic;
 using SimpleIdServer.Module;
+using System.Collections.Generic;
 
 namespace SimpleIdServer.Authenticate.LoginPassword
 {
@@ -32,7 +32,12 @@ namespace SimpleIdServer.Authenticate.LoginPassword
             var result = new BasicAuthenticateOptions();
             if (_properties != null)
             {
-                result.ClaimsIncludedInUserCreation = _properties.TryGetArr("ClaimsIncludedInUserCreation");                
+                bool isEditCredentialsEnabled = false;
+                result.ClaimsIncludedInUserCreation = _properties.TryGetArr("ClaimsIncludedInUserCreation");
+                if (_properties.TryGetValue("IsEditCredentialEnabled", out isEditCredentialsEnabled))
+                {
+                    result.IsEditCredentialEnabled = isEditCredentialsEnabled;
+                }
             }
 
             return result;

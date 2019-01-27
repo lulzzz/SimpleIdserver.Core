@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SimpleIdServer.Authenticate.LoginPassword;
-using SimpleIdServer.Authenticate.SMS;
 using SimpleIdServer.Host;
 using SimpleIdServer.Module;
 using SimpleIdServer.Shell;
@@ -18,16 +17,21 @@ namespace SimpleIdServer.Startup
         {
             var simpleIdServerModule = new SimpleIdentityServerHostModule();
             var shellModule = new ShellModule();
-            // var loginPasswordModule = new LoginPasswordModule();
-            var smsModule = new SmsModule();
+            var loginPasswordModule = new LoginPasswordModule();
+            // var smsModule = new SmsModule();
             var userManagementModule = new UserManagementModule();
             simpleIdServerModule.Init(null);
             shellModule.Init(null);
-            // loginPasswordModule.Init(null);
+            loginPasswordModule.Init(new Dictionary<string, string>
+            {
+                { "IsEditCredentialEnabled", "true" }
+            });
+            /*
             smsModule.Init(new Dictionary<string, string>
             {
                 { "IsSelfProvisioningEnabled", "true" }
             });
+            */
             userManagementModule.Init(null);
         }
 
