@@ -32,7 +32,10 @@ namespace SimpleIdServer.Startup
                 { "IsSelfProvisioningEnabled", "true" }
             });
             */
-            userManagementModule.Init(null);
+            userManagementModule.Init(new Dictionary<string, string>
+            {
+                { "CanUpdateTwoFactorAuthentication", "true" }
+            });
         }
 
         public void ConfigureServices(IServiceCollection services)

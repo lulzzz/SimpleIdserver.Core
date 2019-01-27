@@ -8,19 +8,73 @@
 }
 
 <div class="tab-pane active" id="information">
-    <div>
-        @if(Model.Links == null)
-        {
-    
-        }
-        else
-        {
-            foreach(var link in Model.Links)
-            {
-                <div style="padding-top: 10px">
-                    <a href="@Url.Action(link.Href.ActionName, link.Href.ControllerName, new { area = link.Href.Area })" class="btn btn-default">@link.DisplayName</a>
+    <div class="row" style="padding-top: 20px;">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">@ViewBag.Translations["edit_credentials_link"]</div>
+                <div class="panel-body">
+                    @if (Model.Links == null || !Model.Links.Any())
+                    {
+
+                    }
+                    else
+                    {
+                        <ul class="list-group">
+                            @foreach (var link in Model.Links)
+                            {
+                                <li class="list-group-item">
+                                    <a href="@Url.Action(link.Href.ActionName, link.Href.ControllerName, new { area = link.Href.Area })" class="btn btn-default">@link.DisplayName</a>
+                                </li>
+                            }
+                        </ul>
+                    }
                 </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            @if (ViewBag.IsUpdated)
+            {
+                <div class="alert alert-success">@ViewBag.Translations["user_is_updated"]</div>
             }
-        }
+
+            @if (Model.CanUpdateTwoFactorAuthentication)
+            {
+                using (Html.BeginForm("Edit", "User", null, FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="panel panel-default">
+                        <div class="panel-heading">@ViewBag.Translations["two_factor"]</div>
+                        <div class="panel-body">
+                            @if (Model.TwoFactorAuthTypes == null || !Model.TwoFactorAuthTypes.Any())
+                            {
+                                <i>@ViewBag.Translations["no_two_factor_authenticator"]</i>
+                            }
+                            else
+                            {
+                                <select class="form-control" value="@Model.SelectedTwoFactorAuthType" name="SelectedTwoFactorAuthType">
+                                    <option value="">@ViewBag.Translations["no_two_factor_authenticator_selected"]</option>
+                                    @foreach (var twoFactorAuthType in Model.TwoFactorAuthTypes)
+                                    {
+                                        @if (twoFactorAuthType == Model.SelectedTwoFactorAuthType)
+                                        {
+                                            <option value="@twoFactorAuthType" selected>@twoFactorAuthType</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@twoFactorAuthType">@twoFactorAuthType</option>
+                                        }
+                                    }
+                                </select>
+                            }
+                            <!-- Submit -->
+                            <fieldset class="form-group">
+                                <button type="submit" class="btn btn-primary">@ViewBag.Translations["confirm"]</button>
+                            </fieldset>
+                        </div>
+                    </div>
+                }
+
+            }
+        </div>
     </div>
 </div>

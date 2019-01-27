@@ -8,7 +8,7 @@ namespace SimpleIdServer.UserManagement
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddUserManagement(this IServiceCollection services, IMvcBuilder mvcBuilder)
+        public static IServiceCollection AddUserManagement(this IServiceCollection services, IMvcBuilder mvcBuilder, UserManagementOptions userManagementOptions)
         {
             if (services == null)
             {
@@ -20,6 +20,11 @@ namespace SimpleIdServer.UserManagement
                 throw new ArgumentNullException(nameof(mvcBuilder));
             }
 
+            if (userManagementOptions == null)
+            {
+                throw new ArgumentNullException(nameof(userManagementOptions));
+            }
+
             var assembly = typeof(UserController).Assembly;
             var embeddedFileProvider = new EmbeddedFileProvider(assembly);
             services.Configure<RazorViewEngineOptions>(options =>
@@ -27,6 +32,7 @@ namespace SimpleIdServer.UserManagement
                 options.FileProviders.Add(embeddedFileProvider);
             });
 
+            services.AddSingleton(userManagementOptions);
             mvcBuilder.AddApplicationPart(assembly);
             return services;
         }

@@ -1,8 +1,8 @@
 ﻿namespace SimpleIdServer.Core.Common.Models
 {
-    public class PasswordSettings
+    public class CredentialSettings
     {
-        public double PasswordExpiresIn { get; set; }
+        public double ExpiresIn { get; set; }
         public bool IsRegexEnabled { get; set; }
         public string RegularExpression { get; set; }
         public string PasswordDescription { get; set; }

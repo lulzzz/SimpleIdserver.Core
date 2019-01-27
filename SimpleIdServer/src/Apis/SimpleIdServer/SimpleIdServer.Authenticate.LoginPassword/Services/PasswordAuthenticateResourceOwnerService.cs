@@ -24,6 +24,7 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Services
 
         public override Task<bool> Authenticate(ResourceOwner user, string password)
         {
+            // 1. FETCH THE PASSWORD FROM THE CREDENTIAL
             return Task.FromResult(user.Password == PasswordHelper.ComputeHash(password));
         }
 

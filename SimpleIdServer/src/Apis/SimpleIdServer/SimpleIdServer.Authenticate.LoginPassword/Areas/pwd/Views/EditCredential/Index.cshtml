@@ -2,10 +2,11 @@
     ViewBag.Title = "Edit user";
 }
 
-@model SimpleIdServer.Authenticate.LoginPassword.ViewModels.UpdateResourceOwnerViewModel
-    <h1>
-        @ViewBag.Translations["edit_resource_owner"]
-    </h1>
+@model SimpleIdServer.Authenticate.LoginPassword.ViewModels.UpdateResourceOwnerCredentialsViewModel
+
+<h1>
+    @ViewBag.Translations["edit_resource_owner"]
+</h1>
 
 @if (ViewBag.IsUpdated)
 {
@@ -22,7 +23,7 @@
             <!-- Login -->
             <fieldset class="form-group">
                 <label class="control-label">@ViewBag.Translations["login"]</label>
-                <input type="text" class="form-control" readonly />
+                <input type="text" class="form-control" value="@Model.Login" readonly />
             </fieldset>
             <!-- Actual password -->
             <fieldset class="form-group">

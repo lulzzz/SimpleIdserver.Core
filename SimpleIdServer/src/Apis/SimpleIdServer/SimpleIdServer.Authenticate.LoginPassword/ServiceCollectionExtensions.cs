@@ -14,7 +14,7 @@ namespace SimpleIdServer.Authenticate.LoginPassword
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddLoginPasswordAuthentication(this IServiceCollection services, IMvcBuilder mvcBuilder, BasicAuthenticateOptions basicAuthenticateOptions)
+        public static IServiceCollection AddLoginPasswordAuthentication(this IServiceCollection services, IMvcBuilder mvcBuilder, LoginPasswordOptions basicAuthenticateOptions)
         {
             if (services == null)
             {

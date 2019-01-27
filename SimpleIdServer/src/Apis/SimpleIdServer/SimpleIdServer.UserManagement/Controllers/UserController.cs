@@ -35,13 +35,14 @@ namespace SimpleIdServer.UserManagement.Controllers
         private readonly IUrlHelper _urlHelper;
         private readonly ITwoFactorAuthenticationHandler _twoFactorAuthenticationHandler;
         private readonly IEnumerable<IEditCredentialView> _editCredentialViews;
+        private readonly UserManagementOptions _userManagementOptions;
 
         #region Constructor
 
         public UserController(IUserActions userActions, IProfileActions profileActions, ITranslationManager translationManager, 
             IAuthenticationService authenticationService, IAuthenticationSchemeProvider authenticationSchemeProvider,
             IUrlHelperFactory urlHelperFactory, IActionContextAccessor actionContextAccessor, ITwoFactorAuthenticationHandler twoFactorAuthenticationHandler, 
-            IEnumerable<IEditCredentialView> editCredentialViews) : base(authenticationService)
+            IEnumerable<IEditCredentialView> editCredentialViews, UserManagementOptions userManagementOptions) : base(authenticationService)
         {
             _userActions = userActions;
             _profileActions = profileActions;
@@ -50,6 +51,7 @@ namespace SimpleIdServer.UserManagement.Controllers
             _urlHelper = urlHelperFactory.GetUrlHelper(actionContextAccessor.ActionContext);
             _twoFactorAuthenticationHandler = twoFactorAuthenticationHandler;
             _editCredentialViews = editCredentialViews;
+            _userManagementOptions = userManagementOptions;
         }
 
         #endregion
@@ -86,78 +88,29 @@ namespace SimpleIdServer.UserManagement.Controllers
         public async Task<IActionResult> Edit()
         {
             var authenticatedUser = await SetUser().ConfigureAwait(false);
-            var viewModel = new EditCredentialViewModel();
-            if (_editCredentialViews != null)
-            {
-                viewModel.Links = _editCredentialViews.Where(e => e.IsEnabled).Select(e => {
-                    return new EditCredentialLinkViewModel
-                    {
-                        DisplayName = e.DisplayName,
-                        Href = e.Href
-                    };
-                }).ToList();
-            }
-            return View(viewModel);
+            ViewBag.IsUpdated = false;
+            return await DisplayEditView(authenticatedUser).ConfigureAwait(false);
         }
-
-        /*
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateCredentials(UpdateResourceOwnerCredentialsViewModel viewModel)
+        public async Task<IActionResult> Edit(UpdateTwoFactorAuthenticatorViewModel viewModel)
         {
             if (viewModel == null)
             {
                 throw new ArgumentNullException(nameof(viewModel));
             }
+
+            if (!_userManagementOptions.CanUpdateTwoFactorAuthentication)
+            {
+                return new NotFoundResult();
+            }
             
-            // 1. Validate the view model.
-            await TranslateUserEditView(DefaultLanguage).ConfigureAwait(false);
             var authenticatedUser = await SetUser().ConfigureAwait(false);
-            ViewBag.IsUpdated = false;
-            if (!ModelState.IsValid)
-            {
-                return await GetEditView(authenticatedUser).ConfigureAwait(false);
-            }
-
-            // 2. Update the credentials
-            try
-            {
-                var resourceOwner = await _userActions.GetUser(authenticatedUser).ConfigureAwait(false);
-                var subject = authenticatedUser.GetSubject();
-                await _userActions.UpdateCredentials(new Core.Parameters.ChangePasswordParameter
-                {
-                    ActualPassword = viewModel.ActualPassword,
-                    NewPassword = viewModel.NewPassword,
-                    Subject = subject
-                }).ConfigureAwait(false);
-                ViewBag.IsUpdated = true;
-                return await GetEditView(authenticatedUser).ConfigureAwait(false);
-            }
-            catch(Exception ex)
-            {
-                ModelState.AddModelError("error_message", ex.Message);
-                return await GetEditView(authenticatedUser).ConfigureAwait(false);
-            }
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateTwoFactor(UpdateTwoFactorAuthenticatorViewModel viewModel)
-        {
-            if (viewModel == null)
-            {
-                throw new ArgumentNullException(nameof(viewModel));
-            }
-            
-            await TranslateUserEditView(DefaultLanguage);
-            var authenticatedUser = await SetUser();
-            ViewBag.IsUpdated = false;
-            ViewBag.IsCreated = false;
-            await _userActions.UpdateTwoFactor(authenticatedUser.GetSubject(), viewModel.SelectedTwoFactorAuthType);
+            await _userActions.UpdateTwoFactor(authenticatedUser.GetSubject(), viewModel.SelectedTwoFactorAuthType).ConfigureAwait(false);
             ViewBag.IsUpdated = true;
-            return await GetEditView(authenticatedUser);
+            return await DisplayEditView(authenticatedUser).ConfigureAwait(false);
         }
-        */
 
         /// <summary>
         /// Display the profiles linked to the user account.
@@ -320,24 +273,7 @@ namespace SimpleIdServer.UserManagement.Controllers
         #endregion
 
         #region Private methods
-
-        /*
-        private async Task<IActionResult> GetEditView(ClaimsPrincipal authenticatedUser)
-        {
-            var resourceOwner = await _userActions.GetUser(authenticatedUser);
-            UpdateResourceOwnerViewModel viewModel = null;
-            if (resourceOwner == null)
-            {
-                viewModel = BuildViewModel(resourceOwner.TwoFactorAuthentication, authenticatedUser.GetSubject(), authenticatedUser.Claims, false);
-                return View("Edit", viewModel);
-            }
-
-            viewModel = BuildViewModel(resourceOwner.TwoFactorAuthentication, authenticatedUser.GetSubject(), resourceOwner.Claims, true);
-            viewModel.IsLocalAccount = true;
-            return View("Edit", viewModel);
-        }
-        */
-
+        
         private async Task<ActionResult> GetConsents()
         {
             var authenticatedUser = await SetUser();
@@ -369,64 +305,47 @@ namespace SimpleIdServer.UserManagement.Controllers
 
             return View(result);
         }
-
-        /*
+        
         private async Task TranslateUserEditView(string uiLocales)
         {
             var translations = await _translationManager.GetTranslationsAsync(uiLocales, new List<string>
             {
-                Core.Constants.StandardTranslationCodes.LoginCode,
-                Core.Constants.StandardTranslationCodes.EditResourceOwner,
-                Core.Constants.StandardTranslationCodes.NameCode,
-                Core.Constants.StandardTranslationCodes.YourName,
-                Core.Constants.StandardTranslationCodes.PasswordCode,
-                Core.Constants.StandardTranslationCodes.YourPassword,
-                Core.Constants.StandardTranslationCodes.Email,
-                Core.Constants.StandardTranslationCodes.YourEmail,
+                Core.Constants.StandardTranslationCodes.EditCredentialsLink,
                 Core.Constants.StandardTranslationCodes.ConfirmCode,
-                Core.Constants.StandardTranslationCodes.TwoAuthenticationFactor,
-                Core.Constants.StandardTranslationCodes.UserIsUpdated,
-                Core.Constants.StandardTranslationCodes.Phone,
-                Core.Constants.StandardTranslationCodes.HashedPassword,
-                Core.Constants.StandardTranslationCodes.CreateResourceOwner,
-                Core.Constants.StandardTranslationCodes.Credentials,
-                Core.Constants.StandardTranslationCodes.RepeatPassword,
-                Core.Constants.StandardTranslationCodes.Claims,
-                Core.Constants.StandardTranslationCodes.UserIsCreated,
                 Core.Constants.StandardTranslationCodes.TwoFactor,
                 Core.Constants.StandardTranslationCodes.NoTwoFactorAuthenticator,
                 Core.Constants.StandardTranslationCodes.NoTwoFactorAuthenticatorSelected,
-                Core.Constants.StandardTranslationCodes.ActualPassword,
-                Core.Constants.StandardTranslationCodes.ConfirmActualPassword,
-                Core.Constants.StandardTranslationCodes.NewPassword,
-                Core.Constants.StandardTranslationCodes.ConfirmNewPassword
+                Core.Constants.StandardTranslationCodes.UserIsUpdated
             });
 
             ViewBag.Translations = translations;
         }
 
-        private UpdateResourceOwnerViewModel BuildViewModel(string twoFactorAuthType, string subject, IEnumerable<Claim> claims, bool isLocalAccount)
+        private async Task<IActionResult> DisplayEditView(ClaimsPrincipal authenticatedUser)
         {
-            var editableClaims = new Dictionary<string, string>();
-            var notEditableClaims = new Dictionary<string, string>();
-            foreach(var claim in claims)
+            await TranslateUserEditView(DefaultLanguage).ConfigureAwait(false);
+            var viewModel = new EditCredentialViewModel();
+            if (_editCredentialViews != null)
             {
-                if (Core.Jwt.Constants.NotEditableResourceOwnerClaimNames.Contains(claim.Type))
-                {
-                    notEditableClaims.Add(claim.Type, claim.Value);
-                }
-                else
-                {
-                    editableClaims.Add(claim.Type, claim.Value);
-                }
+                viewModel.Links = _editCredentialViews.Where(e => e.IsEnabled).Select(e => {
+                    return new EditCredentialLinkViewModel
+                    {
+                        DisplayName = e.DisplayName,
+                        Href = e.Href
+                    };
+                }).ToList();
             }
-            
-            var result = new UpdateResourceOwnerViewModel(subject, editableClaims, notEditableClaims, isLocalAccount);
-            result.SelectedTwoFactorAuthType = twoFactorAuthType;
-            result.TwoFactorAuthTypes = _twoFactorAuthenticationHandler.GetAll().Select(s => s.Name).ToList();
-            return result;
+
+            var resourceOwner = await _userActions.GetUser(authenticatedUser).ConfigureAwait(false);
+            if (_userManagementOptions.CanUpdateTwoFactorAuthentication)
+            {
+                viewModel.SelectedTwoFactorAuthType = resourceOwner.TwoFactorAuthentication;
+                viewModel.TwoFactorAuthTypes = _twoFactorAuthenticationHandler.GetAll().Select(s => s.Name).ToList();
+            }
+
+            viewModel.CanUpdateTwoFactorAuthentication = _userManagementOptions.CanUpdateTwoFactorAuthentication;
+            return View("Edit", viewModel);
         }
-        */
 
         #endregion
     }

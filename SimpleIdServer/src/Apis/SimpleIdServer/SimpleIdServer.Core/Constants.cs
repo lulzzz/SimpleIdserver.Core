@@ -345,6 +345,7 @@ namespace SimpleIdServer.Core
             public const string ConfirmNewPassword = "confirm_new_password";
             public const string Update = "update";
             public const string RenewPassword = "renew_password";
+            public const string EditCredentialsLink = "edit_credentials_link";
         }
 
         public static readonly Dictionary<List<ResponseType>, AuthorizationFlow> MappingResponseTypesToAuthorizationFlows = new Dictionary<List<ResponseType>, AuthorizationFlow>

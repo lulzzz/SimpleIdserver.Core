@@ -1,5 +1,4 @@
-﻿using SimpleIdServer.Authenticate.Basic;
-using SimpleIdServer.Module;
+﻿using SimpleIdServer.Module;
 using System.Collections.Generic;
 
 namespace SimpleIdServer.Authenticate.LoginPassword
@@ -24,12 +23,12 @@ namespace SimpleIdServer.Authenticate.LoginPassword
         private void HandleRouteConfigured(object sender, System.EventArgs e)
         {
             var applicationBuilderContext = AspPipelineContext.Instance().ApplicationBuilderContext;
-            applicationBuilderContext.RouteBuilder.UseLoginPasswordAuthentication();
+            applicationBuilderContext.RouteBuilder.UseLoginPasswordAuthentication(GetOptions());
         }
 
-        private BasicAuthenticateOptions GetOptions()
+        private LoginPasswordOptions GetOptions()
         {
-            var result = new BasicAuthenticateOptions();
+            var result = new LoginPasswordOptions();
             if (_properties != null)
             {
                 bool isEditCredentialsEnabled = false;
