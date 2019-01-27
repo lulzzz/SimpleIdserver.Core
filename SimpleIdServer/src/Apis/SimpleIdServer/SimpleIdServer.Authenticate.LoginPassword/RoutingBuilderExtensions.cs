@@ -1,7 +1,6 @@
-﻿using System;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
-using SimpleIdServer.Authenticate.Basic;
+using System;
 
 namespace SimpleIdServer.Authenticate.LoginPassword
 {
@@ -25,12 +24,16 @@ namespace SimpleIdServer.Authenticate.LoginPassword
                 constraints: new { area = Constants.AMR });
             if (options.IsEditCredentialEnabled)
             {
-                routeBuilder.MapRoute("EditCredential",
-                    "EditCredential/{action}/{id?}",
+                routeBuilder.MapRoute("PwdEditCredential",
+                    Constants.AMR + "/EditCredential/{action}/{id?}",
                     new { controller = "EditCredential", action = "Index", area = Constants.AMR },
                     constraints: new { area = Constants.AMR });
             }
 
+            routeBuilder.MapRoute("PwdConfiguration",
+                Constants.AMR + "/Configuration",
+                new { controller = "Configuration", action = "Index", area = Constants.AMR },
+                constraints: new { area = Constants.AMR });
             return routeBuilder;
         }
     }

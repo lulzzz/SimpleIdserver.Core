@@ -14,7 +14,6 @@ namespace SimpleIdServer.Core.WebSite.Authenticate
         Task<string> GenerateAndSendCode(string subject);
         Task<bool> ValidateCode(string code);
         Task<bool> RemoveCode(string code);
-        Task<bool> ChangePassword(ChangePasswordParameter changePasswordParameter);
     }
 
     public class AuthenticateActions : IAuthenticateActions
@@ -24,22 +23,19 @@ namespace SimpleIdServer.Core.WebSite.Authenticate
         private readonly IGenerateAndSendCodeAction _generateAndSendCodeAction;
         private readonly IValidateConfirmationCodeAction _validateConfirmationCodeAction;
         private readonly IRemoveConfirmationCodeAction _removeConfirmationCodeAction;
-        private readonly IChangePasswordAction _changePasswordAction;
 
         public AuthenticateActions(
             IAuthenticateResourceOwnerOpenIdAction authenticateResourceOwnerOpenIdAction,
             ILocalOpenIdUserAuthenticationAction localOpenIdUserAuthenticationAction,
             IGenerateAndSendCodeAction generateAndSendCodeAction,
             IValidateConfirmationCodeAction validateConfirmationCodeAction,
-            IRemoveConfirmationCodeAction removeConfirmationCodeAction,
-            IChangePasswordAction changePasswordAction)
+            IRemoveConfirmationCodeAction removeConfirmationCodeAction)
         {
             _authenticateResourceOwnerOpenIdAction = authenticateResourceOwnerOpenIdAction;
             _localOpenIdUserAuthenticationAction = localOpenIdUserAuthenticationAction;
             _generateAndSendCodeAction = generateAndSendCodeAction;
             _validateConfirmationCodeAction = validateConfirmationCodeAction;
             _removeConfirmationCodeAction = removeConfirmationCodeAction;
-            _changePasswordAction = changePasswordAction;
         }
 
         public async Task<LocalOpenIdAuthenticationResult> LocalOpenIdUserAuthentication(LocalAuthenticationParameter localAuthenticationParameter, AuthorizationParameter authorizationParameter, string code, string issuerName)
@@ -90,11 +86,6 @@ namespace SimpleIdServer.Core.WebSite.Authenticate
         public async Task<bool> RemoveCode(string code)
         {
             return await _removeConfirmationCodeAction.Execute(code);
-        }
-
-        public Task<bool> ChangePassword(ChangePasswordParameter changePasswordParameter)
-        {
-            return _changePasswordAction.Execute(changePasswordParameter);
         }
     }
 }

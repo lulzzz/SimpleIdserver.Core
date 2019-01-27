@@ -2,6 +2,7 @@
 using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.Core.Exceptions;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SimpleIdServer.Core.Services
@@ -10,25 +11,25 @@ namespace SimpleIdServer.Core.Services
     {
         public abstract string Amr { get; }
 
-        private readonly IPasswordSettingsRepository _passwordSettingsRepository;
+        private readonly ICredentialSettingsRepository _passwordSettingsRepository;
         protected readonly IResourceOwnerRepository ResourceOwnerRepository;
 
-        public BaseAuthenticateResourceOwnerService(IPasswordSettingsRepository passwordSettingsRepository, IResourceOwnerRepository resourceOwnerRepository)
+        public BaseAuthenticateResourceOwnerService(ICredentialSettingsRepository passwordSettingsRepository, IResourceOwnerRepository resourceOwnerRepository)
         {
             _passwordSettingsRepository = passwordSettingsRepository;
             ResourceOwnerRepository = resourceOwnerRepository;
         }
 
-        public async Task<ResourceOwner> AuthenticateResourceOwnerAsync(string login, string password)
+        public async Task<ResourceOwner> AuthenticateResourceOwnerAsync(string login, string credentialValue)
         {
             if (string.IsNullOrWhiteSpace(login))
             {
                 throw new ArgumentNullException(nameof(login));
             }
 
-            if (string.IsNullOrWhiteSpace(password))
+            if (string.IsNullOrWhiteSpace(credentialValue))
             {
-                throw new ArgumentNullException(nameof(password));
+                throw new ArgumentNullException(nameof(credentialValue));
             }
 
             var resourceOwner = await GetResourceOwner(login).ConfigureAwait(false);
@@ -42,10 +43,11 @@ namespace SimpleIdServer.Core.Services
                 throw new IdentityServerUserAccountBlockedException();
             }
 
-            var passwordSettigns = await _passwordSettingsRepository.Get().ConfigureAwait(false);
+            var passwordSettigns = await _passwordSettingsRepository.Get(Amr).ConfigureAwait(false);
             var currentDateTime = DateTime.UtcNow;
             var minCurrentEndDate = currentDateTime.AddSeconds(-passwordSettigns.AuthenticationIntervalsInSeconds);
-            if (resourceOwner.FirstAuthenticationFailureDateTime != null && resourceOwner.FirstAuthenticationFailureDateTime.Value.AddSeconds(passwordSettigns.AuthenticationIntervalsInSeconds) >= minCurrentEndDate && resourceOwner.NumberOfAttempts >= passwordSettigns.NumberOfAuthenticationAttempts)
+            var credential = resourceOwner.Credentials.First(c => c.Type == Amr);
+            if (credential.FirstAuthenticationFailureDateTime != null && credential.FirstAuthenticationFailureDateTime.Value.AddSeconds(passwordSettigns.AuthenticationIntervalsInSeconds) >= minCurrentEndDate && credential.NumberOfAttempts >= passwordSettigns.NumberOfAuthenticationAttempts)
             {
                 throw new IdentityServerUserTooManyRetryException
                 {
@@ -53,18 +55,18 @@ namespace SimpleIdServer.Core.Services
                 };
             }
 
-            if (!await Authenticate(resourceOwner, password).ConfigureAwait(false))
+            if (!await Authenticate(resourceOwner, credentialValue).ConfigureAwait(false))
             {
                 if (passwordSettigns.IsBlockAccountPolicyEnabled)
                 {
-                    if (resourceOwner.FirstAuthenticationFailureDateTime == null || resourceOwner.FirstAuthenticationFailureDateTime.Value.AddSeconds(passwordSettigns.AuthenticationIntervalsInSeconds) < minCurrentEndDate)
+                    if (credential.FirstAuthenticationFailureDateTime == null || credential.FirstAuthenticationFailureDateTime.Value.AddSeconds(passwordSettigns.AuthenticationIntervalsInSeconds) < minCurrentEndDate)
                     {
-                        resourceOwner.NumberOfAttempts = 1;
-                        resourceOwner.FirstAuthenticationFailureDateTime = currentDateTime;
+                        credential.NumberOfAttempts = 1;
+                        credential.FirstAuthenticationFailureDateTime = currentDateTime;
                     }
                     else
                     {
-                        resourceOwner.NumberOfAttempts++;
+                        credential.NumberOfAttempts++;
                     }
                     
                     await ResourceOwnerRepository.UpdateAsync(resourceOwner).ConfigureAwait(false);

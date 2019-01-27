@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SimpleIdServer.Authenticate.LoginPassword.Actions;
+using SimpleIdServer.Authenticate.LoginPassword.Parameters;
 using SimpleIdServer.Authenticate.LoginPassword.ViewModels;
 using SimpleIdServer.Core.Extensions;
 using SimpleIdServer.Core.Translation;
-using SimpleIdServer.Core.WebSite.User;
 using SimpleIdServer.Host.Controllers.Website;
 using System;
 using System.Collections.Generic;
@@ -18,13 +19,13 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
     {
         private const string DefaultLanguage = "en";
         private readonly ITranslationManager _translationManager;
-        private readonly IUserActions _userActions;
+        private readonly IChangePasswordAction _changePasswordAction;
 
         public EditCredentialController(IAuthenticationService authenticationService, ITranslationManager translationManager,
-            IUserActions userActions) : base(authenticationService)
+            IChangePasswordAction changePasswordAction) : base(authenticationService)
         {
             _translationManager = translationManager;
-            _userActions = userActions;
+            _changePasswordAction = changePasswordAction;
         }
 
         [HttpGet]
@@ -60,9 +61,8 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
             // 2. Update the credentials
             try
             {
-                var resourceOwner = await _userActions.GetUser(authenticatedUser).ConfigureAwait(false);
                 var subject = authenticatedUser.GetSubject();
-                await _userActions.UpdateCredentials(new Core.Parameters.ChangePasswordParameter
+                await _changePasswordAction.Execute(new ChangePasswordParameter
                 {
                     ActualPassword = viewModel.ActualPassword,
                     NewPassword = viewModel.NewPassword,

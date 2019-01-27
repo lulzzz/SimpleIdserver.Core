@@ -13,7 +13,7 @@ namespace SimpleIdServer.Authenticate.SMS.Services
         private readonly IConfirmationCodeStore _confirmationCodeStore;
 
         public SmsAuthenticateResourceOwnerService(IResourceOwnerRepository resourceOwnerRepository, IConfirmationCodeStore confirmationCodeStore,
-            IPasswordSettingsRepository passwordSettingsRepository) : base(passwordSettingsRepository, resourceOwnerRepository)
+            ICredentialSettingsRepository passwordSettingsRepository) : base(passwordSettingsRepository, resourceOwnerRepository)
         {
             _confirmationCodeStore = confirmationCodeStore;
         }

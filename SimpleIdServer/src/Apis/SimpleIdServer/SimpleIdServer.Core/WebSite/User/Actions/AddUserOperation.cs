@@ -29,7 +29,6 @@ namespace SimpleIdServer.Core.WebSite.User.Actions
         private readonly IOpenIdEventSource _openidEventSource;
         private readonly IEnumerable<IUserClaimsEnricher> _userClaimsEnricherLst;
         private readonly ISubjectBuilder _subjectBuilder;
-        private readonly IPasswordSettingsRepository _passwordSettingsRepository;
 
         public AddUserOperation(IResourceOwnerRepository resourceOwnerRepository, 
             IClaimRepository claimRepository,
@@ -38,7 +37,7 @@ namespace SimpleIdServer.Core.WebSite.User.Actions
             IOpenIdEventSource openIdEventSource,
             IEnumerable<IUserClaimsEnricher> userClaimsEnricherLst,
             ISubjectBuilder subjectBuilder,
-            IPasswordSettingsRepository passwordSettingsRepository)
+            ICredentialSettingsRepository passwordSettingsRepository)
         {
             _resourceOwnerRepository = resourceOwnerRepository;
             _claimRepository = claimRepository;
@@ -47,7 +46,6 @@ namespace SimpleIdServer.Core.WebSite.User.Actions
             _openidEventSource = openIdEventSource;
             _userClaimsEnricherLst = userClaimsEnricherLst;
             _subjectBuilder = subjectBuilder;
-            _passwordSettingsRepository = passwordSettingsRepository;
         }
 
         public async Task<string> Execute(AddUserParameter addUserParameter, string issuer = null)
@@ -120,9 +118,6 @@ namespace SimpleIdServer.Core.WebSite.User.Actions
                 }
             }
 
-            var psettings = await _passwordSettingsRepository.Get().ConfigureAwait(false);
-            var expiresIn = DateTime.UtcNow.AddSeconds(psettings.PasswordExpiresIn);
-
             // 4. Add the resource owner.
             var newResourceOwner = new ResourceOwner
             {
@@ -130,11 +125,7 @@ namespace SimpleIdServer.Core.WebSite.User.Actions
                 Claims = newClaims,
                 TwoFactorAuthentication = string.Empty,
                 CreateDateTime = DateTime.UtcNow,
-                NumberOfAttempts = 0,
                 UpdateDateTime = DateTime.UtcNow,
-                IsBlocked = false,
-                PasswordExpirationDateTime = expiresIn,
-                Password = PasswordHelper.ComputeHash(addUserParameter.Password)
             };                        
             if (!await _resourceOwnerRepository.InsertAsync(newResourceOwner))
             {

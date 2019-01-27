@@ -17,7 +17,7 @@ namespace SimpleIdServer.Host.Extensions
         public List<Client> Clients { get; set; }
         public List<Translation> Translations { get; set; }
         public List<JsonWebKey> JsonWebKeys { get; set; }
-        public PasswordSettings PasswordSettings { get; set; }
+        public List<CredentialSetting> CredentialSettings{ get; set; }
     }
 
     public class IdentityServerOptions

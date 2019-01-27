@@ -11,10 +11,6 @@ namespace SimpleIdServer.Core.Common.Models
         /// </summary>
         public string Id { get; set; }
         /// <summary>
-        /// Gets or sets the password
-        /// </summary>
-        public string Password { get; set; }
-        /// <summary>
         /// Gets or sets the list of claims.
         /// </summary>
         public IList<Claim> Claims { get; set; }
@@ -31,24 +27,12 @@ namespace SimpleIdServer.Core.Common.Models
         /// </summary>
         public DateTime UpdateDateTime { get; set; }
         /// <summary>
-        /// Gets or sets the password expiration datetime.
-        /// </summary>
-        public DateTime PasswordExpirationDateTime { get; set; }
-        /// <summary>
-        /// Gets or sets the blocked datetime.
-        /// </summary>
-        public DateTime BlockedDateTime { get; set; }
-        /// <summary>
         /// Gets or sets is blocked.
         /// </summary>
         public bool IsBlocked { get; set; }
         /// <summary>
-        /// Gets or sets the first authentication failure datetime.
+        /// Gets or sets the credentials.
         /// </summary>
-        public DateTime? FirstAuthenticationFailureDateTime { get; set; }
-        /// <summary>
-        /// Gets or sets the number of attemps.
-        /// </summary>
-        public int NumberOfAttempts { get; set; }
+        public IEnumerable<ResourceOwnerCredential> Credentials { get; set; }
     }
 }

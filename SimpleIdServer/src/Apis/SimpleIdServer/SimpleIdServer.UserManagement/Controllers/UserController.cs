@@ -34,7 +34,7 @@ namespace SimpleIdServer.UserManagement.Controllers
         private readonly IAuthenticationSchemeProvider _authenticationSchemeProvider;
         private readonly IUrlHelper _urlHelper;
         private readonly ITwoFactorAuthenticationHandler _twoFactorAuthenticationHandler;
-        private readonly IEnumerable<IEditCredentialView> _editCredentialViews;
+        private readonly IEnumerable<IAuthModule> _authModules;
         private readonly UserManagementOptions _userManagementOptions;
 
         #region Constructor
@@ -42,7 +42,7 @@ namespace SimpleIdServer.UserManagement.Controllers
         public UserController(IUserActions userActions, IProfileActions profileActions, ITranslationManager translationManager, 
             IAuthenticationService authenticationService, IAuthenticationSchemeProvider authenticationSchemeProvider,
             IUrlHelperFactory urlHelperFactory, IActionContextAccessor actionContextAccessor, ITwoFactorAuthenticationHandler twoFactorAuthenticationHandler, 
-            IEnumerable<IEditCredentialView> editCredentialViews, UserManagementOptions userManagementOptions) : base(authenticationService)
+            IEnumerable<IAuthModule> authModules, UserManagementOptions userManagementOptions) : base(authenticationService)
         {
             _userActions = userActions;
             _profileActions = profileActions;
@@ -50,7 +50,7 @@ namespace SimpleIdServer.UserManagement.Controllers
             _authenticationSchemeProvider = authenticationSchemeProvider;
             _urlHelper = urlHelperFactory.GetUrlHelper(actionContextAccessor.ActionContext);
             _twoFactorAuthenticationHandler = twoFactorAuthenticationHandler;
-            _editCredentialViews = editCredentialViews;
+            _authModules = authModules;
             _userManagementOptions = userManagementOptions;
         }
 
@@ -325,13 +325,13 @@ namespace SimpleIdServer.UserManagement.Controllers
         {
             await TranslateUserEditView(DefaultLanguage).ConfigureAwait(false);
             var viewModel = new EditCredentialViewModel();
-            if (_editCredentialViews != null)
+            if (_authModules != null)
             {
-                viewModel.Links = _editCredentialViews.Where(e => e.IsEnabled).Select(e => {
+                viewModel.Links = _authModules.Where(e => e.IsEditCredentialsEnabled).Select(e => {
                     return new EditCredentialLinkViewModel
                     {
                         DisplayName = e.DisplayName,
-                        Href = e.Href
+                        Href = e.EditCredentialUrl
                     };
                 }).ToList();
             }

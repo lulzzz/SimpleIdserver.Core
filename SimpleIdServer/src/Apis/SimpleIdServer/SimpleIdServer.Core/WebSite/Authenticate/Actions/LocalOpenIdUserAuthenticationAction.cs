@@ -36,7 +36,6 @@ namespace SimpleIdServer.Core.WebSite.Authenticate.Actions
         public ActionResult ActionResult { get; set; }
         public ICollection<Claim> Claims { get; set; }
         public string TwoFactor { get; set; }
-        public DateTime PasswordExpirationDateTime { get; set; }
     }
 
     public class LocalOpenIdUserAuthenticationAction : ILocalOpenIdUserAuthenticationAction
@@ -96,8 +95,7 @@ namespace SimpleIdServer.Core.WebSite.Authenticate.Actions
                                 resourceOwner.Id,
                                 claims, issuerName),
                 Claims = claims,
-                TwoFactor = resourceOwner.TwoFactorAuthentication,
-                PasswordExpirationDateTime = resourceOwner.PasswordExpirationDateTime
+                TwoFactor = resourceOwner.TwoFactorAuthentication
             };
         }
 

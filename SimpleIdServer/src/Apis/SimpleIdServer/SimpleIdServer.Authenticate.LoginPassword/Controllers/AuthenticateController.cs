@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc.Routing;
 using SimpleIdServer.Authenticate.Basic;
 using SimpleIdServer.Authenticate.Basic.Controllers;
 using SimpleIdServer.Authenticate.Basic.ViewModels;
+using SimpleIdServer.Authenticate.LoginPassword.Actions;
+using SimpleIdServer.Authenticate.LoginPassword.Parameters;
 using SimpleIdServer.Authenticate.LoginPassword.ViewModels;
 using SimpleIdServer.Bus;
 using SimpleIdServer.Core;
@@ -36,6 +38,7 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
     public class AuthenticateController : BaseAuthenticateController
     {
         private readonly IResourceOwnerAuthenticateHelper _resourceOwnerAuthenticateHelper;
+        private readonly IChangePasswordAction _changePasswordAction;
 
         public AuthenticateController(
             IAuthenticateActions authenticateActions,
@@ -55,12 +58,14 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
             IAuthenticateHelper authenticateHelper,
             IResourceOwnerAuthenticateHelper resourceOwnerAuthenticateHelper,
             ITwoFactorAuthenticationHandler twoFactorAuthenticationHandler,
+            IChangePasswordAction changePasswordAction,
             LoginPasswordOptions basicAuthenticateOptions) : base(authenticateActions, profileActions, dataProtectionProvider, encoder,
                 translationManager, simpleIdentityServerEventSource, urlHelperFactory, actionContextAccessor, eventPublisher,
                 authenticationService, authenticationSchemeProvider, userActions, payloadSerializer, configurationService,
                 authenticateHelper, twoFactorAuthenticationHandler, basicAuthenticateOptions)
         {
             _resourceOwnerAuthenticateHelper = resourceOwnerAuthenticateHelper;
+            _changePasswordAction = changePasswordAction;
         }
 
         public async Task<IActionResult> Index()
@@ -313,7 +318,7 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
                 var claims = authenticatedUser.Claims.ToList();
                 var subject = authenticatedUser.GetSubject();
                 // 1. Change the password.
-                await _authenticateActions.ChangePassword(new ChangePasswordParameter
+                await _changePasswordAction.Execute(new ChangePasswordParameter
                 {
                     NewPassword = viewModel.NewPassword,
                     ActualPassword = viewModel.ActualPassword,

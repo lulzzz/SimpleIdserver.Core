@@ -60,14 +60,9 @@ namespace SimpleIdServer.Core.Extensions
                 Claims = user.Claims == null ? new List<Claim>() : user.Claims.Select(c => c.Copy()).ToList(),
                 CreateDateTime = user.CreateDateTime,
                 Id = user.Id,
-                BlockedDateTime = user.BlockedDateTime,
                 IsBlocked = user.IsBlocked,
-                NumberOfAttempts = user.NumberOfAttempts,
-                PasswordExpirationDateTime = user.PasswordExpirationDateTime,
-                Password = user.Password,
                 TwoFactorAuthentication = user.TwoFactorAuthentication,
-                UpdateDateTime = user.UpdateDateTime,
-                FirstAuthenticationFailureDateTime = user.FirstAuthenticationFailureDateTime
+                UpdateDateTime = user.UpdateDateTime
             };
         }
 

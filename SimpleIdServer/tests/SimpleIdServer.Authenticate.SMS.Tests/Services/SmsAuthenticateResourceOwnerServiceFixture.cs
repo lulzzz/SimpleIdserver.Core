@@ -17,7 +17,7 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Services
     {
         private Mock<IResourceOwnerRepository> _resourceOwnerRepositoryStub;
         private Mock<IConfirmationCodeStore> _confirmationCodeStoreStub;
-        private Mock<IPasswordSettingsRepository> _passwordSettingsRepositoryStub;
+        private Mock<ICredentialSettingsRepository> _passwordSettingsRepositoryStub;
         private IAuthenticateResourceOwnerService _authenticateResourceOwnerService;
 
         [Fact]
@@ -145,7 +145,7 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Services
         {
             _resourceOwnerRepositoryStub = new Mock<IResourceOwnerRepository>();
             _confirmationCodeStoreStub = new Mock<IConfirmationCodeStore>();
-            _passwordSettingsRepositoryStub = new Mock<IPasswordSettingsRepository>();
+            _passwordSettingsRepositoryStub = new Mock<ICredentialSettingsRepository>();
             _authenticateResourceOwnerService = new SmsAuthenticateResourceOwnerService(_resourceOwnerRepositoryStub.Object,
                 _confirmationCodeStoreStub.Object, _passwordSettingsRepositoryStub.Object);
         }

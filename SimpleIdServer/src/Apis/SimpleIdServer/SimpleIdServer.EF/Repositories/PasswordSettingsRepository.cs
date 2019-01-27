@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SimpleIdServer.EF.Repositories
 {
-    internal sealed class PasswordSettingsRepository : IPasswordSettingsRepository
+    internal sealed class PasswordSettingsRepository : ICredentialSettingsRepository
     {
         private readonly SimpleIdentityServerContext _context;
 

@@ -49,6 +49,7 @@ namespace SimpleIdServer.Host
         public static class EndPoints
         {
             public const string DiscoveryAction = ".well-known/openid-configuration";
+            public const string ModulesConfiguration = ".well-known/authmodules";
             public const string Authorization = "authorization";
             public const string Token = "token";
             public const string UserInfo = "userinfo";

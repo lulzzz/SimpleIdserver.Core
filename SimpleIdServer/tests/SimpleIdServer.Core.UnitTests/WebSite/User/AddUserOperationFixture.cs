@@ -26,7 +26,7 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.User
         private Mock<ISubjectBuilder> _subjectBuilderStub;
         private Mock<IAccountFilter> _accountFilterStub;
         private Mock<IUserClaimsEnricher> _userClaimsEnricherStub;
-        private Mock<IPasswordSettingsRepository> _passwordSettingsRepositoryStub;
+        private Mock<ICredentialSettingsRepository> _passwordSettingsRepositoryStub;
         private IAddUserOperation _addResourceOwnerAction;
         
         [Fact]
@@ -120,7 +120,7 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.User
             _subjectBuilderStub = new Mock<ISubjectBuilder>();
             _accountFilterStub = new Mock<IAccountFilter>();
             _userClaimsEnricherStub = new Mock<IUserClaimsEnricher>();
-            _passwordSettingsRepositoryStub = new Mock<IPasswordSettingsRepository>();
+            _passwordSettingsRepositoryStub = new Mock<ICredentialSettingsRepository>();
 
             _addResourceOwnerAction = new AddUserOperation(
                 _resourceOwnerRepositoryStub.Object,

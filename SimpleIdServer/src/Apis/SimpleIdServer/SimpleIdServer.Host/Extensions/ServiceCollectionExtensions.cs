@@ -138,7 +138,7 @@ namespace SimpleIdServer.Host.Extensions
                 jsonWebKeys: options.Configuration.JsonWebKeys == null ? null : options.Configuration.JsonWebKeys,
                 scopes: DefaultConfiguration.DEFAULT_SCOPES,
                 claims: DefaultConfiguration.DEFAULT_CLAIMS,
-                passwordSettings: options.Configuration.PasswordSettings == null ? DefaultConfiguration.DEFAULT_PASSWORD_SETTINGS : options.Configuration.PasswordSettings)
+                credentialSettings: options.Configuration.CredentialSettings == null ? DefaultConfiguration.DEFAULT_CREDENTIAL_SETTINGS : options.Configuration.CredentialSettings)
                 .AddSimpleIdentityServerJwt()
                 .AddHostIdentityServer(options)
                 .AddDefaultTokenStore()

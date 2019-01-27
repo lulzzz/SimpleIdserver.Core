@@ -7,10 +7,12 @@
         public string Area { get; set; }
     }
 
-    public interface IEditCredentialView
+    public interface IAuthModule
     {
+        string Name { get; }
         string DisplayName { get; }
-        RedirectUrl Href { get; }
-        bool IsEnabled { get; }
+        bool IsEditCredentialsEnabled { get; }
+        RedirectUrl ConfigurationUrl { get; }
+        RedirectUrl EditCredentialUrl { get; }
     }
 }

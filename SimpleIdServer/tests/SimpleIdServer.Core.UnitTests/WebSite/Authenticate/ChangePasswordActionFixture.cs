@@ -13,7 +13,7 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Authenticate
 {
     public class ChangePasswordActionFixture
     {
-        private Mock<IPasswordSettingsRepository> _passwordSettingsRepositoryStub;
+        private Mock<ICredentialSettingsRepository> _passwordSettingsRepositoryStub;
         private Mock<IResourceOwnerRepository> _resourceOwnerRepositoryStub;
         private IChangePasswordAction _changePasswordAction;
 
@@ -97,7 +97,7 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Authenticate
 
         private void InitializeFakeObjects()
         {
-            _passwordSettingsRepositoryStub = new Mock<IPasswordSettingsRepository>();
+            _passwordSettingsRepositoryStub = new Mock<ICredentialSettingsRepository>();
             _resourceOwnerRepositoryStub = new Mock<IResourceOwnerRepository>();
             _changePasswordAction = new ChangePasswordAction(_passwordSettingsRepositoryStub.Object, _resourceOwnerRepositoryStub.Object);
         }

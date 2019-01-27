@@ -26,7 +26,6 @@ namespace SimpleIdServer.Core.Common.Repositories
     {
         Task<ResourceOwner> GetResourceOwnerByClaim(string key, string value);
         Task<ResourceOwner> GetAsync(string id);
-        Task<ResourceOwner> GetAsync(string id, string password);
         Task<ICollection<ResourceOwner>> GetAsync(IEnumerable<System.Security.Claims.Claim> claims);
         Task<ICollection<ResourceOwner>> GetAllAsync();
         Task<bool> InsertAsync(ResourceOwner resourceOwner);

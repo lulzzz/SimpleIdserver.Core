@@ -1,4 +1,5 @@
-﻿using SimpleIdServer.Core.Common.Models;
+﻿using Newtonsoft.Json;
+using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Helpers;
 using System;
 using System.Collections.Generic;
@@ -8,15 +9,17 @@ namespace SimpleIdServer.Host
 {
     internal static class DefaultConfiguration
     {
-        public static PasswordSettings DEFAULT_PASSWORD_SETTINGS = new PasswordSettings
+        public static IEnumerable<CredentialSetting> DEFAULT_CREDENTIAL_SETTINGS = new List<CredentialSetting>
         {
-            IsBlockAccountPolicyEnabled = true,
-            NumberOfAuthenticationAttempts = 3,
-            AuthenticationIntervalsInSeconds = 10,
-            IsRegexEnabled = false,
-            RegularExpression = @"^(?=(.*\d){2})(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z\d]).{8,}$",
-            PasswordDescription = "at least 8 characters, 2 letters, 2 digits, 1 upper case, 1 lower case and 1 symbol",
-            PasswordExpiresIn = TimeSpan.FromDays(2).TotalSeconds
+            new CredentialSetting
+            {
+                IsBlockAccountPolicyEnabled = true,
+                NumberOfAuthenticationAttempts = 3,
+                AuthenticationIntervalsInSeconds = 10,
+                ExpiresIn = TimeSpan.FromDays(2).TotalSeconds,
+                CredentialType = "pwd",
+                Options = "{ IsRegexEnabled : 'false' }"
+            }
         };
 
         public static List<Translation> DEFAULT_TRANSLATIONS = new List<Translation>
@@ -395,13 +398,19 @@ namespace SimpleIdServer.Host
                 Id = "administrator",
                 CreateDateTime = DateTime.UtcNow,
                 UpdateDateTime =  DateTime.UtcNow,
-                PasswordExpirationDateTime = DateTime.UtcNow.AddDays(10),
-                Password = PasswordHelper.ComputeHash("password"),
                 Claims = new List<Claim>
                 {
                     new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject, "administrator"),
                     new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Role, "['administrator']"),
                     new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber, "+32485350536")
+                },
+                Credentials = new List<ResourceOwnerCredential>
+                {
+                    new ResourceOwnerCredential
+                    {
+                        ExpirationDateTime = DateTime.UtcNow.AddDays(10),
+                        Value = PasswordHelper.ComputeHash("password")
+                    }
                 }
             }
         };

@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using SimpleIdServer.Authenticate.Basic;
+using SimpleIdServer.Authenticate.LoginPassword.Actions;
 using SimpleIdServer.Authenticate.LoginPassword.Controllers;
 using SimpleIdServer.Authenticate.LoginPassword.Services;
 using SimpleIdServer.Core.Services;
@@ -44,29 +45,42 @@ namespace SimpleIdServer.Authenticate.LoginPassword
             });
             services.AddSingleton(basicAuthenticateOptions);
             services.AddTransient<IAuthenticateResourceOwnerService, PasswordAuthenticateResourceOwnerService>();
-            services.AddSingleton<IEditCredentialView>(new EditCredentialView(basicAuthenticateOptions.IsEditCredentialEnabled));
+            services.AddTransient<IChangePasswordAction, ChangePasswordAction>();
+            services.AddSingleton<IAuthModule>(new PwdAuthModule(basicAuthenticateOptions.IsEditCredentialEnabled));
             mvcBuilder.AddApplicationPart(assembly);
             return services;
         }
 
-        private class EditCredentialView : IEditCredentialView
+        private class PwdAuthModule : IAuthModule
         {
             private readonly bool _isEnabled;
 
-            public EditCredentialView(bool isEnabled)
+            public PwdAuthModule(bool isEnabled)
             {
                 _isEnabled = isEnabled;
             }
 
-            public string DisplayName { get => "Edit login & password credential"; }
-            public RedirectUrl Href { get => new RedirectUrl
+            public string Name { get => Constants.AMR; }
+            public string DisplayName { get => "login & password"; }
+            public bool IsEditCredentialsEnabled { get => _isEnabled; }
+            public RedirectUrl EditCredentialUrl
+            {
+                get => new RedirectUrl
                 {
                     ActionName = "Index",
                     ControllerName = "EditCredential",
                     Area = Constants.AMR
                 };
             }
-            public bool IsEnabled { get => _isEnabled; }
+            public RedirectUrl ConfigurationUrl
+            {
+                get => new RedirectUrl
+                {
+                    ActionName = "Index",
+                    ControllerName = "Configuration",
+                    Area = Constants.AMR
+                };
+            }
         }
     }
 }

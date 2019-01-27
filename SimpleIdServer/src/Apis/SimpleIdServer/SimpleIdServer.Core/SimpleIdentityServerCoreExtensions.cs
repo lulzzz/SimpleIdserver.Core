@@ -46,7 +46,7 @@ namespace SimpleIdServer.Core
     public static class SimpleIdentityServerCoreExtensions
     {
         public static IServiceCollection AddSimpleIdentityServerCore(this IServiceCollection serviceCollection, OAuthConfigurationOptions configurationOptions = null, List<ClaimAggregate> claims = null, List<Common.Models.Client> clients = null, List<Consent> consents = null, List<JsonWebKey> jsonWebKeys = null,
-            List<ResourceOwnerProfile> profiles = null, List<ResourceOwner> resourceOwners = null, List<Scope> scopes = null, List<Common.Models.Translation> translations = null, PasswordSettings passwordSettings = null)
+            List<ResourceOwnerProfile> profiles = null, List<ResourceOwner> resourceOwners = null, List<Scope> scopes = null, List<Common.Models.Translation> translations = null, IEnumerable<CredentialSetting> credentialSettings = null)
         {
             if (serviceCollection == null)
             {
@@ -136,7 +136,6 @@ namespace SimpleIdServer.Core
             serviceCollection.AddTransient<IResourceOwnerAuthenticateHelper, ResourceOwnerAuthenticateHelper>();
             serviceCollection.AddTransient<IAmrHelper, AmrHelper>();
             serviceCollection.AddTransient<IRevokeTokenParameterValidator, RevokeTokenParameterValidator>();
-            serviceCollection.AddTransient<IChangePasswordAction, ChangePasswordAction>();
             serviceCollection.AddSingleton<IClientPasswordService, DefaultClientPasswordService>();
             serviceCollection.AddSingleton<IConfigurationService>(new DefaultConfigurationService(configurationOptions));
             serviceCollection.AddSingleton<IClaimRepository>(new DefaultClaimRepository(claims));
@@ -151,7 +150,7 @@ namespace SimpleIdServer.Core
             serviceCollection.AddSingleton<IAccountFilter>(new DefaultAccountFilter());
             serviceCollection.AddSingleton<IUserClaimsEnricher>(new DefaultUserClaimsEnricher());
             serviceCollection.AddSingleton<IClientInfoService>(new DefaultClientInfoService());
-            serviceCollection.AddSingleton<IPasswordSettingsRepository>(new DefaultPasswordSettingsRepository(passwordSettings));
+            serviceCollection.AddSingleton<ICredentialSettingsRepository>(new DefaultCredentialSettingRepository(credentialSettings));
             return serviceCollection;
         }
     }

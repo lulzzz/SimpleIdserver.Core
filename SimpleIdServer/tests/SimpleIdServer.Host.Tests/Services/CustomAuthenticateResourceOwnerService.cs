@@ -10,7 +10,7 @@ namespace SimpleIdServer.Host.Tests.Services
 {
     public class CustomAuthenticateResourceOwnerService : BaseAuthenticateResourceOwnerService
     {
-        public CustomAuthenticateResourceOwnerService(IResourceOwnerRepository resourceOwnerRepository, IPasswordSettingsRepository passwordSettingsRepository) : base(passwordSettingsRepository, resourceOwnerRepository)
+        public CustomAuthenticateResourceOwnerService(IResourceOwnerRepository resourceOwnerRepository, ICredentialSettingsRepository passwordSettingsRepository) : base(passwordSettingsRepository, resourceOwnerRepository)
         {
         }
 

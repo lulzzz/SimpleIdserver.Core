@@ -59,27 +59,6 @@ namespace SimpleIdServer.Core.Repositories
             return Task.FromResult(user.Copy());
         }
 
-        public Task<ResourceOwner> GetAsync(string id, string password)
-        {
-            if (string.IsNullOrWhiteSpace(id))
-            {
-                throw new ArgumentNullException(nameof(id));
-            }
-
-            if (string.IsNullOrWhiteSpace(password))
-            {
-                throw new ArgumentNullException(nameof(password));
-            }
-
-            var user = _users.FirstOrDefault(u => u.Claims.First(c => c.Type == SimpleIdServer.Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject).Value == id && u.Password == password);
-            if (user == null)
-            {
-                return Task.FromResult((ResourceOwner)null);
-            }
-
-            return Task.FromResult(user.Copy());
-        }
-
         public Task<ICollection<ResourceOwner>> GetAsync(IEnumerable<Claim> claims)
         {
             if (claims == null)
@@ -187,13 +166,8 @@ namespace SimpleIdServer.Core.Repositories
             {
                 return Task.FromResult(false);
             }
-
-            user.BlockedDateTime = resourceOwner.BlockedDateTime;
+            
             user.IsBlocked = resourceOwner.IsBlocked;
-            user.FirstAuthenticationFailureDateTime = resourceOwner.FirstAuthenticationFailureDateTime;
-            user.PasswordExpirationDateTime = resourceOwner.PasswordExpirationDateTime;
-            user.NumberOfAttempts = resourceOwner.NumberOfAttempts;
-            user.Password = resourceOwner.Password;
             user.TwoFactorAuthentication = resourceOwner.TwoFactorAuthentication;
             user.UpdateDateTime = DateTime.UtcNow;
             user.Claims = resourceOwner.Claims;

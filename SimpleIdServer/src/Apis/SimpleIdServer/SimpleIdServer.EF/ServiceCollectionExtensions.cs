@@ -22,7 +22,7 @@ namespace SimpleIdServer.EF
             serviceCollection.AddTransient<IJsonWebKeyRepository, JsonWebKeyRepository>();
             serviceCollection.AddTransient<IClaimRepository, ClaimRepository>();
             serviceCollection.AddTransient<IProfileRepository, ProfileRepository>();
-            serviceCollection.AddTransient<IPasswordSettingsRepository, PasswordSettingsRepository>();
+            serviceCollection.AddTransient<ICredentialSettingsRepository, PasswordSettingsRepository>();
             return serviceCollection;
         }
     }
