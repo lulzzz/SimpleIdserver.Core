@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using SimpleIdServer.Authenticate.LoginPassword.Parameters;
 using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.Core.Exceptions;
@@ -59,7 +58,7 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Actions
 
             credential.Value = PasswordHelper.ComputeHash(changePasswordParameter.NewPassword);
             credential.ExpirationDateTime = DateTime.UtcNow.AddSeconds(passwordSettings.ExpiresIn);
-            // await _resourceOwnerRepository.UpdateAsync(resourceOwner).ConfigureAwait(false);
+            await _resourceOwnerRepository.UpdateCredential(changePasswordParameter.Subject, credential).ConfigureAwait(false);
             return true;
         }
     }

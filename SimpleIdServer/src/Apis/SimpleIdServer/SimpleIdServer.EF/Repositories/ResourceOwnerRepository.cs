@@ -1,30 +1,14 @@
-﻿#region copyright
-// Copyright 2015 Habart Thierry
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-#endregion
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SimpleIdServer.Core.Common.Parameters;
 using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.Core.Common.Results;
 using SimpleIdServer.EF.Extensions;
 using SimpleIdServer.EF.Models;
 using SimpleIdServer.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Domains = SimpleIdServer.Core.Common.Models;
 
 namespace SimpleIdServer.EF.Repositories
@@ -34,9 +18,7 @@ namespace SimpleIdServer.EF.Repositories
         private readonly SimpleIdentityServerContext _context;
         private readonly ITechnicalEventSource _managerEventSource;
 
-        public ResourceOwnerRepository(
-            SimpleIdentityServerContext context,
-            ITechnicalEventSource managerEventSource)
+        public ResourceOwnerRepository(SimpleIdentityServerContext context, ITechnicalEventSource managerEventSource)
         {
             _context = context;
             _managerEventSource = managerEventSource;
@@ -56,7 +38,7 @@ namespace SimpleIdServer.EF.Repositories
 
             try
             {
-                var result = await _context.ResourceOwners.Include(r => r.Claims)
+                var result = await _context.ResourceOwners.Include(r => r.Claims).Include(r => r.Credentials)
                     .FirstOrDefaultAsync(r => r.Claims.Any(c => c.ClaimCode == key && c.Value == value))
                     .ConfigureAwait(false);
                 if (result == null)
@@ -85,35 +67,8 @@ namespace SimpleIdServer.EF.Repositories
 
                 var result = await _context.ResourceOwners
                     .Include(r => r.Claims)
+                    .Include(r => r.Credentials)
                     .FirstOrDefaultAsync(r => r.Claims.Any(c => c.ClaimCode == claimIdentifier.Code && c.Value == id))
-                    .ConfigureAwait(false);
-                if (result == null)
-                {
-                    return null;
-                }
-
-                return result.ToDomain();
-            }
-            catch (Exception ex)
-            {
-                _managerEventSource.Failure(ex);
-                return null;
-            }
-        }
-
-        public async Task<Domains.ResourceOwner> GetAsync(string id, string password)
-        {
-            try
-            {
-                var claimIdentifier = await _context.Claims.FirstOrDefaultAsync(c => c.IsIdentifier).ConfigureAwait(false);
-                if (claimIdentifier == null)
-                {
-                    throw new InvalidOperationException("no claim can be used to uniquely identified the resource owner");
-                }
-
-                var result = await _context.ResourceOwners
-                    .Include(r => r.Claims)
-                    .FirstOrDefaultAsync(r => r.Claims.Any(c => c.ClaimCode == claimIdentifier.Code && c.Value == id) && r.Password == password)
                     .ConfigureAwait(false);
                 if (result == null)
                 {
@@ -138,6 +93,7 @@ namespace SimpleIdServer.EF.Repositories
 
             return await _context.ResourceOwners
                 .Include(r => r.Claims)
+                .Include(r => r.Credentials)
                 .Where(r => claims.All(c => r.Claims.Any(sc => sc.Value == c.Value && sc.ClaimCode == c.Type)))
                 .Select(u => u.ToDomain())
                 .ToListAsync().ConfigureAwait(false);
@@ -160,6 +116,7 @@ namespace SimpleIdServer.EF.Repositories
 
                 var record = await _context.ResourceOwners
                    .Include(r => r.Claims)
+                   .Include(r => r.Credentials)
                    .Include(r => r.Consents)
                    .FirstOrDefaultAsync(r => r.Claims.Any(c => c.ClaimCode == claimIdentifier.Code && c.Value == id));
                 if (record == null)
@@ -185,16 +142,11 @@ namespace SimpleIdServer.EF.Repositories
                 var user = new ResourceOwner
                 {
                     Id = resourceOwner.Id,
-                    Password = resourceOwner.Password,
-                    BlockedDateTime = resourceOwner.BlockedDateTime,
                     IsBlocked = resourceOwner.IsBlocked,
-                    PasswordExpirationDateTime = resourceOwner.PasswordExpirationDateTime,
                     TwoFactorAuthentication = resourceOwner.TwoFactorAuthentication,
                     Claims = new List<ResourceOwnerClaim>(),
                     CreateDateTime = DateTime.UtcNow,
-                    UpdateDateTime = DateTime.UtcNow,
-                    NumberOfAttempts = resourceOwner.NumberOfAttempts,
-                    FirstAuthenticationFailureDateTime = resourceOwner.FirstAuthenticationFailureDateTime
+                    UpdateDateTime = DateTime.UtcNow
                 };
 
                 if (resourceOwner.Claims != null)
@@ -237,14 +189,9 @@ namespace SimpleIdServer.EF.Repositories
                         return false;
                     }
 
-                    record.Password = resourceOwner.Password;
-                    record.BlockedDateTime = resourceOwner.BlockedDateTime;
                     record.IsBlocked = resourceOwner.IsBlocked;
-                    record.PasswordExpirationDateTime = resourceOwner.PasswordExpirationDateTime;
                     record.TwoFactorAuthentication = resourceOwner.TwoFactorAuthentication;
                     record.UpdateDateTime = DateTime.UtcNow;
-                    record.NumberOfAttempts = resourceOwner.NumberOfAttempts;
-                    record.FirstAuthenticationFailureDateTime = resourceOwner.FirstAuthenticationFailureDateTime;
                     record.Claims = new List<ResourceOwnerClaim>();
                     _context.ResourceOwnerClaims.RemoveRange(record.Claims);
                     if (resourceOwner.Claims != null)
@@ -290,7 +237,8 @@ namespace SimpleIdServer.EF.Repositories
                 }
 
                 IQueryable<Models.ResourceOwner> result = _context.ResourceOwners
-                    .Include(r => r.Claims);
+                    .Include(r => r.Claims)
+                    .Include(r => r.Credentials);
 
                 if (parameter.Subjects != null)
                 {                    
@@ -343,6 +291,52 @@ namespace SimpleIdServer.EF.Repositories
                 _managerEventSource.Failure(ex);
                 return null;
             }
+        }
+
+        public async Task<bool> UpdateCredential(string subject, Domains.ResourceOwnerCredential credential)
+        {
+            if (string.IsNullOrWhiteSpace(subject))
+            {
+                throw new ArgumentNullException(nameof(subject));
+            }
+
+            if (credential == null)
+            {
+                throw new ArgumentNullException(nameof(credential));
+            }
+
+            var claimIdentifier = await _context.Claims.FirstOrDefaultAsync(c => c.IsIdentifier).ConfigureAwait(false);
+            if (claimIdentifier == null)
+            {
+                throw new InvalidOperationException("no claim can be used to uniquely identified the resource owner");
+            }
+
+            var user = await _context.ResourceOwners.Include(r => r.Credentials).FirstOrDefaultAsync(r => r.Claims.Any(c => c.ClaimCode == claimIdentifier.Code && c.Value == subject))
+                    .ConfigureAwait(false);
+            if (user == null)
+            {
+                return false;
+            }
+
+            var cred = user.Credentials.FirstOrDefault(c => c.Type == credential.Type);
+            if (cred == null)
+            {
+                cred = new ResourceOwnerCredential
+                {
+                    Type = credential.Type
+                };
+                user.Credentials.Add(cred);
+            }
+
+            cred.BlockedDateTime = credential.BlockedDateTime;
+            cred.ExpirationDateTime = credential.ExpirationDateTime;
+            cred.FirstAuthenticationFailureDateTime = credential.FirstAuthenticationFailureDateTime;
+            cred.IsBlocked = credential.IsBlocked;
+            cred.NumberOfAttempts = credential.NumberOfAttempts;
+            cred.ResourceOwnerId = user.Id;
+            cred.Value = credential.Value;
+            await _context.SaveChangesAsync().ConfigureAwait(false);
+            return true;
         }
     }
 }

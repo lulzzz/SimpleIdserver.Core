@@ -36,8 +36,7 @@ namespace SimpleIdServer.Core.WebSite.User.Actions
             IAccountFilter accountFilter, 
             IOpenIdEventSource openIdEventSource,
             IEnumerable<IUserClaimsEnricher> userClaimsEnricherLst,
-            ISubjectBuilder subjectBuilder,
-            ICredentialSettingsRepository passwordSettingsRepository)
+            ISubjectBuilder subjectBuilder)
         {
             _resourceOwnerRepository = resourceOwnerRepository;
             _claimRepository = claimRepository;

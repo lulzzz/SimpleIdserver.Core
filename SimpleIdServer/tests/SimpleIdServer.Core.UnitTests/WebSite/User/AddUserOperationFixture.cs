@@ -26,7 +26,6 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.User
         private Mock<ISubjectBuilder> _subjectBuilderStub;
         private Mock<IAccountFilter> _accountFilterStub;
         private Mock<IUserClaimsEnricher> _userClaimsEnricherStub;
-        private Mock<ICredentialSettingsRepository> _passwordSettingsRepositoryStub;
         private IAddUserOperation _addResourceOwnerAction;
         
         [Fact]
@@ -69,10 +68,6 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.User
                 IsValid = true
             }));
             _resourceOwnerRepositoryStub.Setup(r => r.InsertAsync(It.IsAny<ResourceOwner>())).Returns(Task.FromResult(false));
-            _passwordSettingsRepositoryStub.Setup(p => p.Get()).Returns(Task.FromResult(new PasswordSettings
-            {
-                PasswordExpiresIn = 200
-            }));
             var parameter = new AddUserParameter("password");
 
             // ACT
@@ -98,10 +93,6 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.User
             _resourceOwnerRepositoryStub.Setup(r => r.GetAsync(It.IsAny<string>()))
                 .Returns(Task.FromResult((ResourceOwner)null));
             _resourceOwnerRepositoryStub.Setup(r => r.InsertAsync(It.IsAny<ResourceOwner>())).Returns(Task.FromResult(true));
-            _passwordSettingsRepositoryStub.Setup(p => p.Get()).Returns(Task.FromResult(new PasswordSettings
-            {
-                PasswordExpiresIn = 200
-            }));
 
             // ACT
             await _addResourceOwnerAction.Execute(parameter, null);
@@ -120,7 +111,6 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.User
             _subjectBuilderStub = new Mock<ISubjectBuilder>();
             _accountFilterStub = new Mock<IAccountFilter>();
             _userClaimsEnricherStub = new Mock<IUserClaimsEnricher>();
-            _passwordSettingsRepositoryStub = new Mock<ICredentialSettingsRepository>();
 
             _addResourceOwnerAction = new AddUserOperation(
                 _resourceOwnerRepositoryStub.Object,
@@ -129,8 +119,7 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.User
                 _accountFilterStub.Object,
                 _openidEventSourceStub.Object,
                 new List<IUserClaimsEnricher> { _userClaimsEnricherStub.Object },
-                _subjectBuilderStub.Object,
-                _passwordSettingsRepositoryStub.Object);
+                _subjectBuilderStub.Object);
         }
     }
 }

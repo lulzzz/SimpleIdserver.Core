@@ -9,7 +9,7 @@ namespace SimpleIdServer.Authenticate.LoginPassword
         public bool IsRegexEnabled { get; set; }
         [DataMember(Name = "regex")]
         public string RegularExpression { get; set; }
-        [DataMember(Name = "pwd")]
+        [DataMember(Name = "pwd_description")]
         public string PasswordDescription { get; set; }
     }
 }

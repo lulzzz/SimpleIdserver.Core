@@ -12,12 +12,12 @@ namespace SimpleIdServer.Core.Services
         public abstract string Amr { get; }
 
         private readonly ICredentialSettingsRepository _passwordSettingsRepository;
-        protected readonly IResourceOwnerRepository ResourceOwnerRepository;
+        protected readonly IResourceOwnerRepository _resourceOwnerRepository;
 
         public BaseAuthenticateResourceOwnerService(ICredentialSettingsRepository passwordSettingsRepository, IResourceOwnerRepository resourceOwnerRepository)
         {
             _passwordSettingsRepository = passwordSettingsRepository;
-            ResourceOwnerRepository = resourceOwnerRepository;
+            _resourceOwnerRepository = resourceOwnerRepository;
         }
 
         public async Task<ResourceOwner> AuthenticateResourceOwnerAsync(string login, string credentialValue)
@@ -55,6 +55,11 @@ namespace SimpleIdServer.Core.Services
                 };
             }
 
+            if (credential.IsBlocked)
+            {
+                throw new IdentityServerCredentialBlockedException();
+            }
+
             if (!await Authenticate(resourceOwner, credentialValue).ConfigureAwait(false))
             {
                 if (passwordSettigns.IsBlockAccountPolicyEnabled)
@@ -68,8 +73,8 @@ namespace SimpleIdServer.Core.Services
                     {
                         credential.NumberOfAttempts++;
                     }
-                    
-                    await ResourceOwnerRepository.UpdateAsync(resourceOwner).ConfigureAwait(false);
+
+                    await _resourceOwnerRepository.UpdateCredential(login, credential).ConfigureAwait(false);
                 }
 
                 throw new IdentityServerUserPasswordInvalidException();

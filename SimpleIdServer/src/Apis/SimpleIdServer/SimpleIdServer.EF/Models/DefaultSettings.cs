@@ -1,4 +1,4 @@
-﻿namespace SimpleIdServer.Core.Common.Models
+﻿namespace SimpleIdServer.EF.Models
 {
     public class DefaultSettings
     {

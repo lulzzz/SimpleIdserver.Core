@@ -1,7 +1,7 @@
-using System;
 using Microsoft.Extensions.DependencyInjection;
 using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.EF.Repositories;
+using System;
 
 namespace SimpleIdServer.EF
 {
@@ -22,7 +22,8 @@ namespace SimpleIdServer.EF
             serviceCollection.AddTransient<IJsonWebKeyRepository, JsonWebKeyRepository>();
             serviceCollection.AddTransient<IClaimRepository, ClaimRepository>();
             serviceCollection.AddTransient<IProfileRepository, ProfileRepository>();
-            serviceCollection.AddTransient<ICredentialSettingsRepository, PasswordSettingsRepository>();
+            serviceCollection.AddTransient<ICredentialSettingsRepository, CredentialsSettingsRepository>();
+            serviceCollection.AddTransient<IDefaultSettingsRepository, DefaultSettingsRepository>();
             return serviceCollection;
         }
     }

@@ -2,23 +2,35 @@
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.EF.Extensions;
-using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SimpleIdServer.EF.Repositories
 {
-    internal sealed class PasswordSettingsRepository : ICredentialSettingsRepository
+    internal sealed class CredentialsSettingsRepository : ICredentialSettingsRepository
     {
         private readonly SimpleIdentityServerContext _context;
 
-        public PasswordSettingsRepository(SimpleIdentityServerContext context)
+        public CredentialsSettingsRepository(SimpleIdentityServerContext context)
         {
             _context = context;
         }
 
-        public async Task<PasswordSettings> Get()
+        public async Task<IEnumerable<CredentialSetting>> Get()
         {
-            var result = await _context.PasswordSettings.FirstOrDefaultAsync().ConfigureAwait(false);
+            var result = await _context.CredentialSettings.ToListAsync().ConfigureAwait(false);
+            if (result == null)
+            {
+                return null;
+            }
+
+            return result.Select(s => s.ToDomain());
+        }
+
+        public async Task<CredentialSetting> Get(string type)
+        {
+            var result = await _context.CredentialSettings.FirstOrDefaultAsync(p => p.CredentialType == type).ConfigureAwait(false);
             if (result == null)
             {
                 return null;
@@ -27,32 +39,28 @@ namespace SimpleIdServer.EF.Repositories
             return result.ToDomain();
         }
 
-        public async Task<bool> Update(PasswordSettings passwordSettings)
+        public async Task<bool> Update(CredentialSetting passwordSettings)
         {
-            var record = await _context.PasswordSettings.FirstOrDefaultAsync().ConfigureAwait(false);
+            var record = await _context.CredentialSettings.FirstOrDefaultAsync().ConfigureAwait(false);
             if (record == null)
             {
-                _context.PasswordSettings.Add(new Models.PasswordSettings
+                _context.CredentialSettings.Add(new Models.CredentialSetting
                 {
                     AuthenticationIntervalsInSeconds = passwordSettings.AuthenticationIntervalsInSeconds,
-                    Id = Guid.NewGuid().ToString(),
                     IsBlockAccountPolicyEnabled = passwordSettings.IsBlockAccountPolicyEnabled,
-                    IsRegexEnabled = passwordSettings.IsRegexEnabled,
                     NumberOfAuthenticationAttempts = passwordSettings.NumberOfAuthenticationAttempts,
-                    PasswordDescription = passwordSettings.PasswordDescription,
-                    PasswordExpiresIn = passwordSettings.PasswordExpiresIn,
-                    RegularExpression = passwordSettings.RegularExpression
+                    CredentialType = passwordSettings.CredentialType,
+                    ExpiresIn = passwordSettings.ExpiresIn,
+                    Options = passwordSettings.Options
                 });
             }
             else
             {
                 record.AuthenticationIntervalsInSeconds = passwordSettings.AuthenticationIntervalsInSeconds;
                 record.IsBlockAccountPolicyEnabled = passwordSettings.IsBlockAccountPolicyEnabled;
-                record.IsRegexEnabled = passwordSettings.IsRegexEnabled;
                 record.NumberOfAuthenticationAttempts = passwordSettings.NumberOfAuthenticationAttempts;
-                record.PasswordDescription = passwordSettings.PasswordDescription;
-                record.PasswordExpiresIn = passwordSettings.PasswordExpiresIn;
-                record.RegularExpression = passwordSettings.RegularExpression;
+                record.ExpiresIn = passwordSettings.ExpiresIn;
+                record.Options = passwordSettings.Options;
             }
 
             await _context.SaveChangesAsync().ConfigureAwait(false);

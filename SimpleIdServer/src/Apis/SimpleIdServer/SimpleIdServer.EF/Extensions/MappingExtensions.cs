@@ -12,22 +12,38 @@ namespace SimpleIdServer.EF.Extensions
     {
         #region To Domain Objects
 
-        public static Domain.PasswordSettings ToDomain(this Model.PasswordSettings passwordSettings)
+        public static Domain.DefaultSettings ToDomain(this Model.DefaultSettings defaultSettings)
         {
-            if (passwordSettings == null)
+            if (defaultSettings == null)
             {
-                throw new ArgumentNullException(nameof(passwordSettings));
+                throw new ArgumentNullException(nameof(defaultSettings));
             }
 
-            return new Domain.PasswordSettings
+            return new Domain.DefaultSettings
             {
-                AuthenticationIntervalsInSeconds = passwordSettings.AuthenticationIntervalsInSeconds,
-                IsBlockAccountPolicyEnabled = passwordSettings.IsBlockAccountPolicyEnabled,
-                IsRegexEnabled = passwordSettings.IsRegexEnabled,
-                NumberOfAuthenticationAttempts = passwordSettings.NumberOfAuthenticationAttempts,
-                PasswordDescription =  passwordSettings.PasswordDescription,
-                PasswordExpiresIn = passwordSettings.PasswordExpiresIn,
-                RegularExpression = passwordSettings.RegularExpression
+                DefaultAuthorizationCodeValidityPeriodInSeconds = defaultSettings.DefaultAuthorizationCodeValidityPeriodInSeconds,
+                DefaultLanguage = defaultSettings.DefaultLanguage,
+                DefaultTokenValidityPeriodInSeconds = defaultSettings.DefaultTokenValidityPeriodInSeconds,
+                DefaultTwoFactorAuthentication = defaultSettings.DefaultTwoFactorAuthentication,
+                Id = defaultSettings.Id
+            };
+        }
+
+        public static Domain.CredentialSetting ToDomain(this Model.CredentialSetting credentialSetting)
+        {
+            if (credentialSetting == null)
+            {
+                throw new ArgumentNullException(nameof(credentialSetting));
+            }
+
+            return new Domain.CredentialSetting
+            {
+                CredentialType = credentialSetting.CredentialType,
+                ExpiresIn = credentialSetting.ExpiresIn,
+                Options = credentialSetting.Options,
+                AuthenticationIntervalsInSeconds = credentialSetting.AuthenticationIntervalsInSeconds,
+                IsBlockAccountPolicyEnabled = credentialSetting.IsBlockAccountPolicyEnabled,
+                NumberOfAuthenticationAttempts = credentialSetting.NumberOfAuthenticationAttempts
             };
         }
 
@@ -98,25 +114,41 @@ namespace SimpleIdServer.EF.Extensions
             }
 
             var claims = new List<Claim>();
-            if (resourceOwner.Claims != null 
-                && resourceOwner.Claims.Any())
+            var credentials = new List<Domain.ResourceOwnerCredential>();
+            if (resourceOwner.Claims != null && resourceOwner.Claims.Any())
             {
-                resourceOwner.Claims.ForEach(r => claims.Add(new Claim(r.ClaimCode, r.Value)));
+                foreach(var c in resourceOwner.Claims)
+                {
+                    claims.Add(new Claim(c.ClaimCode, c.Value));
+                }
+            }
+
+            if (resourceOwner.Credentials != null && resourceOwner.Credentials.Any())
+            {
+                foreach(var cr in resourceOwner.Credentials)
+                {
+                    credentials.Add(new Domain.ResourceOwnerCredential
+                    {
+                        BlockedDateTime = cr.BlockedDateTime,
+                        ExpirationDateTime = cr.ExpirationDateTime,
+                        FirstAuthenticationFailureDateTime = cr.FirstAuthenticationFailureDateTime,
+                        IsBlocked = cr.IsBlocked,
+                        NumberOfAttempts = cr.NumberOfAttempts,
+                        Type = cr.Type,
+                        Value = cr.Value
+                    });
+                }
             }
 
             return new Domain.ResourceOwner
             {
                 Id = resourceOwner.Id,
-                BlockedDateTime = resourceOwner.BlockedDateTime,
                 IsBlocked = resourceOwner.IsBlocked,
-                PasswordExpirationDateTime = resourceOwner.PasswordExpirationDateTime,
                 TwoFactorAuthentication = resourceOwner.TwoFactorAuthentication,
                 Claims = claims,
-                Password = resourceOwner.Password,
                 CreateDateTime = resourceOwner.CreateDateTime,
                 UpdateDateTime = resourceOwner.UpdateDateTime,
-                NumberOfAttempts = resourceOwner.NumberOfAttempts,
-                FirstAuthenticationFailureDateTime = resourceOwner.FirstAuthenticationFailureDateTime
+                Credentials = credentials
             };
         }
 

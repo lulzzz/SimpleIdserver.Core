@@ -50,7 +50,7 @@ namespace SimpleIdServer.Core.Repositories
                 throw new ArgumentNullException(nameof(id));
             }
 
-            var user = _users.FirstOrDefault(u => u.Claims.First(c => c.Type == SimpleIdServer.Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject).Value == id);
+            var user = _users.FirstOrDefault(u => u.Claims.First(c => c.Type == Jwt.Constants.StandardResourceOwnerClaimNames.Subject).Value == id);
             if (user == null)
             {
                 return Task.FromResult((ResourceOwner)null);
@@ -171,6 +171,30 @@ namespace SimpleIdServer.Core.Repositories
             user.TwoFactorAuthentication = resourceOwner.TwoFactorAuthentication;
             user.UpdateDateTime = DateTime.UtcNow;
             user.Claims = resourceOwner.Claims;
+            return Task.FromResult(true);
+        }
+
+        public Task<bool> UpdateCredential(string subject, ResourceOwnerCredential credential)
+        {
+            var user = _users.FirstOrDefault(u => u.Claims.First(c => c.Type == SimpleIdServer.Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject).Value == subject);
+            if (user == null)
+            {
+                return Task.FromResult(false);
+            }
+
+            var cr = user.Credentials.FirstOrDefault(c => c.Type == credential.Type);
+            if (cr == null)
+            {
+                cr = new ResourceOwnerCredential();
+            }
+
+            cr.Type = credential.Type;
+            cr.Value = credential.Value;
+            cr.IsBlocked = credential.IsBlocked;
+            cr.NumberOfAttempts = credential.NumberOfAttempts;
+            cr.BlockedDateTime = credential.BlockedDateTime;
+            cr.ExpirationDateTime = credential.ExpirationDateTime;
+            cr.FirstAuthenticationFailureDateTime = credential.FirstAuthenticationFailureDateTime;
             return Task.FromResult(true);
         }
     }

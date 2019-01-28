@@ -6,16 +6,16 @@ namespace SimpleIdServer.EF.Mappings
 {
     internal static class PasswordSettingsMapping
     {
-        public static ModelBuilder AddPasswordSettingsMapping(this ModelBuilder modelBuilder)
+        public static ModelBuilder AddCredentialsSettingsMapping(this ModelBuilder modelBuilder)
         {
             if (modelBuilder == null)
             {
                 throw new ArgumentNullException(nameof(modelBuilder));
             }
 
-            modelBuilder.Entity<PasswordSettings>()
-                .ToTable("passwordSettings")
-                .HasKey(c => c.Id);
+            modelBuilder.Entity<CredentialSetting>()
+                .ToTable("credentialSettings")
+                .HasKey(c => c.CredentialType);
             return modelBuilder;
         }
     }

@@ -36,7 +36,7 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Services
 
         public override Task<ResourceOwner> GetResourceOwner(string login)
         {
-            return ResourceOwnerRepository.GetAsync(login);
+            return _resourceOwnerRepository.GetAsync(login);
         }
 
         public override Task Validate(ResourceOwner user)

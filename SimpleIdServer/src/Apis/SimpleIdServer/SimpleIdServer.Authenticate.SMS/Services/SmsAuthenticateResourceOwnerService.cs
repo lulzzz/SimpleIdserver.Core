@@ -45,7 +45,7 @@ namespace SimpleIdServer.Authenticate.SMS.Services
 
         public override Task<ResourceOwner> GetResourceOwner(string login)
         {
-            return ResourceOwnerRepository.GetResourceOwnerByClaim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber, login);
+            return _resourceOwnerRepository.GetResourceOwnerByClaim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber, login);
         }
 
         public override Task Validate(ResourceOwner user)

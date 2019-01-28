@@ -27,7 +27,8 @@ namespace SimpleIdServer.EF
         public virtual DbSet<ScopeClaim> ScopeClaims { get; set; }
         public virtual DbSet<ResourceOwnerClaim> ResourceOwnerClaims { get; set; }
         public virtual DbSet<Profile> Profiles { get; set; }
-        public virtual DbSet<PasswordSettings> PasswordSettings { get; set; }
+        public virtual DbSet<CredentialSetting> CredentialSettings { get; set; }
+        public virtual DbSet<DefaultSettings> DefaultSettings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -45,7 +46,9 @@ namespace SimpleIdServer.EF
             modelBuilder.AddResourceOwnerClaimMapping();
             modelBuilder.AddClientSecretMapping();
             modelBuilder.AddProfileMapping();
-            modelBuilder.AddPasswordSettingsMapping();
+            modelBuilder.AddCredentialsSettingsMapping();
+            modelBuilder.AddResourceCredentialMapping();
+            modelBuilder.AddDefaultSettingsMapping();
             base.OnModelCreating(modelBuilder);
         }
     }

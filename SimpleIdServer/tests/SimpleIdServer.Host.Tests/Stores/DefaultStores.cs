@@ -18,6 +18,8 @@ using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using Newtonsoft.Json;
+using SimpleIdServer.Authenticate.LoginPassword;
 using SimpleIdServer.Core.Common;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Helpers;
@@ -302,7 +304,6 @@ namespace SimpleIdServer.Host.Tests.Stores
         {
             return new List<ResourceOwner>
             {
-
                     new ResourceOwner
                     {
                         Id = "administrator",
@@ -313,75 +314,162 @@ namespace SimpleIdServer.Host.Tests.Stores
                             new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber, "phone"),
                             new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Address, "{ country : 'france' }")
                         },
-                        Password = PasswordHelper.ComputeHash("password"),
-                        PasswordExpirationDateTime = DateTime.UtcNow.AddDays(2)
+                        Credentials = new List<ResourceOwnerCredential>
+                        {
+                            new ResourceOwnerCredential
+                            {
+                                ExpirationDateTime = DateTime.UtcNow.AddDays(2),
+                                Value = PasswordHelper.ComputeHash("password"),
+                                Type = "pwd"
+                            },
+                            new ResourceOwnerCredential
+                            {
+                                ExpirationDateTime = DateTime.UtcNow.AddDays(2),
+                                Type = "sms"
+                            }
+                        }
                     },
                     new ResourceOwner
                     {
                         Id = "user",
-                        Password = PasswordHelper.ComputeHash("password"),
                         Claims = new List<Claim>
                         {
                             new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject, "user")
                         },
-                        PasswordExpirationDateTime = DateTime.UtcNow.AddDays(2)
+                        Credentials = new List<ResourceOwnerCredential>
+                        {
+                            new ResourceOwnerCredential
+                            {
+                                ExpirationDateTime = DateTime.UtcNow.AddDays(2),
+                                Value = PasswordHelper.ComputeHash("password"),
+                                Type = "pwd"
+                            },
+                            new ResourceOwnerCredential
+                            {
+                                ExpirationDateTime = DateTime.UtcNow.AddDays(2),
+                                Type = "sms"
+                            }
+                        }
                     },
                     new ResourceOwner
                     {
                         Id = "superuser",
-                        Password = PasswordHelper.ComputeHash("password"),
                         Claims = new List<Claim>
                         {
                             new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject, "superuser"),
                             new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Role, "[ 'administrator', 'role' ]")
                         },
-                        PasswordExpirationDateTime = DateTime.UtcNow.AddDays(2)
+                        Credentials = new List<ResourceOwnerCredential>
+                        {
+                            new ResourceOwnerCredential
+                            {
+                                ExpirationDateTime = DateTime.UtcNow.AddDays(2),
+                                Value = PasswordHelper.ComputeHash("password"),
+                                Type = "pwd"
+                            },
+                            new ResourceOwnerCredential
+                            {
+                                ExpirationDateTime = DateTime.UtcNow.AddDays(2),
+                                Type = "sms"
+                            }
+                        }
                     },
                     new ResourceOwner
                     {
                         Id = "blockeduser",
-                        Password = PasswordHelper.ComputeHash("password"),
                         Claims = new List<Claim>
                         {
                             new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject, "blockeduser")
                         },
-                        PasswordExpirationDateTime = DateTime.UtcNow.AddDays(2),
-                        IsBlocked = true
+                        IsBlocked = true,
+                        Credentials = new List<ResourceOwnerCredential>
+                        {
+                            new ResourceOwnerCredential
+                            {
+                                Value = PasswordHelper.ComputeHash("password"),
+                                ExpirationDateTime = DateTime.UtcNow.AddDays(2),
+                                Type = "pwd",
+                                IsBlocked = true
+                            },
+                            new ResourceOwnerCredential
+                            {
+                                ExpirationDateTime = DateTime.UtcNow.AddDays(2),
+                                Type = "sms"
+                            }
+                        }
                     },
                     new ResourceOwner
                     {
                         Id = "toomanyattemps",
-                        Password = PasswordHelper.ComputeHash("password"),
                         Claims = new List<Claim>
                         {
                             new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject, "toomanyattemps")
                         },
-                        NumberOfAttempts = 10,
-                        FirstAuthenticationFailureDateTime = DateTime.UtcNow.AddSeconds(-1),
+                        Credentials = new List<ResourceOwnerCredential>
+                        {
+                            new ResourceOwnerCredential
+                            {
+                                NumberOfAttempts = 10,
+                                FirstAuthenticationFailureDateTime = DateTime.UtcNow.AddSeconds(-1),
+                                Value = PasswordHelper.ComputeHash("password"),
+                                Type = "pwd"
+                            },
+                            new ResourceOwnerCredential
+                            {
+                                ExpirationDateTime = DateTime.UtcNow.AddDays(2),
+                                Type = "sms"
+                            }
+                        }
                     },
                     new ResourceOwner
                     {
                         Id = "expired",
-                        Password = PasswordHelper.ComputeHash("password"),
                         Claims = new List<Claim>
                         {
                             new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject, "expired")
                         },
-                        PasswordExpirationDateTime = DateTime.UtcNow.AddDays(-2)
+                        Credentials = new List<ResourceOwnerCredential>
+                        {
+                            new ResourceOwnerCredential
+                            {
+                                ExpirationDateTime = DateTime.UtcNow.AddDays(-2),
+                                Value = PasswordHelper.ComputeHash("password"),
+                                Type = "pwd"
+                            },
+                            new ResourceOwnerCredential
+                            {
+                                ExpirationDateTime = DateTime.UtcNow.AddDays(2),
+                                Type = "sms"
+                            }
+                        }
                     }
             };
         }
 
-        public static PasswordSettings GetPasswordSettings()
+        public static List<CredentialSetting> GetCredentialSettings()
         {
-            return new PasswordSettings
+            return new List<CredentialSetting>
             {
-                AuthenticationIntervalsInSeconds = 2000000000,
-                IsBlockAccountPolicyEnabled  = true,
-                IsRegexEnabled = true,
-                NumberOfAuthenticationAttempts = 2,
-                RegularExpression = @"^(?=(.*\d){2})(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z\d]).{8,}$",
-                PasswordDescription = "at least 8 characters, 2 letters, 2 digits, 1 upper case, 1 lower case and 1 symbol",
+                new CredentialSetting
+                {
+                    CredentialType = "pwd",
+                    AuthenticationIntervalsInSeconds = 2000000000,
+                    IsBlockAccountPolicyEnabled  = true,
+                    Options = JsonConvert.SerializeObject(new PwdCredentialOptions
+                    {
+                        IsRegexEnabled = true,
+                        PasswordDescription = "at least 8 characters, 2 letters, 2 digits, 1 upper case, 1 lower case and 1 symbol",
+                        RegularExpression = @"^(?=(.*\d){2})(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z\d]).{8,}$"
+                    }),
+                    NumberOfAuthenticationAttempts = 2
+                },
+                new CredentialSetting
+                {
+                    CredentialType = "sms",
+                    AuthenticationIntervalsInSeconds = 2000000000,
+                   NumberOfAuthenticationAttempts = 2,
+                   IsBlockAccountPolicyEnabled = true
+                }
             };
         }
 

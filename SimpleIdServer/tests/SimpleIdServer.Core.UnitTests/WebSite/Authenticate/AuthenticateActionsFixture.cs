@@ -1,10 +1,10 @@
 ﻿using Moq;
-using System;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using SimpleIdServer.Core.Parameters;
 using SimpleIdServer.Core.WebSite.Authenticate;
 using SimpleIdServer.Core.WebSite.Authenticate.Actions;
+using System;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace SimpleIdentityServer.Core.UnitTests.WebSite.Authenticate
@@ -16,7 +16,6 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Authenticate
         private Mock<IGenerateAndSendCodeAction> _generateAndSendCodeActionStub;
         private Mock<IValidateConfirmationCodeAction> _validateConfirmationCodeActionStub;
         private Mock<IRemoveConfirmationCodeAction> _removeConfirmationCodeActionStub;
-        private Mock<IChangePasswordAction> _changePasswordAction;
         private IAuthenticateActions _authenticateActions;
 
         [Fact]
@@ -92,14 +91,12 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Authenticate
             _generateAndSendCodeActionStub = new Mock<IGenerateAndSendCodeAction>();
             _validateConfirmationCodeActionStub = new Mock<IValidateConfirmationCodeAction>();
             _removeConfirmationCodeActionStub = new Mock<IRemoveConfirmationCodeAction>();
-            _changePasswordAction = new Mock<IChangePasswordAction>();
             _authenticateActions = new AuthenticateActions(
                 _authenticateResourceOwnerActionFake.Object,
                 _localOpenIdUserAuthenticationActionFake.Object,
                 _generateAndSendCodeActionStub.Object,
                 _validateConfirmationCodeActionStub.Object,
-                _removeConfirmationCodeActionStub.Object,
-                _changePasswordAction.Object);
+                _removeConfirmationCodeActionStub.Object);
         }
     }
 }

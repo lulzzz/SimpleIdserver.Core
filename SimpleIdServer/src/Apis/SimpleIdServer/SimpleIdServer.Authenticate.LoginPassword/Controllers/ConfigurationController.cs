@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 
 namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
 {
@@ -8,7 +7,13 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
     {
         public IActionResult Index()
         {
-            return new OkObjectResult(new PwdCredentialOptions());
+            var result = new[]
+            {
+                "is_regex_enabled",
+                "regex",
+                "pwd_description"
+            };
+            return new OkObjectResult(result);
         }
     }
 }

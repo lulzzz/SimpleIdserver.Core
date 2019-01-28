@@ -233,6 +233,12 @@ namespace SimpleIdServer.Host
                 LanguageTag = "en",
                 Code = Core.Constants.StandardTranslationCodes.RememberMyLoginCode,
                 Value = "Remember credentials"
+            },
+            new Translation
+            {
+                LanguageTag = "en",
+                Code = Core.Constants.StandardTranslationCodes.EditCredentialsLink,
+                Value = "Edit credentials"
             }
         };
 
@@ -409,7 +415,11 @@ namespace SimpleIdServer.Host
                     new ResourceOwnerCredential
                     {
                         ExpirationDateTime = DateTime.UtcNow.AddDays(10),
-                        Value = PasswordHelper.ComputeHash("password")
+                        Value = PasswordHelper.ComputeHash("password"),
+                        IsBlocked = false,
+                        FirstAuthenticationFailureDateTime = null,
+                        Type = "pwd",
+                        NumberOfAttempts = 0
                     }
                 }
             }
