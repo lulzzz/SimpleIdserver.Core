@@ -89,7 +89,7 @@ namespace SimpleIdServer.Core.Api.Authorization.Actions
                     authorizationParameter.State);
             }
 
-            var result = await _processAuthorizationRequest.ProcessAsync(authorizationParameter, principal as ClaimsPrincipal, client, issuerName);
+            var result = await _processAuthorizationRequest.ProcessAsync(authorizationParameter, principal as ClaimsPrincipal, client, issuerName).ConfigureAwait(false);
             if (result.Type == TypeActionResult.RedirectToCallBackUrl)
             {
                 var claimsPrincipal = principal as ClaimsPrincipal;

@@ -19,7 +19,7 @@ namespace SimpleIdServer.Authenticate.LoginPassword
             }
             
             routeBuilder.MapRoute("PasswordAuthentication",
-                "Authenticate/{action}/{id?}",
+                Constants.AMR + "/Authenticate/{action}/{id?}",
                 new { controller = "Authenticate", action = "Index", area = Constants.AMR },
                 constraints: new { area = Constants.AMR });
             if (options.IsEditCredentialEnabled)

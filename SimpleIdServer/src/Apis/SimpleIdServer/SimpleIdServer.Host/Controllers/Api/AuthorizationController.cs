@@ -1,20 +1,4 @@
-﻿#region copyright
-// Copyright 2015 Habart Thierry
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-#endregion
-
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
 using SimpleIdServer.Common.Dtos.Responses;
@@ -30,6 +14,7 @@ using SimpleIdServer.Host.Extensions;
 using SimpleIdServer.Host.Parsers;
 using SimpleIdServer.Lib;
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -76,7 +61,7 @@ namespace SimpleIdServer.Host.Controllers.Api
             var sessionId = GetSessionId();
             var serializer = new ParamSerializer();
             var authorizationRequest = serializer.Deserialize<AuthorizationRequest>(query);
-            authorizationRequest = await ResolveAuthorizationRequest(authorizationRequest);
+            authorizationRequest = await ResolveAuthorizationRequest(authorizationRequest).ConfigureAwait(false);
             authorizationRequest.OriginUrl = originUrl;
             authorizationRequest.SessionId = sessionId;
             var authenticatedUser = await _authenticationService.GetAuthenticatedUser(this, Constants.CookieNames.CookieName);
@@ -109,11 +94,16 @@ namespace SimpleIdServer.Host.Controllers.Api
                     }
 
                     // Add the encoded request into the query string
+                    if (actionResult.AmrLst != null)
+                    {
+                        authorizationRequest.AmrValues = string.Join(" ", actionResult.AmrLst);
+                    }
+
                     var encryptedRequest = _dataProtector.Protect(authorizationRequest);
                     actionResult.RedirectInstruction.AddParameter(Core.Constants.StandardAuthorizationResponseNames.AuthorizationCodeName, encryptedRequest);
                 }
 
-                var url = GetRedirectionUrl(Request, actionResult.Amr, actionResult.RedirectInstruction.Action);
+                var url = GetRedirectionUrl(Request, actionResult.AmrLst == null || !actionResult.AmrLst.Any() ? null : actionResult.AmrLst.First(), actionResult.RedirectInstruction.Action);
                 var uri = new Uri(url);
                 var redirectionUrl = uri.AddParametersInQuery(_actionResultParser.GetRedirectionParameters(actionResult));
                 return new RedirectResult(redirectionUrl.AbsoluteUri);

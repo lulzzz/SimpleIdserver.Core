@@ -28,6 +28,7 @@ namespace SimpleIdServer.Host
             public const string PasswordLessCookieName = "SimpleIdServer-PasswordLess";
             public const string TwoFactorCookieName = "SimpleIdServer-TwoFactorAuth";
             public const string ChangePasswordCookieName = "SimpleIdServer-ChangePassword";
+            public const string AcrCookieName = "SimpleIdServer-AcrCookieName";
         }
 
         public static Dictionary<IdentityServerEndPoints, string> MappingIdentityServerEndPointToPartialUrl = new Dictionary<IdentityServerEndPoints, string>

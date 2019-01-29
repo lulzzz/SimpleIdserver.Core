@@ -1,8 +1,9 @@
-﻿using System;
-using Microsoft.AspNetCore.Mvc.Razor;
+﻿using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using SimpleIdServer.Module;
 using SimpleIdServer.UserManagement.Controllers;
+using System;
 
 namespace SimpleIdServer.UserManagement
 {
@@ -25,7 +26,7 @@ namespace SimpleIdServer.UserManagement
                 throw new ArgumentNullException(nameof(userManagementOptions));
             }
 
-            var assembly = typeof(UserController).Assembly;
+            var assembly = typeof(HomeController).Assembly;
             var embeddedFileProvider = new EmbeddedFileProvider(assembly);
             services.Configure<RazorViewEngineOptions>(options =>
             {
@@ -33,8 +34,22 @@ namespace SimpleIdServer.UserManagement
             });
 
             services.AddSingleton(userManagementOptions);
+            services.AddSingleton<IUiModule>(new UiManagerModuleUI());
             mvcBuilder.AddApplicationPart(assembly);
             return services;
+        }
+
+        private class UiManagerModuleUI : IUiModule
+        {
+            public string DisplayName { get => "Profile"; }
+            public string Name { get => "uimanager"; }
+            public string Picture { get => ""; }
+            public RedirectUrl RedirectionUrl => new RedirectUrl
+            {
+                ActionName = "Index",
+                ControllerName = "Home",
+                Area = "admin"
+            };
         }
     }
 }

@@ -50,10 +50,7 @@ namespace SimpleIdServer.Core.WebSite.Authenticate
                 throw new ArgumentNullException("authorizationParameter");
             }
 
-            return await _localOpenIdUserAuthenticationAction.Execute(
-                localAuthenticationParameter,
-                authorizationParameter,
-                code, issuerName);
+            return await _localOpenIdUserAuthenticationAction.Execute(localAuthenticationParameter, authorizationParameter, code, issuerName);
         }
 
         public async Task<ActionResult> AuthenticateResourceOwnerOpenId(AuthorizationParameter parameter, ClaimsPrincipal claimsPrincipal, string code, string issuerName)

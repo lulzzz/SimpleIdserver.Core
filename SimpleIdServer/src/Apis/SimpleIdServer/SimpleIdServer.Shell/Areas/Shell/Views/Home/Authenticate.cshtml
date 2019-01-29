@@ -1,0 +1,8 @@
+@{
+    ViewBag.Title = "Home";
+    Layout = "~/Areas/Shell/Views/Shared/_Layout.cshtml";
+}
+
+@model SimpleIdServer.Shell.ViewModels.AuthenticateViewModel
+
+<a href="@Model.AuthUrl" class="btn btn-primary">Authenticate</a>

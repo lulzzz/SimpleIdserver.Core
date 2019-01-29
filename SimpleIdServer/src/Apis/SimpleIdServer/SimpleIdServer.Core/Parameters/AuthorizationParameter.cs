@@ -169,7 +169,7 @@ namespace SimpleIdServer.Core.Parameters
         public string UiLocales { get; set; }
         public string IdTokenHint { get; set; }        
         public string LoginHint { get; set; }
-        public string AcrValues { get; set; }
+        public IEnumerable<string> AcrValues { get; set; }
         public ClaimsParameter Claims { get; set; }
         public string CodeChallenge { get; set; }
         public CodeChallengeMethods? CodeChallengeMethod { get; set; } 

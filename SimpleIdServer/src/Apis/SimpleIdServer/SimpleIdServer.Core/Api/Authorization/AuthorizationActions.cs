@@ -133,7 +133,6 @@ namespace SimpleIdServer.Core.Api.Authorization
 
                 _eventPublisher.Publish(new AuthorizationGranted(Guid.NewGuid().ToString(), processId, _payloadSerializer.GetPayload(actionResult), 1));
                 actionResult.ProcessId = processId;
-                actionResult.Amr = _amrHelper.GetAmr(_resourceOwnerAuthenticateHelper.GetAmrs(), parameter.AmrValues);
                 return actionResult;
             }
             catch(IdentityServerException ex)

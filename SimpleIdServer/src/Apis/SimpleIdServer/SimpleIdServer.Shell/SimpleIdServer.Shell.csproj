@@ -4,6 +4,7 @@
   </PropertyGroup>
   <ItemGroup>  
     <ProjectReference Include="..\..\Common\SimpleIdServer.Module\SimpleIdServer.Module.csproj" />  
+    <ProjectReference Include="..\SimpleIdServer.Client\SimpleIdServer.Client.csproj" />  
     <ProjectReference Include="..\SimpleIdServer.Host\SimpleIdServer.Host.csproj" />  
   </ItemGroup>
   <ItemGroup>
@@ -23,5 +24,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="Areas\Shell\Views\Error\Index.cshtml" />
+    <None Remove="Areas\Shell\Views\Home\Authenticate.cshtml" />
   </ItemGroup>
 </Project>

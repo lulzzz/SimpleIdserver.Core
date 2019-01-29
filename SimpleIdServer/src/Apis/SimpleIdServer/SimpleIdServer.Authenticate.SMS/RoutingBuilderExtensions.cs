@@ -14,7 +14,7 @@ namespace SimpleIdServer.Authenticate.SMS
             }
             
             routeBuilder.MapRoute("BasicAuthentication",
-                "Authenticate/{action}/{id?}",
+                Constants.AMR + "/Authenticate/{action}/{id?}",
                 new { controller = "Authenticate", action = "Index", area = Constants.AMR },
                 constraints: new { area = Constants.AMR });
             return routeBuilder;

@@ -8,7 +8,7 @@ namespace SimpleIdServer.Shell
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddBasicShell(this IServiceCollection services, IMvcBuilder mvcBuilder)
+        public static IServiceCollection AddBasicShell(this IServiceCollection services, IMvcBuilder mvcBuilder, ShellModuleOptions shellModuleOptions)
         {
             if (services == null)
             {
@@ -20,6 +20,11 @@ namespace SimpleIdServer.Shell
                 throw new ArgumentNullException(nameof(mvcBuilder));
             }
 
+            if (shellModuleOptions == null)
+            {
+                throw new ArgumentNullException(nameof(shellModuleOptions));
+            }
+
             var assembly = typeof(HomeController).Assembly;
             var embeddedFileProvider = new EmbeddedFileProvider(assembly);
             services.Configure<RazorViewEngineOptions>(options =>
@@ -27,6 +32,7 @@ namespace SimpleIdServer.Shell
                 options.FileProviders.Add(embeddedFileProvider);
             });
 
+            services.AddSingleton(shellModuleOptions);
             mvcBuilder.AddApplicationPart(assembly);
             return services;
         }

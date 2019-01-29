@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SimpleIdServer.Authenticate.LoginPassword;
+using SimpleIdServer.Authenticate.SMS;
 using SimpleIdServer.Host;
 using SimpleIdServer.Module;
 using SimpleIdServer.Shell;
@@ -18,7 +19,7 @@ namespace SimpleIdServer.Startup
             var simpleIdServerModule = new SimpleIdentityServerHostModule();
             var shellModule = new ShellModule();
             var loginPasswordModule = new LoginPasswordModule();
-            // var smsModule = new SmsModule();
+            var smsModule = new SmsModule();
             var userManagementModule = new UserManagementModule();
             simpleIdServerModule.Init(null);
             shellModule.Init(null);
@@ -26,12 +27,10 @@ namespace SimpleIdServer.Startup
             {
                 { "IsEditCredentialEnabled", "true" }
             });
-            /*
             smsModule.Init(new Dictionary<string, string>
             {
                 { "IsSelfProvisioningEnabled", "true" }
             });
-            */
             userManagementModule.Init(new Dictionary<string, string>
             {
                 { "CanUpdateTwoFactorAuthentication", "true" }
@@ -46,11 +45,12 @@ namespace SimpleIdServer.Startup
             services.AddLogging();
             var mvcBuilder = services.AddMvc();
             AspPipelineContext.Instance().StartConfigureServices(services);
-            services.AddAuthentication(Host.Constants.CookieNames.ExternalCookieName)
-                .AddCookie(Host.Constants.CookieNames.ExternalCookieName)
-                .AddCookie(Host.Constants.CookieNames.ChangePasswordCookieName)
-                .AddCookie(Host.Constants.CookieNames.TwoFactorCookieName)
-                .AddCookie(Host.Constants.CookieNames.PasswordLessCookieName)
+            services.AddAuthentication(Constants.CookieNames.ExternalCookieName)
+                .AddCookie(Constants.CookieNames.ExternalCookieName)
+                .AddCookie(Constants.CookieNames.ChangePasswordCookieName)
+                .AddCookie(Constants.CookieNames.TwoFactorCookieName)
+                .AddCookie(Constants.CookieNames.PasswordLessCookieName)
+                .AddCookie(Constants.CookieNames.AcrCookieName)
                 .AddFacebook(opts =>
                 {
                     opts.ClientId = "569242033233529";
@@ -62,7 +62,7 @@ namespace SimpleIdServer.Startup
             services.AddAuthentication(Host.Constants.CookieNames.CookieName)
                 .AddCookie(Host.Constants.CookieNames.CookieName, opts =>
                 {
-                    opts.LoginPath = "/Authenticate";
+                    opts.LoginPath = "/Home/Authenticate";
                 });
 
             AspPipelineContext.Instance().ConfigureServiceContext.AddAuthentication();

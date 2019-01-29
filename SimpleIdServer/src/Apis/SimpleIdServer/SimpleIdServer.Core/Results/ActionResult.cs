@@ -13,6 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #endregion
+
+using System.Collections.Generic;
+
 namespace SimpleIdServer.Core.Results
 {
     public enum TypeActionResult
@@ -25,9 +28,15 @@ namespace SimpleIdServer.Core.Results
 
     public class ActionResult
     {
+        public ActionResult()
+        {
+            AmrLst = new List<string>();
+        }
+
         public TypeActionResult Type { get; set; }
         public RedirectInstruction RedirectInstruction { get; set; }
         public string ProcessId { get; set; }
-        public string Amr { get; set; }
+        public ICollection<string> AmrLst { get; set; }
+        public string Acr { get; set; }
     }
 }

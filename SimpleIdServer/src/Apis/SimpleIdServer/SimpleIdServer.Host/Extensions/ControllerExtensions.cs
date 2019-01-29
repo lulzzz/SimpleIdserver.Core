@@ -71,10 +71,7 @@ namespace SimpleIdServer.Host.Extensions
             return controller.Response.Body.WriteAsync(payload, 0, payload.Length);
         }
 
-        public static ActionResult CreateRedirectionFromActionResult(
-            this Controller controller,
-            Core.Results.ActionResult actionResult,
-            AuthorizationRequest authorizationRequest)
+        public static ActionResult CreateRedirectionFromActionResult(this Controller controller, Core.Results.ActionResult actionResult, AuthorizationRequest authorizationRequest)
         {
             var actionResultParser = ActionResultParserFactory.CreateActionResultParser();
             if (actionResult.Type == TypeActionResult.RedirectToCallBackUrl)

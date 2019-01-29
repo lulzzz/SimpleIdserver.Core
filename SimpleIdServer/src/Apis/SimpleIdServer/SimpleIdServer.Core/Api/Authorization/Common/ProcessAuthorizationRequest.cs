@@ -33,6 +33,7 @@ using SimpleIdServer.Core.Services;
 using SimpleIdServer.Core.Validators;
 using SimpleIdServer.OAuth.Logging;
 using Newtonsoft.Json;
+using SimpleIdServer.Core.Common.Repositories;
 
 namespace SimpleIdServer.Core.Api.Authorization.Common
 {
@@ -51,6 +52,7 @@ namespace SimpleIdServer.Core.Api.Authorization.Common
         private readonly IJwtParser _jwtParser;
         private readonly IConfigurationService _configurationService;
         private readonly IOAuthEventSource _oauthEventSource;
+        private readonly IAuthenticationContextclassReferenceRepository _authenticationContextclassReferenceRepository;
 
         public ProcessAuthorizationRequest(
             IParameterParserHelper parameterParserHelper,
@@ -60,7 +62,8 @@ namespace SimpleIdServer.Core.Api.Authorization.Common
             IConsentHelper consentHelper,
             IJwtParser jwtParser,
             IConfigurationService configurationService,
-            IOAuthEventSource oauthEventSource)
+            IOAuthEventSource oauthEventSource,
+            IAuthenticationContextclassReferenceRepository authenticationContextclassReferenceRepository)
         {
             _parameterParserHelper = parameterParserHelper;
             _clientValidator = clientValidator;
@@ -70,9 +73,10 @@ namespace SimpleIdServer.Core.Api.Authorization.Common
             _jwtParser = jwtParser;
             _configurationService = configurationService;
             _oauthEventSource = oauthEventSource;
+            _authenticationContextclassReferenceRepository = authenticationContextclassReferenceRepository;
         }
 
-        public async Task<ActionResult> ProcessAsync(AuthorizationParameter authorizationParameter, ClaimsPrincipal claimsPrincipal, Core.Common.Models.Client client, string issuerName)
+        public async Task<ActionResult> ProcessAsync(AuthorizationParameter authorizationParameter, ClaimsPrincipal claimsPrincipal, Client client, string issuerName)
         {
             if (authorizationParameter == null)
             {
@@ -88,7 +92,7 @@ namespace SimpleIdServer.Core.Api.Authorization.Common
             Consent confirmedConsent = null;
             if (endUserIsAuthenticated)
             {
-                confirmedConsent = await GetResourceOwnerConsent(claimsPrincipal, authorizationParameter);
+                confirmedConsent = await GetResourceOwnerConsent(claimsPrincipal, authorizationParameter).ConfigureAwait(false);
             }
 
             var serializedAuthorizationParameter = JsonConvert.SerializeObject(authorizationParameter);
@@ -173,23 +177,15 @@ namespace SimpleIdServer.Core.Api.Authorization.Common
                     {
                         result = _actionResultFactory.CreateAnEmptyActionResultWithRedirection();
                         result.RedirectInstruction.Action = IdentityServerEndPoints.AuthenticateIndex;
+                        await SetAcr(authorizationParameter, result).ConfigureAwait(false);
                     }
                 }
             }
 
             if (result == null)
             {
-                result = ProcessPromptParameters(
-                    prompts,
-                    claimsPrincipal,
-                    authorizationParameter,
-                    confirmedConsent);
-
-                await ProcessIdTokenHint(result,
-                    authorizationParameter,
-                    prompts,
-                    claimsPrincipal,
-                    issuerName);
+                result = await ProcessPromptParameters(prompts, claimsPrincipal, authorizationParameter, confirmedConsent).ConfigureAwait(false);
+                await ProcessIdTokenHint(result, authorizationParameter, prompts, claimsPrincipal, issuerName).ConfigureAwait(false);
             }
 
             var actionTypeName = Enum.GetName(typeof(TypeActionResult), result.Type);
@@ -204,10 +200,9 @@ namespace SimpleIdServer.Core.Api.Authorization.Common
             return result;
         }
 
-        private async Task ProcessIdTokenHint(
-            ActionResult actionResult,
-            AuthorizationParameter authorizationParameter,
-            ICollection<PromptParameter> prompts,
+        private async Task ProcessIdTokenHint(ActionResult actionResult, 
+            AuthorizationParameter authorizationParameter, 
+            ICollection<PromptParameter> prompts, 
             ClaimsPrincipal claimsPrincipal,
             string issuerName)
         {
@@ -278,7 +273,21 @@ namespace SimpleIdServer.Core.Api.Authorization.Common
             }
         }
 
-        private ActionResult ProcessPromptParameters(ICollection<PromptParameter> prompts, ClaimsPrincipal principal, AuthorizationParameter authorizationParameter, Consent confirmedConsent)
+        private async Task SetAcr(AuthorizationParameter authorizationParameter, ActionResult actionResult)
+        {
+            if (authorizationParameter.AcrValues == null || !authorizationParameter.AcrValues.Any())
+            {
+                return;
+            }
+
+            var acrLst = await _authenticationContextclassReferenceRepository.Get(authorizationParameter.AcrValues).ConfigureAwait(false);
+            var selectedAcrName = authorizationParameter.AcrValues.FirstOrDefault(a => acrLst.Any(ac => ac.Name == a));
+            var selectedAcr = acrLst.FirstOrDefault(a => a.Name == selectedAcrName);
+            actionResult.Acr = selectedAcr.Name;
+            actionResult.AmrLst = new List<string> { selectedAcr.AmrLst.First() };
+        }
+
+        private async Task<ActionResult> ProcessPromptParameters(ICollection<PromptParameter> prompts, ClaimsPrincipal principal, AuthorizationParameter authorizationParameter, Consent confirmedConsent)
         {
             if (prompts == null || !prompts.Any())
             {
@@ -321,6 +330,7 @@ namespace SimpleIdServer.Core.Api.Authorization.Common
             {
                 var result = _actionResultFactory.CreateAnEmptyActionResultWithRedirection();
                 result.RedirectInstruction.Action = IdentityServerEndPoints.AuthenticateIndex;
+                await SetAcr(authorizationParameter, result).ConfigureAwait(false);
                 return result;
             }
 
@@ -330,6 +340,7 @@ namespace SimpleIdServer.Core.Api.Authorization.Common
                 if (!endUserIsAuthenticated)
                 {
                     result.RedirectInstruction.Action = IdentityServerEndPoints.AuthenticateIndex;
+                    await SetAcr(authorizationParameter, result).ConfigureAwait(false);
                     return result;
                 }
 

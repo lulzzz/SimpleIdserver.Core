@@ -24,16 +24,7 @@
                     @if (ViewBag.IsAuthenticated)
                     {
                         <li>
-                            <a href="@Url.Content("~/User")">Profile</a>
-                        </li>
-                        <li>
-                            <a href="@Url.Content("~/Authenticate/Logout")">Disconnect</a>
-                        </li>
-                    }
-                    else
-                    {
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.Content("~/Authenticate")">Authenticate</a>
+                            <a href="@Url.Content("~/Home/Logout")">Disconnect</a>
                         </li>
                     }
                 </ul>

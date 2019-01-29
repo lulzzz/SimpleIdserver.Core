@@ -10,10 +10,10 @@ using SimpleIdServer.Core.Extensions;
 using SimpleIdServer.Core.Services;
 using SimpleIdServer.Core.Translation;
 using SimpleIdServer.Core.WebSite.User;
-using SimpleIdServer.Host;
 using SimpleIdServer.Host.Controllers.Website;
 using SimpleIdServer.Host.Extensions;
 using SimpleIdServer.Module;
+using SimpleIdServer.Host;
 using SimpleIdServer.UserManagement.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -23,9 +23,9 @@ using System.Threading.Tasks;
 
 namespace SimpleIdServer.UserManagement.Controllers
 {
-    [Area("UserManagement")]
+    [Area("admin")]
     [Authorize("Connected")]
-    public class UserController : BaseController
+    public class HomeController : BaseController
     {
         private const string DefaultLanguage = "en";
         private readonly IUserActions _userActions;
@@ -39,7 +39,7 @@ namespace SimpleIdServer.UserManagement.Controllers
 
         #region Constructor
 
-        public UserController(IUserActions userActions, IProfileActions profileActions, ITranslationManager translationManager, 
+        public HomeController(IUserActions userActions, IProfileActions profileActions, ITranslationManager translationManager, 
             IAuthenticationService authenticationService, IAuthenticationSchemeProvider authenticationSchemeProvider,
             IUrlHelperFactory urlHelperFactory, IActionContextAccessor actionContextAccessor, ITwoFactorAuthenticationHandler twoFactorAuthenticationHandler, 
             IEnumerable<IAuthModule> authModules, UserManagementOptions userManagementOptions) : base(authenticationService)

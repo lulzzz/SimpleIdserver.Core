@@ -3,6 +3,8 @@
     Layout = "~/Areas/Shell/Views/Shared/_Layout.cshtml";
 }
 
+@model SimpleIdServer.Shell.ViewModels.HomeViewModel
+
 <div class="row">
     <h1>Dashboard</h1>
     <a href="@Url.Content("~/.well-known/openid-configuration")">
@@ -17,37 +19,20 @@
                 </div>
             </div>
         </section>
-    </a>
-    @if (!ViewBag.IsAuthenticated)
-    {
-        <a href="@Url.Content("~/Authenticate")">
-            <section class="col-md-3 tile">
-                <div class="header"></div>
-                <div class="row clicked">
-                    <div class="col-md-4 picture">
-                        <img src="@Url.Content("~/img/Unknown.png")" />
+        @foreach (var tile in Model.Tiles)
+        {
+            <a href="@Url.Action(tile.RedirectionUrl.ActionName, tile.RedirectionUrl.ControllerName, new { area = tile.RedirectionUrl.Area })">
+                <section class="col-md-3 tile">
+                    <div class="header"></div>
+                    <div class="row clicked">
+                        <div class="col-md-4 picture">
+                            <img src="@tile.Picture" />
+                        </div>
+                        <div class="col-md-8 title">
+                            <h4>@tile.DisplayName</h4>
+                        </div>
                     </div>
-                    <div class="col-md-8 title">
-                        <h4>Authenticate</h4>
-                    </div>
-                </div>
-            </section>
-        </a>
-    }
-    else
-    {
-        <a href="@Url.Content("~/User")">
-            <section class="col-md-3 tile">
-                <div class="header"></div>
-                <div class="row clicked">
-                    <div class="col-md-4 picture">
-                        <img src="@Url.Content("~/img/Unknown.png")" />
-                    </div>
-                    <div class="col-md-8 title">
-                        <h4>Profile</h4>
-                    </div>
-                </div>
-            </section>
-        </a>
-    }
+                </section>
+            </a>
+        }
 </div>

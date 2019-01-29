@@ -9,6 +9,41 @@ namespace SimpleIdServer.Host
 {
     internal static class DefaultConfiguration
     {
+        public static ICollection<AuthenticationContextclassReference> DEFAULT_ACR_LST = new List<AuthenticationContextclassReference>
+        {
+            new AuthenticationContextclassReference
+            {
+                AmrLst = new List<string>
+                {
+                    "pwd"
+                },
+                DisplayName = "SID LOA1",
+                Name = "sid::loa-1",
+                Type = AuthenticationContextclassReferenceTypes.LOA1
+            },
+            new AuthenticationContextclassReference
+            {
+                AmrLst = new List<string>
+                {
+                    "sms"
+                },
+                DisplayName = "SID LOA2",
+                Name = "sid::loa-2",
+                Type = AuthenticationContextclassReferenceTypes.LOA2
+            },
+            new AuthenticationContextclassReference
+            {
+                AmrLst = new List<string>
+                {
+                    "pwd",
+                    "sms"
+                },
+                DisplayName = "SID LOA3",
+                Name = "sid::loa-3",
+                Type = AuthenticationContextclassReferenceTypes.LOA3
+            }
+        };
+
         public static IEnumerable<CredentialSetting> DEFAULT_CREDENTIAL_SETTINGS = new List<CredentialSetting>
         {
             new CredentialSetting
@@ -19,6 +54,14 @@ namespace SimpleIdServer.Host
                 ExpiresIn = TimeSpan.FromDays(2).TotalSeconds,
                 CredentialType = "pwd",
                 Options = "{ IsRegexEnabled : 'false' }"
+            },
+            new CredentialSetting
+            {
+                IsBlockAccountPolicyEnabled = true,
+                NumberOfAuthenticationAttempts = 3,
+                AuthenticationIntervalsInSeconds = 10,
+                ExpiresIn = TimeSpan.FromDays(2).TotalSeconds,
+                CredentialType = "sms"
             }
         };
 
@@ -420,6 +463,14 @@ namespace SimpleIdServer.Host
                         FirstAuthenticationFailureDateTime = null,
                         Type = "pwd",
                         NumberOfAttempts = 0
+                    },
+                    new ResourceOwnerCredential
+                    {
+                        ExpirationDateTime = DateTime.UtcNow.AddDays(10),
+                        IsBlocked = false,
+                        FirstAuthenticationFailureDateTime = null,
+                        Type = "sms",
+                        NumberOfAttempts = 0
                     }
                 }
             }
@@ -522,6 +573,53 @@ namespace SimpleIdServer.Host
 					"https://localhost:64951/end_session"
 				}
 			},
+            new Client
+            {
+                ClientId = "adminUiModule",
+                Secrets = new List<ClientSecret>
+                {
+                    new ClientSecret
+                    {
+                        Type = ClientSecretTypes.SharedSecret,
+                        Value = "adminUiModuleSecret"
+                    }
+                },
+                ClientName = "AdminUIModule",
+                TokenEndPointAuthMethod = TokenEndPointAuthenticationMethods.client_secret_post,
+                ApplicationType = ApplicationTypes.web,
+                UpdateDateTime = DateTime.UtcNow,
+                CreateDateTime = DateTime.UtcNow,
+                AllowedScopes = new List<Scope>
+                {
+                    new Scope
+                    {
+                        Name = "openid"
+                    },
+                    new Scope
+                    {
+                        Name = "role"
+                    },
+                    new Scope
+                    {
+                        Name = "profile"
+                    }
+                },
+                GrantTypes = new List<GrantType>
+                {
+                    GrantType.authorization_code
+                },
+                ResponseTypes = new List<ResponseType>
+                {
+                    ResponseType.token,
+                    ResponseType.id_token,
+                    ResponseType.code
+                },
+                RedirectionUrls = new List<string>
+                {
+                    "http://localhost:60000/Home/Callback",
+                    "https://localhost:60010/Home/Callback"
+                }
+            },
             new Client
             {
                 ClientId = "uma",

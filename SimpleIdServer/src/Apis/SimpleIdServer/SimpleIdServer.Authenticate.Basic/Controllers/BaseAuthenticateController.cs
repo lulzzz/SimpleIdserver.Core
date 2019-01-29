@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +8,6 @@ using SimpleIdServer.Authenticate.Basic.ViewModels;
 using SimpleIdServer.Bus;
 using SimpleIdServer.Core;
 using SimpleIdServer.Core.Api.Profile;
-using SimpleIdServer.Dtos.Requests;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Errors;
 using SimpleIdServer.Core.Exceptions;
@@ -26,10 +20,16 @@ using SimpleIdServer.Core.Translation;
 using SimpleIdServer.Core.WebSite.Authenticate;
 using SimpleIdServer.Core.WebSite.Authenticate.Common;
 using SimpleIdServer.Core.WebSite.User;
+using SimpleIdServer.Dtos.Requests;
 using SimpleIdServer.Host.Controllers.Website;
 using SimpleIdServer.Host.Extensions;
 using SimpleIdServer.OpenId.Events;
 using SimpleIdServer.OpenId.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace SimpleIdServer.Authenticate.Basic.Controllers
 {
@@ -89,12 +89,167 @@ namespace SimpleIdServer.Authenticate.Basic.Controllers
             _twoFactorAuthenticationHandler = twoFactorAuthenticationHandler;
         }
 
-        public async Task<ActionResult> Logout()
+        #region Authentication process which follows OPENID
+
+        [HttpGet]
+        public async Task<ActionResult> OpenId(string code)
         {
-            HttpContext.Response.Cookies.Delete(Constants.SESSION_ID);
-            await _authenticationService.SignOutAsync(HttpContext, Host.Constants.CookieNames.CookieName, new Microsoft.AspNetCore.Authentication.AuthenticationProperties());
-            return RedirectToAction("Index", "Authenticate");
+            if (string.IsNullOrWhiteSpace(code))
+            {
+                throw new ArgumentNullException(nameof(code));
+            }
+
+            var authenticatedUser = await SetUser().ConfigureAwait(false);
+            var request = _dataProtector.Unprotect<AuthorizationRequest>(code);
+            var issuerName = Request.GetAbsoluteUriWithVirtualPath();
+            var actionResult = await _authenticateActions.AuthenticateResourceOwnerOpenId(request.ToParameter(), authenticatedUser, code, issuerName).ConfigureAwait(false);
+            var result = this.CreateRedirectionFromActionResult(actionResult, request);
+            if (result != null)
+            {
+                LogAuthenticateUser(actionResult, request.ProcessId);
+                return result;
+            }
+
+            await TranslateView(request.UiLocales).ConfigureAwait(false);
+            var viewModel = new AuthorizeOpenIdViewModel
+            {
+                Code = code
+            };
+
+            // await SetIdProviders(viewModel).ConfigureAwait(false);
+            return View(viewModel);
         }
+
+        [HttpPost]
+        public async Task ExternalLoginOpenId(string provider, string code)
+        {
+            if (string.IsNullOrWhiteSpace(code))
+            {
+                throw new ArgumentNullException("code");
+            }
+
+            // 1. Persist the request code into a cookie & fix the space problems
+            var cookieValue = Guid.NewGuid().ToString();
+            var cookieName = string.Format(ExternalAuthenticateCookieName, cookieValue);
+            Response.Cookies.Append(cookieName, code,
+                new CookieOptions
+                {
+                    Expires = DateTime.UtcNow.AddMinutes(5)
+                });
+
+            // 2. Redirect the User agent
+            var redirectUrl = _urlHelper.AbsoluteAction("LoginCallbackOpenId", "Authenticate", new { code = cookieValue });
+            await _authenticationService.ChallengeAsync(HttpContext, provider, new AuthenticationProperties
+            {
+                RedirectUri = redirectUrl
+            }).ConfigureAwait(false);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> LoginCallbackOpenId(string code, string error)
+        {
+            if (string.IsNullOrWhiteSpace(code))
+            {
+                throw new ArgumentNullException("code");
+            }
+
+            // 1 : retrieve the request from the cookie
+            var cookieName = string.Format(ExternalAuthenticateCookieName, code);
+            var request = Request.Cookies[string.Format(ExternalAuthenticateCookieName, code)];
+            if (request == null)
+            {
+                throw new IdentityServerException(ErrorCodes.UnhandledExceptionCode, ErrorDescriptions.TheRequestCannotBeExtractedFromTheCookie);
+            }
+
+            // 2 : remove the cookie
+            Response.Cookies.Append(cookieName, string.Empty,
+                new CookieOptions
+                {
+                    Expires = DateTime.UtcNow.AddDays(-1)
+                });
+
+            // 3 : Raise an exception is there's an authentication error
+            if (!string.IsNullOrWhiteSpace(error))
+            {
+                throw new IdentityServerException(ErrorCodes.UnhandledExceptionCode, string.Format(ErrorDescriptions.AnErrorHasBeenRaisedWhenTryingToAuthenticate, error));
+            }
+
+            // 4. Check if the user is authenticated
+            var authenticatedUser = await _authenticationService.GetAuthenticatedUser(this, Host.Constants.CookieNames.ExternalCookieName).ConfigureAwait(false);
+            if (authenticatedUser == null ||
+                !authenticatedUser.Identity.IsAuthenticated ||
+                !(authenticatedUser.Identity is ClaimsIdentity))
+            {
+                throw new IdentityServerException(ErrorCodes.UnhandledExceptionCode, ErrorDescriptions.TheUserNeedsToBeAuthenticated);
+            }
+
+            // 5. Rerieve the claims & insert the resource owner if needed.
+            var claimsIdentity = authenticatedUser.Identity as ClaimsIdentity;
+            var claims = authenticatedUser.Claims.ToList();
+            var resourceOwner = await _profileActions.GetResourceOwner(authenticatedUser.GetSubject()).ConfigureAwait(false);
+            string sub = string.Empty;
+            if (resourceOwner == null)
+            {
+                try
+                {
+                    sub = await AddExternalUser(authenticatedUser).ConfigureAwait(false);
+                }
+                catch (IdentityServerException ex)
+                {
+                    return RedirectToAction("Index", "Error", new { code = ex.Code, message = ex.Message, area = "Shell" });
+                }
+                catch (Exception ex)
+                {
+                    return RedirectToAction("Index", "Error", new { code = ErrorCodes.InternalError, message = ex.Message, area = "Shell" });
+                }
+            }
+
+            if (resourceOwner != null)
+            {
+                claims = resourceOwner.Claims.ToList();
+            }
+            else
+            {
+                var nameIdentifier = claims.First(c => c.Type == ClaimTypes.NameIdentifier);
+                claims.Remove(nameIdentifier);
+                claims.Add(new Claim(ClaimTypes.NameIdentifier, sub));
+            }
+
+            var subject = claims.GetSubject();
+
+            if (resourceOwner != null && !string.IsNullOrWhiteSpace(resourceOwner.TwoFactorAuthentication))
+            {
+                await SetTwoFactorCookie(claims).ConfigureAwait(false);
+                try
+                {
+                    var confirmationCode = await _authenticateActions.GenerateAndSendCode(resourceOwner.Id).ConfigureAwait(false);
+                    _simpleIdentityServerEventSource.GetConfirmationCode(confirmationCode);
+                    return RedirectToAction("SendCode", new { code = request });
+                }
+                catch
+                {
+                    return RedirectToAction("SendCode");
+                }
+            }
+
+            // 6. Try to authenticate the resource owner & returns the claims.
+            var authorizationRequest = _dataProtector.Unprotect<AuthorizationRequest>(request);
+            var issuerName = Request.GetAbsoluteUriWithVirtualPath();
+            var actionResult = await _authenticateHelper.ProcessRedirection(authorizationRequest.ToParameter(), request, subject, claims, issuerName).ConfigureAwait(false);
+
+            // 7. Store claims into new cookie
+            if (actionResult != null)
+            {
+                await SetLocalCookie(claims.ToOpenidClaims(), authorizationRequest.SessionId).ConfigureAwait(false);
+                await _authenticationService.SignOutAsync(HttpContext, Host.Constants.CookieNames.ExternalCookieName, new Microsoft.AspNetCore.Authentication.AuthenticationProperties()).ConfigureAwait(false);
+                LogAuthenticateUser(actionResult, authorizationRequest.ProcessId);
+                return this.CreateRedirectionFromActionResult(actionResult, authorizationRequest);
+            }
+
+            return RedirectToAction("OpenId", "Authenticate", new { code = code });
+        }
+        
+        #endregion
                 
         #region Normal authentication process
         
@@ -302,171 +457,6 @@ namespace SimpleIdServer.Authenticate.Basic.Controllers
             return RedirectToAction("Index", "User", new { area = "UserManagement" });
         }
         
-        #endregion
-        
-        #region Authentication process which follows OPENID
-        
-        [HttpGet]
-        public async Task<ActionResult> OpenId(string code)
-        {
-            if (string.IsNullOrWhiteSpace(code))
-            {
-                throw new ArgumentNullException(nameof(code));
-            }
-
-            var authenticatedUser = await SetUser().ConfigureAwait(false);
-            var request = _dataProtector.Unprotect<AuthorizationRequest>(code);
-            var issuerName = Request.GetAbsoluteUriWithVirtualPath();
-            var actionResult = await _authenticateActions.AuthenticateResourceOwnerOpenId(
-                request.ToParameter(),
-                authenticatedUser,
-                code, issuerName).ConfigureAwait(false);
-            var result = this.CreateRedirectionFromActionResult(actionResult,
-                request);
-            if (result != null)
-            {
-                LogAuthenticateUser(actionResult, request.ProcessId);
-                return result;
-            }
-
-            await TranslateView(request.UiLocales).ConfigureAwait(false);
-            var viewModel = new AuthorizeOpenIdViewModel
-            {
-                Code = code
-            };
-
-            await SetIdProviders(viewModel).ConfigureAwait(false);
-            return View(viewModel);
-        }
-        
-        [HttpPost]
-        public async Task ExternalLoginOpenId(string provider, string code)
-        {
-            if (string.IsNullOrWhiteSpace(code))
-            {
-                throw new ArgumentNullException("code");
-            }
-
-            // 1. Persist the request code into a cookie & fix the space problems
-            var cookieValue = Guid.NewGuid().ToString();
-            var cookieName = string.Format(ExternalAuthenticateCookieName, cookieValue);
-            Response.Cookies.Append(cookieName, code, 
-                new CookieOptions
-                {
-                    Expires = DateTime.UtcNow.AddMinutes(5)
-                });
-
-            // 2. Redirect the User agent
-            var redirectUrl = _urlHelper.AbsoluteAction("LoginCallbackOpenId", "Authenticate", new { code = cookieValue });
-            await _authenticationService.ChallengeAsync(HttpContext, provider, new AuthenticationProperties
-            {
-                RedirectUri = redirectUrl
-            }).ConfigureAwait(false);
-        }
-        
-        [HttpGet]
-        public async Task<ActionResult> LoginCallbackOpenId(string code, string error)
-        {
-            if (string.IsNullOrWhiteSpace(code))
-            {
-                throw new ArgumentNullException("code");
-            }
-
-            // 1 : retrieve the request from the cookie
-            var cookieName = string.Format(ExternalAuthenticateCookieName, code);
-            var request = Request.Cookies[string.Format(ExternalAuthenticateCookieName, code)];
-            if (request == null)
-            {
-                throw new IdentityServerException(ErrorCodes.UnhandledExceptionCode,
-                    ErrorDescriptions.TheRequestCannotBeExtractedFromTheCookie);
-            }
-
-            // 2 : remove the cookie
-            Response.Cookies.Append(cookieName, string.Empty,
-                new CookieOptions{
-                    Expires = DateTime.UtcNow.AddDays(-1)
-                });
-
-            // 3 : Raise an exception is there's an authentication error
-            if (!string.IsNullOrWhiteSpace(error))
-            {
-                throw new IdentityServerException(ErrorCodes.UnhandledExceptionCode, string.Format(ErrorDescriptions.AnErrorHasBeenRaisedWhenTryingToAuthenticate, error));
-            }            
-            
-            // 4. Check if the user is authenticated
-            var authenticatedUser = await _authenticationService.GetAuthenticatedUser(this, Host.Constants.CookieNames.ExternalCookieName).ConfigureAwait(false);
-            if (authenticatedUser == null ||
-                !authenticatedUser.Identity.IsAuthenticated ||
-                !(authenticatedUser.Identity is ClaimsIdentity)) {
-                  throw new IdentityServerException(ErrorCodes.UnhandledExceptionCode, ErrorDescriptions.TheUserNeedsToBeAuthenticated);
-            }
-            
-            // 5. Rerieve the claims & insert the resource owner if needed.
-            var claimsIdentity = authenticatedUser.Identity as ClaimsIdentity;
-            var claims = authenticatedUser.Claims.ToList();
-            var resourceOwner = await _profileActions.GetResourceOwner(authenticatedUser.GetSubject()).ConfigureAwait(false);
-            string sub = string.Empty;
-            if (resourceOwner == null)
-            {
-                try
-                {
-                    sub = await AddExternalUser(authenticatedUser).ConfigureAwait(false);
-                }
-                catch (IdentityServerException ex)
-                {
-                    return RedirectToAction("Index", "Error", new { code = ex.Code, message = ex.Message, area = "Shell" });
-                }
-                catch (Exception ex)
-                {
-                    return RedirectToAction("Index", "Error", new { code = ErrorCodes.InternalError, message = ex.Message, area = "Shell" });
-                }
-            }
-
-            if (resourceOwner != null)
-            {
-                claims = resourceOwner.Claims.ToList();
-            }
-            else
-            {
-                var nameIdentifier = claims.First(c => c.Type == ClaimTypes.NameIdentifier);
-                claims.Remove(nameIdentifier);
-                claims.Add(new Claim(ClaimTypes.NameIdentifier, sub));
-            }
-
-            var subject = claims.GetSubject();
-
-            if (resourceOwner != null && !string.IsNullOrWhiteSpace(resourceOwner.TwoFactorAuthentication))
-            {
-                await SetTwoFactorCookie(claims).ConfigureAwait(false);
-                try
-                {
-                    var confirmationCode = await _authenticateActions.GenerateAndSendCode(resourceOwner.Id).ConfigureAwait(false);
-                    _simpleIdentityServerEventSource.GetConfirmationCode(confirmationCode);
-                    return RedirectToAction("SendCode", new { code = request });
-                }
-                catch
-                {
-                    return RedirectToAction("SendCode");
-                }
-            }
-
-            // 6. Try to authenticate the resource owner & returns the claims.
-            var authorizationRequest = _dataProtector.Unprotect<AuthorizationRequest>(request);
-            var issuerName = Request.GetAbsoluteUriWithVirtualPath();
-            var actionResult = await _authenticateHelper.ProcessRedirection(authorizationRequest.ToParameter(), request, subject, claims, issuerName).ConfigureAwait(false);
-
-            // 7. Store claims into new cookie
-            if (actionResult != null)
-            {
-                await SetLocalCookie(claims.ToOpenidClaims(), authorizationRequest.SessionId).ConfigureAwait(false);
-                await _authenticationService.SignOutAsync(HttpContext, Host.Constants.CookieNames.ExternalCookieName, new Microsoft.AspNetCore.Authentication.AuthenticationProperties()).ConfigureAwait(false);
-                LogAuthenticateUser(actionResult, authorizationRequest.ProcessId);
-                return this.CreateRedirectionFromActionResult(actionResult, authorizationRequest);
-            }
-
-            return RedirectToAction("OpenId", "Authenticate", new { code = code });
-        }
-
         #endregion
 
         #region Protected methods

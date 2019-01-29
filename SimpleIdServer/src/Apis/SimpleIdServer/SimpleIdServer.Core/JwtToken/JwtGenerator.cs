@@ -440,6 +440,7 @@ namespace SimpleIdServer.Core.JwtToken
             var clientId = authorizationParameter.ClientId;
             var maxAge = authorizationParameter.MaxAge;
             var amrValues = authorizationParameter.AmrValues;
+            var acrValues = authorizationParameter.AcrValues;
 
             var issuerClaimParameter = claimParameters.FirstOrDefault(c => c.Name == StandardClaimNames.Issuer);
             var audiencesClaimParameter = claimParameters.FirstOrDefault(c => c.Name == StandardClaimNames.Audiences);
@@ -455,8 +456,7 @@ namespace SimpleIdServer.Core.JwtToken
             var audiences = new List<string>();
             var expirationInSeconds = timeKeyValuePair.Key;
             var issuedAtTime = timeKeyValuePair.Value;
-            var acrValues = Constants.StandardArcParameterNames.OpenIdCustomAuthLevel + ".password=1";
-            var amr = new []{ "password" };
+            var amr = new [] { "pwd" };
             if (amrValues != null)
             {
                 amr = amrValues.ToArray();

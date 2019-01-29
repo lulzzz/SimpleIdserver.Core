@@ -66,7 +66,7 @@ namespace SimpleIdServer.Shell.Controllers
         public async Task<ActionResult> Index(string code)
         {
             var request = _dataProtector.Unprotect<AuthorizationRequest>(code);
-            var client = new Client();
+            var client = new SimpleIdServer.Core.Common.Models.Client();
             var authenticatedUser = await SetUser();
             var issuerName = Request.GetAbsoluteUriWithVirtualPath();
             var actionResult = await _consentActions.DisplayConsent(request.ToParameter(),

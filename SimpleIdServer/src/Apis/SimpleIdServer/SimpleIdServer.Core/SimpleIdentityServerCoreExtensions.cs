@@ -46,7 +46,8 @@ namespace SimpleIdServer.Core
     public static class SimpleIdentityServerCoreExtensions
     {
         public static IServiceCollection AddSimpleIdentityServerCore(this IServiceCollection serviceCollection, OAuthConfigurationOptions configurationOptions = null, List<ClaimAggregate> claims = null, List<Common.Models.Client> clients = null, List<Consent> consents = null, List<JsonWebKey> jsonWebKeys = null,
-            List<ResourceOwnerProfile> profiles = null, List<ResourceOwner> resourceOwners = null, List<Scope> scopes = null, List<Common.Models.Translation> translations = null, IEnumerable<CredentialSetting> credentialSettings = null)
+            List<ResourceOwnerProfile> profiles = null, List<ResourceOwner> resourceOwners = null, List<Scope> scopes = null, List<Common.Models.Translation> translations = null, IEnumerable<CredentialSetting> credentialSettings = null,
+            ICollection<AuthenticationContextclassReference> acrLst = null)
         {
             if (serviceCollection == null)
             {
@@ -146,6 +147,7 @@ namespace SimpleIdServer.Core
             serviceCollection.AddSingleton<IResourceOwnerRepository>(new DefaultResourceOwnerRepository(resourceOwners));
             serviceCollection.AddSingleton<IScopeRepository>(new DefaultScopeRepository(scopes));
             serviceCollection.AddSingleton<ITranslationRepository>(new DefaultTranslationRepository(translations));
+            serviceCollection.AddSingleton<IAuthenticationContextclassReferenceRepository>(new DefaultAuthenticationContextclassReferenceRepository(acrLst));
             serviceCollection.AddSingleton<ISubjectBuilder>(new DefaultSubjectBuilder());
             serviceCollection.AddSingleton<IAccountFilter>(new DefaultAccountFilter());
             serviceCollection.AddSingleton<IUserClaimsEnricher>(new DefaultUserClaimsEnricher());
