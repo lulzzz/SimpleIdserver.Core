@@ -42,6 +42,16 @@ namespace SimpleIdServer.Host
                 DisplayName = "SID LOA3",
                 Name = "sid::loa-3",
                 Type = AuthenticationContextclassReferenceTypes.LOA3
+            },
+            new AuthenticationContextclassReference
+            {
+                AmrLst = new List<string>
+                {
+                    "eid"
+                },
+                DisplayName = "SID LOA3-1",
+                Name = "sid::loa-3-1",
+                Type = AuthenticationContextclassReferenceTypes.LOA3
             }
         };
 
@@ -472,6 +482,14 @@ namespace SimpleIdServer.Host
                         FirstAuthenticationFailureDateTime = null,
                         Type = "sms",
                         NumberOfAttempts = 0
+                    },
+                    new ResourceOwnerCredential
+                    {
+                        ExpirationDateTime = DateTime.UtcNow.AddDays(10),
+                        IsBlocked = false,
+                        FirstAuthenticationFailureDateTime = null,
+                        Type = "eid",
+                        Value = ""
                     }
                 }
             }
