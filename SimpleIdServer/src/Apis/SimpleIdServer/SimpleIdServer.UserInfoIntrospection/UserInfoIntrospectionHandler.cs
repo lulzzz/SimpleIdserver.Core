@@ -79,7 +79,7 @@ namespace SimpleIdServer.UserInfoIntrospection
             {
                 return new List<Claim>
                 {
-                    new Claim(kvp.Key, kvp.Value.ToString())
+                    new Claim(kvp.Key, kvp.Value == null ? string.Empty : kvp.Value.ToString())
                 };
             }
 

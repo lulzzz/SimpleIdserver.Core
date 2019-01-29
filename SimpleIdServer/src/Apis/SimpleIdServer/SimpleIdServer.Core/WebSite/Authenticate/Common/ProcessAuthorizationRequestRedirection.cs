@@ -56,7 +56,7 @@ namespace SimpleIdServer.Core.WebSite.Authenticate.Common
             ActionResult result;
             if (authorizationParameter.AcrValues != null && authorizationParameter.AcrValues.Any())
             {
-                var nextAmr = await _amrHelper.GetNextAmr(authorizationParameter.AcrValues.First(), authorizationParameter.AmrValues.Last()).ConfigureAwait(false);
+                var nextAmr = await _amrHelper.GetNextAmr(authorizationParameter.AcrValues.First(), authorizationParameter.AmrValues).ConfigureAwait(false);
                 if (!string.IsNullOrWhiteSpace(nextAmr))
                 {
                     result = _actionResultFactory.CreateAnEmptyActionResultWithRedirection();

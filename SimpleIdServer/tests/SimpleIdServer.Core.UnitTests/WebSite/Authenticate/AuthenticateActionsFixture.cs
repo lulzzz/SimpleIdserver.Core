@@ -13,7 +13,6 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Authenticate
     {
         private Mock<IAuthenticateResourceOwnerOpenIdAction> _authenticateResourceOwnerActionFake;
         private Mock<ILocalOpenIdUserAuthenticationAction> _localOpenIdUserAuthenticationActionFake;
-        private Mock<IGenerateAndSendCodeAction> _generateAndSendCodeActionStub;
         private Mock<IValidateConfirmationCodeAction> _validateConfirmationCodeActionStub;
         private Mock<IRemoveConfirmationCodeAction> _removeConfirmationCodeActionStub;
         private IAuthenticateActions _authenticateActions;
@@ -88,13 +87,11 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Authenticate
         {
             _authenticateResourceOwnerActionFake = new Mock<IAuthenticateResourceOwnerOpenIdAction>();
             _localOpenIdUserAuthenticationActionFake = new Mock<ILocalOpenIdUserAuthenticationAction>();
-            _generateAndSendCodeActionStub = new Mock<IGenerateAndSendCodeAction>();
             _validateConfirmationCodeActionStub = new Mock<IValidateConfirmationCodeAction>();
             _removeConfirmationCodeActionStub = new Mock<IRemoveConfirmationCodeAction>();
             _authenticateActions = new AuthenticateActions(
                 _authenticateResourceOwnerActionFake.Object,
                 _localOpenIdUserAuthenticationActionFake.Object,
-                _generateAndSendCodeActionStub.Object,
                 _validateConfirmationCodeActionStub.Object,
                 _removeConfirmationCodeActionStub.Object);
         }

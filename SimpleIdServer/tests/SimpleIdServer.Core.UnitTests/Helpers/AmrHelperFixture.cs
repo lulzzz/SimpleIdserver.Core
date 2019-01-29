@@ -1,15 +1,92 @@
 ﻿using Moq;
-using System.Collections.Generic;
+using SimpleIdServer.Core.Common.Models;
+using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.Core.Errors;
 using SimpleIdServer.Core.Exceptions;
 using SimpleIdServer.Core.Helpers;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace SimpleIdentityServer.Core.UnitTests.Helpers
 {
     public class AmrHelperFixture
     {
+        private Mock<IAuthenticationContextclassReferenceRepository> _authenticationContextclassReferenceRepositoryStub;
         private IAmrHelper _amrHelper;
+
+        [Fact]
+        public async Task When_Pass_Null_Parameters_To_GetNextAmr_Then_Exceptions_Are_Thrown()
+        {
+            // ARRANGE
+            InitializeFakeObjects();
+
+            // ACTS & ASSERTS
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _amrHelper.GetNextAmr(null, null)).ConfigureAwait(false);
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _amrHelper.GetNextAmr("acr", null)).ConfigureAwait(false);
+        }
+
+        [Fact]
+        public async Task When_Pass_Unknown_Acr_Then_Null_Is_Returned()
+        {
+            // ARRANGE
+            InitializeFakeObjects();
+            _authenticationContextclassReferenceRepositoryStub.Setup(a => a.Get(It.IsAny<string>())).Returns(Task.FromResult((AuthenticationContextclassReference)null));
+
+            // ACT
+            var result = await _amrHelper.GetNextAmr("acr", new[] { "amr" }).ConfigureAwait(false);
+
+            // ASSERT
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public async Task When_Pass_First_Amr_Then_Second_Is_Returned()
+        {
+            // ARRANGE
+            InitializeFakeObjects();
+            _authenticationContextclassReferenceRepositoryStub.Setup(a => a.Get(It.IsAny<string>())).Returns(Task.FromResult(new AuthenticationContextclassReference
+            {
+                Name = "acr",
+                AmrLst = new List<string>
+                {
+                    "amr",
+                    "amr1",
+                    "amr2"
+                }
+            }));
+
+            // ACT
+            var result = await _amrHelper.GetNextAmr("acr", new[] { "amr", "amr1" }).ConfigureAwait(false);
+
+            // ASSERT
+
+            Assert.Equal("amr2", result);
+        }
+
+        [Fact]
+        public async Task When_Pass_Last_Amr_Then_Null_Is_Returned()
+        {
+            // ARRANGE
+            InitializeFakeObjects();
+            _authenticationContextclassReferenceRepositoryStub.Setup(a => a.Get(It.IsAny<string>())).Returns(Task.FromResult(new AuthenticationContextclassReference
+            {
+                Name = "acr",
+                AmrLst = new List<string>
+                {
+                    "amr",
+                    "amr1",
+                    "amr2"
+                }
+            }));
+
+            // ACT
+            var result = await _amrHelper.GetNextAmr("acr", new[] { "amr", "amr1", "amr2" }).ConfigureAwait(false);
+
+            // ASSERT
+            Assert.Null(result);
+        }
 
         [Fact]
         public void When_No_Amr_Then_Exception_Is_Thrown()
@@ -65,7 +142,8 @@ namespace SimpleIdentityServer.Core.UnitTests.Helpers
 
         private void InitializeFakeObjects()
         {
-            _amrHelper = new AmrHelper();
+            _authenticationContextclassReferenceRepositoryStub = new Mock<IAuthenticationContextclassReferenceRepository>();
+            _amrHelper = new AmrHelper(_authenticationContextclassReferenceRepositoryStub.Object);
         }
     }
 }

@@ -33,7 +33,6 @@ namespace SimpleIdServer.UserManagement.Controllers
         private readonly ITranslationManager _translationManager;
         private readonly IAuthenticationSchemeProvider _authenticationSchemeProvider;
         private readonly IUrlHelper _urlHelper;
-        private readonly ITwoFactorAuthenticationHandler _twoFactorAuthenticationHandler;
         private readonly IEnumerable<IAuthModule> _authModules;
         private readonly UserManagementOptions _userManagementOptions;
 
@@ -41,7 +40,7 @@ namespace SimpleIdServer.UserManagement.Controllers
 
         public HomeController(IUserActions userActions, IProfileActions profileActions, ITranslationManager translationManager, 
             IAuthenticationService authenticationService, IAuthenticationSchemeProvider authenticationSchemeProvider,
-            IUrlHelperFactory urlHelperFactory, IActionContextAccessor actionContextAccessor, ITwoFactorAuthenticationHandler twoFactorAuthenticationHandler, 
+            IUrlHelperFactory urlHelperFactory, IActionContextAccessor actionContextAccessor, 
             IEnumerable<IAuthModule> authModules, UserManagementOptions userManagementOptions) : base(authenticationService)
         {
             _userActions = userActions;
@@ -49,7 +48,6 @@ namespace SimpleIdServer.UserManagement.Controllers
             _translationManager = translationManager;
             _authenticationSchemeProvider = authenticationSchemeProvider;
             _urlHelper = urlHelperFactory.GetUrlHelper(actionContextAccessor.ActionContext);
-            _twoFactorAuthenticationHandler = twoFactorAuthenticationHandler;
             _authModules = authModules;
             _userManagementOptions = userManagementOptions;
         }
@@ -340,7 +338,6 @@ namespace SimpleIdServer.UserManagement.Controllers
             if (_userManagementOptions.CanUpdateTwoFactorAuthentication)
             {
                 viewModel.SelectedTwoFactorAuthType = resourceOwner.TwoFactorAuthentication;
-                viewModel.TwoFactorAuthTypes = _twoFactorAuthenticationHandler.GetAll().Select(s => s.Name).ToList();
             }
 
             viewModel.CanUpdateTwoFactorAuthentication = _userManagementOptions.CanUpdateTwoFactorAuthentication;

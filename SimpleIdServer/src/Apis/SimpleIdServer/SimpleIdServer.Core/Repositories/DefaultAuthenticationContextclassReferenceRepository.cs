@@ -29,5 +29,10 @@ namespace SimpleIdServer.Core.Repositories
         {
             return Task.FromResult(_acrLst.Where(a => names.Contains(a.Name)));
         }
+
+        public Task<AuthenticationContextclassReference> GetDefault()
+        {
+            return Task.FromResult(_acrLst.FirstOrDefault(a => a.IsDefault));
+        }
     }
 }

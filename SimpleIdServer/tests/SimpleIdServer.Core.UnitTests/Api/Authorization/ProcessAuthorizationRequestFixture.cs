@@ -29,6 +29,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Authorization
         private ProcessAuthorizationRequest _processAuthorizationRequest;
         private Mock<IConfigurationService> _simpleIdentityServerConfiguratorStub;
         private Mock<IOAuthEventSource> _oauthEventSource;
+        private Mock<IAuthenticationContextclassReferenceRepository> _authenticationContextclassReferenceRepositoryStub;
         private JwtGenerator _jwtGenerator;
 
         #region TEST FAILURES
@@ -405,6 +406,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Authorization
         }
         */
         #endregion
+
         /*
         #region TEST VALID SCENARIOS
 
@@ -651,7 +653,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Authorization
             var claimsMapping = new ClaimsMapping();
             var jwsGenerator = new JwsGenerator(createJwsSignature);
             var jweGenerator = new JweGenerator(jweHelper);
-
+            _authenticationContextclassReferenceRepositoryStub = new Mock<IAuthenticationContextclassReferenceRepository>();
             _processAuthorizationRequest = new ProcessAuthorizationRequest(
                 parameterParserHelper,
                 clientValidator,
@@ -660,7 +662,8 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Authorization
                 consentHelper,
                 jwtParser,
                 _simpleIdentityServerConfiguratorStub.Object,
-                _oauthEventSource.Object);
+                _oauthEventSource.Object,
+                _authenticationContextclassReferenceRepositoryStub.Object);
             _jwtGenerator = new JwtGenerator(_simpleIdentityServerConfiguratorStub.Object,
                 clientRepository.Object,
                 clientValidator,

@@ -277,14 +277,28 @@ namespace SimpleIdServer.Core.Api.Authorization.Common
         {
             if (authorizationParameter.AcrValues == null || !authorizationParameter.AcrValues.Any())
             {
+                await SetDefaultAcr(actionResult).ConfigureAwait(false);
                 return;
             }
 
             var acrLst = await _authenticationContextclassReferenceRepository.Get(authorizationParameter.AcrValues).ConfigureAwait(false);
             var selectedAcrName = authorizationParameter.AcrValues.FirstOrDefault(a => acrLst.Any(ac => ac.Name == a));
             var selectedAcr = acrLst.FirstOrDefault(a => a.Name == selectedAcrName);
+            if (selectedAcr == null)
+            {
+                await SetDefaultAcr(actionResult).ConfigureAwait(false);
+                return;
+            }
+
             actionResult.Acr = selectedAcr.Name;
             actionResult.AmrLst = new List<string> { selectedAcr.AmrLst.First() };
+        }
+
+        private async Task SetDefaultAcr(ActionResult actionResult)
+        {
+            var acr = await _authenticationContextclassReferenceRepository.GetDefault().ConfigureAwait(false);
+            actionResult.Acr = acr.Name;
+            actionResult.AmrLst = new List<string> { acr.AmrLst.First() };
         }
 
         private async Task<ActionResult> ProcessPromptParameters(ICollection<PromptParameter> prompts, ClaimsPrincipal principal, AuthorizationParameter authorizationParameter, Consent confirmedConsent)

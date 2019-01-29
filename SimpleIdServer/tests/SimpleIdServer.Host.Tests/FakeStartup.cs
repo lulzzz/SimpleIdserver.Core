@@ -162,7 +162,8 @@ namespace SimpleIdServer.Host.Tests
             services.AddTransient<IAuthenticateResourceOwnerService, SmsAuthenticateResourceOwnerService>();
             services.AddHostIdentityServer(_options)
                 .AddSimpleIdentityServerCore(null, null, 
-                    DefaultStores.Clients(_context), DefaultStores.Consents(), DefaultStores.JsonWebKeys(_context), null, DefaultStores.Users(), DefaultStores.Scopes(), credentialSettings: DefaultStores.GetCredentialSettings())
+                    DefaultStores.Clients(_context), DefaultStores.Consents(), DefaultStores.JsonWebKeys(_context), null, DefaultStores.Users(), DefaultStores.Scopes(), credentialSettings: DefaultStores.GetCredentialSettings(),
+                    acrLst: DefaultStores.GetAcrs())
                 .AddDefaultTokenStore()
                 .AddStorage(o => o.UseInMemoryStorage())
                 .AddSimpleIdentityServerJwt()

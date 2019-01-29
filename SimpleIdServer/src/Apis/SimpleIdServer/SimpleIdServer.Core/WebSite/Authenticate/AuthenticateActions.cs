@@ -11,7 +11,6 @@ namespace SimpleIdServer.Core.WebSite.Authenticate
     {
         Task<ActionResult> AuthenticateResourceOwnerOpenId(AuthorizationParameter parameter, ClaimsPrincipal claimsPrincipal, string code, string issuerName);
         Task<LocalOpenIdAuthenticationResult> LocalOpenIdUserAuthentication(LocalAuthenticationParameter localAuthenticationParameter, AuthorizationParameter authorizationParameter, string code, string issuerName);
-        Task<string> GenerateAndSendCode(string subject);
         Task<bool> ValidateCode(string code);
         Task<bool> RemoveCode(string code);
     }
@@ -20,20 +19,17 @@ namespace SimpleIdServer.Core.WebSite.Authenticate
     {
         private readonly IAuthenticateResourceOwnerOpenIdAction _authenticateResourceOwnerOpenIdAction;
         private readonly ILocalOpenIdUserAuthenticationAction _localOpenIdUserAuthenticationAction;
-        private readonly IGenerateAndSendCodeAction _generateAndSendCodeAction;
         private readonly IValidateConfirmationCodeAction _validateConfirmationCodeAction;
         private readonly IRemoveConfirmationCodeAction _removeConfirmationCodeAction;
 
         public AuthenticateActions(
             IAuthenticateResourceOwnerOpenIdAction authenticateResourceOwnerOpenIdAction,
             ILocalOpenIdUserAuthenticationAction localOpenIdUserAuthenticationAction,
-            IGenerateAndSendCodeAction generateAndSendCodeAction,
             IValidateConfirmationCodeAction validateConfirmationCodeAction,
             IRemoveConfirmationCodeAction removeConfirmationCodeAction)
         {
             _authenticateResourceOwnerOpenIdAction = authenticateResourceOwnerOpenIdAction;
             _localOpenIdUserAuthenticationAction = localOpenIdUserAuthenticationAction;
-            _generateAndSendCodeAction = generateAndSendCodeAction;
             _validateConfirmationCodeAction = validateConfirmationCodeAction;
             _removeConfirmationCodeAction = removeConfirmationCodeAction;
         }
@@ -68,11 +64,6 @@ namespace SimpleIdServer.Core.WebSite.Authenticate
             return await _authenticateResourceOwnerOpenIdAction.Execute(parameter, 
                 claimsPrincipal, 
                 code, issuerName);
-        }
-
-        public async Task<string> GenerateAndSendCode(string subject)
-        {
-            return await _generateAndSendCodeAction.ExecuteAsync(subject);
         }
 
         public async Task<bool> ValidateCode(string code)

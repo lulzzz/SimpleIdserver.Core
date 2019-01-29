@@ -16,6 +16,7 @@ namespace SimpleIdServer.Core.Common.Models
         /// Unique name for examples : sid::loa-1 or sid::loa-2 or sid::loa-3 or sid::loa-4
         /// </summary>
         public string Name { get; set; }
+        public bool IsDefault { get; set; }
         public string DisplayName { get; set; }
         public AuthenticationContextclassReferenceTypes Type { get; set; }
         /// <summary>

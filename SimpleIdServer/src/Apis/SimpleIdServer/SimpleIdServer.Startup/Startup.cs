@@ -48,7 +48,6 @@ namespace SimpleIdServer.Startup
             services.AddAuthentication(Constants.CookieNames.ExternalCookieName)
                 .AddCookie(Constants.CookieNames.ExternalCookieName)
                 .AddCookie(Constants.CookieNames.ChangePasswordCookieName)
-                .AddCookie(Constants.CookieNames.TwoFactorCookieName)
                 .AddCookie(Constants.CookieNames.PasswordLessCookieName)
                 .AddCookie(Constants.CookieNames.AcrCookieName)
                 .AddFacebook(opts =>

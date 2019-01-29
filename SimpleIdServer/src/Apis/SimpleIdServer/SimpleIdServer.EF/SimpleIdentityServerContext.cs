@@ -29,6 +29,7 @@ namespace SimpleIdServer.EF
         public virtual DbSet<Profile> Profiles { get; set; }
         public virtual DbSet<CredentialSetting> CredentialSettings { get; set; }
         public virtual DbSet<DefaultSettings> DefaultSettings { get; set; }
+        public virtual DbSet<AuthenticationContextclassReference> AuthenticationContextclassReferences { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -49,6 +50,7 @@ namespace SimpleIdServer.EF
             modelBuilder.AddCredentialsSettingsMapping();
             modelBuilder.AddResourceCredentialMapping();
             modelBuilder.AddDefaultSettingsMapping();
+            modelBuilder.AddAuthenticationContextclassReferenceMapping();
             base.OnModelCreating(modelBuilder);
         }
     }

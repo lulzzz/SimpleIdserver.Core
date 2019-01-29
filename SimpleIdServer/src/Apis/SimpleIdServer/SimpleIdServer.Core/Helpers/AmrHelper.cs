@@ -10,7 +10,7 @@ namespace SimpleIdServer.Core.Helpers
     public interface IAmrHelper
     {
         string GetAmr(IEnumerable<string> currentAmrs, IEnumerable<string> exceptedAmrs);
-        Task<string> GetNextAmr(string actualAcr, string actualAmr);
+        Task<string> GetNextAmr(string actualAcr, IEnumerable<string> actualAmrs);
     }
 
     internal sealed class AmrHelper : IAmrHelper
@@ -22,28 +22,27 @@ namespace SimpleIdServer.Core.Helpers
             _authenticationContextclassReferenceRepository = authenticationContextclassReferenceRepository;
         }
 
-        public async Task<string> GetNextAmr(string actualAcr, string actualAmr)
+        public async Task<string> GetNextAmr(string actualAcr, IEnumerable<string> actualAmrs)
         {
             if (string.IsNullOrWhiteSpace(actualAcr))
             {
                 throw new ArgumentNullException(nameof(actualAcr));
             }
 
-            if (string.IsNullOrWhiteSpace(actualAmr))
+            if (actualAmrs == null)
             {
-                throw new ArgumentNullException(nameof(actualAmr));
+                throw new ArgumentNullException(nameof(actualAmrs));
             }
 
             var acr = await _authenticationContextclassReferenceRepository.Get(actualAcr).ConfigureAwait(false);
-            if(acr == null)
+            if (acr == null)
             {
                 return null;
             }
 
-            var index = acr.AmrLst.ToList().IndexOf(actualAmr);
-            if (index + 1 < acr.AmrLst.Count())
+            if (actualAmrs.Count() < acr.AmrLst.Count())
             {
-                return acr.AmrLst.ElementAt(index + 1);
+                return acr.AmrLst.ElementAt(actualAmrs.Count());
             }
 
             return null;

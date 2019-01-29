@@ -19,7 +19,8 @@ namespace SimpleIdServer.Host
                 },
                 DisplayName = "SID LOA1",
                 Name = "sid::loa-1",
-                Type = AuthenticationContextclassReferenceTypes.LOA1
+                Type = AuthenticationContextclassReferenceTypes.LOA1,
+                IsDefault = true
             },
             new AuthenticationContextclassReference
             {

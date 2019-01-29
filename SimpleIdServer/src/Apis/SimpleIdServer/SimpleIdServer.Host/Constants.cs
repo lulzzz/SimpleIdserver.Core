@@ -26,7 +26,6 @@ namespace SimpleIdServer.Host
             public const string CookieName = "SimpleIdServer";
             public const string ExternalCookieName = "SimpleIdServer-External";
             public const string PasswordLessCookieName = "SimpleIdServer-PasswordLess";
-            public const string TwoFactorCookieName = "SimpleIdServer-TwoFactorAuth";
             public const string ChangePasswordCookieName = "SimpleIdServer-ChangePassword";
             public const string AcrCookieName = "SimpleIdServer-AcrCookieName";
         }

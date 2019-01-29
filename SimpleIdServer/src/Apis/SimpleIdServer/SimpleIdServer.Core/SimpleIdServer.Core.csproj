@@ -32,7 +32,6 @@
     <ProjectReference Include="..\SimpleIdServer.OpenId.Events\SimpleIdServer.OpenId.Events.csproj" />
     <ProjectReference Include="..\SimpleIdServer.OpenId.Logging\SimpleIdServer.OpenId.Logging.csproj" />
     <ProjectReference Include="..\SimpleIdServer.Store\SimpleIdServer.Store.csproj" />
-    <ProjectReference Include="..\SimpleIdServer.TwoFactorAuthentication\SimpleIdServer.TwoFactorAuthentication.csproj" />
   </ItemGroup>
 
   <ItemGroup>

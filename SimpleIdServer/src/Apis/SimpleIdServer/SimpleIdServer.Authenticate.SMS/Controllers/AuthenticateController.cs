@@ -55,14 +55,13 @@ namespace SimpleIdServer.Authenticate.SMS.Controllers
             IPayloadSerializer payloadSerializer,
             IConfigurationService configurationService,
             IAuthenticateHelper authenticateHelper,
-            ITwoFactorAuthenticationHandler twoFactorAuthenticationHandler,
             ISmsAuthenticationOperation smsAuthenticationOperation,
             IGenerateAndSendSmsCodeOperation generateAndSendSmsCodeOperation,
             IResourceOwnerAuthenticateHelper resourceOwnerAuthenticateHelper,
             SmsAuthenticationOptions basicAuthenticateOptions) : base(authenticateActions, profileActions, dataProtectionProvider, encoder,
                 translationManager, simpleIdentityServerEventSource, urlHelperFactory, actionContextAccessor, eventPublisher,
                 authenticationService, authenticationSchemeProvider, userActions, payloadSerializer, configurationService,
-                authenticateHelper, twoFactorAuthenticationHandler, basicAuthenticateOptions)
+                authenticateHelper, basicAuthenticateOptions)
         {
             _smsAuthenticationOperation = smsAuthenticationOperation;
             _generateAndSendSmsCodeOperation = generateAndSendSmsCodeOperation;
@@ -84,6 +83,8 @@ namespace SimpleIdServer.Authenticate.SMS.Controllers
             }
 
             await SetUser().ConfigureAwait(false);
+            var acrUser = await _authenticationService.GetAuthenticatedUser(this, Host.Constants.CookieNames.AcrCookieName).ConfigureAwait(false);
+            var acrUserSubject = (acrUser == null || acrUser.IsAuthenticated() == false) ? null : acrUser.Claims.First(c => c.Type == Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject).Value;
             var uiLocales = DefaultLanguage;
             // 1. Decrypt the request
             var request = _dataProtector.Unprotect<AuthorizationRequest>(viewModel.Code);
@@ -94,7 +95,7 @@ namespace SimpleIdServer.Authenticate.SMS.Controllers
                 ResourceOwner resourceOwner = null;
                 try
                 {
-                    resourceOwner = await _smsAuthenticationOperation.Execute(viewModel.PhoneNumber).ConfigureAwait(false);
+                    resourceOwner = await _smsAuthenticationOperation.Execute(viewModel.PhoneNumber, acrUserSubject).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -206,9 +207,11 @@ namespace SimpleIdServer.Authenticate.SMS.Controllers
             {
                 var encryptedRequest = _dataProtector.Protect(request);
                 actionResult.RedirectInstruction.AddParameter(Core.Constants.StandardAuthorizationResponseNames.AuthorizationCodeName, encryptedRequest);
+                await SetAcrCookie(authenticatedUser.Claims).ConfigureAwait(false);
                 return this.CreateRedirectionFromActionResult(actionResult, request);
             }
 
+            await _authenticationService.SignOutAsync(HttpContext, Host.Constants.CookieNames.AcrCookieName, new AuthenticationProperties()).ConfigureAwait(false);
             await SetLocalCookie(authenticatedUser.Claims, request.SessionId).ConfigureAwait(false);
             var result = this.CreateRedirectionFromActionResult(actionResult, request);
             LogAuthenticateUser(actionResult, request.ProcessId);

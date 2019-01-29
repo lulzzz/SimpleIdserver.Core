@@ -50,8 +50,17 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Services
         {
             // ARRANGE
             InitializeFakeObjects();
-            _resourceOwnerRepositoryStub.Setup(r => r.GetResourceOwnerByClaim(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwner()));
-            _passwordSettingsRepositoryStub.Setup(p => p.Get()).Returns(Task.FromResult(new PasswordSettings()));
+            _resourceOwnerRepositoryStub.Setup(r => r.GetResourceOwnerByClaim(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwner
+            {
+                Credentials = new List<ResourceOwnerCredential>
+                {
+                    new ResourceOwnerCredential
+                    {
+                        Type = "sms"
+                    }
+                }
+            }));
+            _passwordSettingsRepositoryStub.Setup(p => p.Get(It.IsAny<string>())).Returns(Task.FromResult(new CredentialSetting()));
             _confirmationCodeStoreStub.Setup(c => c.Get(It.IsAny<string>())).Returns(() => Task.FromResult((ConfirmationCode)null));
             
             // ACT
@@ -71,9 +80,16 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Services
                 Claims = new List<Claim>
                 {
                     new Claim("phone_number", "phone")
+                },
+                Credentials = new List<ResourceOwnerCredential>
+                {
+                    new ResourceOwnerCredential
+                    {
+                        Type = "sms"
+                    }
                 }
             }));
-            _passwordSettingsRepositoryStub.Setup(p => p.Get()).Returns(Task.FromResult(new PasswordSettings()));
+            _passwordSettingsRepositoryStub.Setup(p => p.Get(It.IsAny<string>())).Returns(Task.FromResult(new CredentialSetting()));
             _confirmationCodeStoreStub.Setup(c => c.Get(It.IsAny<string>())).Returns(() => Task.FromResult(new ConfirmationCode
             {
                 Subject = "notcorrectphone"
@@ -95,6 +111,13 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Services
                 Claims = new List<Claim>
                 {
                     new Claim("phone_number", "phone")
+                },
+                Credentials = new List<ResourceOwnerCredential>
+                {
+                    new ResourceOwnerCredential
+                    {
+                        Type = "sms"
+                    }
                 }
             }));
             _confirmationCodeStoreStub.Setup(c => c.Get(It.IsAny<string>())).Returns(() => Task.FromResult(new ConfirmationCode
@@ -103,7 +126,7 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Services
                 IssueAt = DateTime.UtcNow.AddDays(-1),
                 ExpiresIn = 100
             }));
-            _passwordSettingsRepositoryStub.Setup(p => p.Get()).Returns(Task.FromResult(new PasswordSettings()));
+            _passwordSettingsRepositoryStub.Setup(p => p.Get(It.IsAny<string>())).Returns(Task.FromResult(new CredentialSetting()));
 
             // ACT
             var result = await Assert.ThrowsAsync< IdentityServerUserPasswordInvalidException>(() => _authenticateResourceOwnerService.AuthenticateResourceOwnerAsync("phone", "password"));
@@ -122,6 +145,13 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Services
                 Claims = new List<Claim>
                 {
                     new Claim("phone_number", "phone")
+                },
+                Credentials = new List<ResourceOwnerCredential>
+                {
+                    new ResourceOwnerCredential
+                    {
+                        Type = "sms"
+                    }
                 }
             }));
             _confirmationCodeStoreStub.Setup(c => c.Get(It.IsAny<string>())).Returns(() => Task.FromResult(new ConfirmationCode
@@ -130,7 +160,7 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Services
                 IssueAt = DateTime.UtcNow,
                 ExpiresIn = 100
             }));
-            _passwordSettingsRepositoryStub.Setup(p => p.Get()).Returns(Task.FromResult(new PasswordSettings()));
+            _passwordSettingsRepositoryStub.Setup(p => p.Get(It.IsAny<string>())).Returns(Task.FromResult(new CredentialSetting()));
 
 
             // ACT

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using SimpleIdServer.Core.Common.Models;
@@ -12,7 +13,7 @@ namespace SimpleIdServer.Authenticate.SMS.Actions
 {
     public interface ISmsAuthenticationOperation
     {
-        Task<ResourceOwner> Execute(string phoneNumber);
+        Task<ResourceOwner> Execute(string phoneNumber, string authenticatedUserSubject = null);
     }
 
     internal sealed class SmsAuthenticationOperation : ISmsAuthenticationOperation
@@ -31,20 +32,33 @@ namespace SimpleIdServer.Authenticate.SMS.Actions
 			_smsAuthenticationOptions = smsAuthenticationOptions;
         }
 
-        public async Task<ResourceOwner> Execute(string phoneNumber)
+        public async Task<ResourceOwner> Execute(string phoneNumber, string authenticatedUserSubject = null)
         {
             if (string.IsNullOrWhiteSpace(phoneNumber))
             {
                 throw new ArgumentNullException(nameof(phoneNumber));
             }
-			
-			// 1. Check user exists
-			var resourceOwner = await _resourceOwnerRepository.GetResourceOwnerByClaim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber, phoneNumber);
+
+            // 1. Check user exists
+            ResourceOwner resourceOwner = null;
+            if (!string.IsNullOrWhiteSpace(authenticatedUserSubject))
+            {
+                resourceOwner = await _resourceOwnerRepository.GetAsync(authenticatedUserSubject).ConfigureAwait(false);
+                if (!resourceOwner.Claims.Any(c => c.Type == Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber && c.Value == phoneNumber))
+                {
+                    throw new InvalidOperationException("the phone number is not valid");
+                }
+            }
+			else
+            {
+                resourceOwner = await _resourceOwnerRepository.GetResourceOwnerByClaim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber, phoneNumber);
+            }
+
 			if (!_smsAuthenticationOptions.IsSelfProvisioningEnabled && resourceOwner == null)
 			{
 				throw new InvalidOperationException("the user doesn't exist");
 			}
-			
+
             // 2. Send the confirmation code (SMS).
             await _generateAndSendSmsCodeOperation.Execute(phoneNumber);
             if (resourceOwner != null)

@@ -12,6 +12,23 @@ namespace SimpleIdServer.EF.Extensions
     {
         #region To Domain Objects
 
+        public static Domain.AuthenticationContextclassReference ToDomain(this Model.AuthenticationContextclassReference authenticationContextclassReference)
+        {
+            if (authenticationContextclassReference == null)
+            {
+                throw new ArgumentNullException(nameof(authenticationContextclassReference));
+            }
+
+            return new Domain.AuthenticationContextclassReference
+            {
+                AmrLst = string.IsNullOrWhiteSpace(authenticationContextclassReference.AmrLst) ? new List<string>() : authenticationContextclassReference.AmrLst.Split(',').ToList(),
+                DisplayName = authenticationContextclassReference.DisplayName,
+                IsDefault = authenticationContextclassReference.IsDefault,
+                Name = authenticationContextclassReference.Name,
+                Type = (Domain.AuthenticationContextclassReferenceTypes)authenticationContextclassReference.Type
+            };
+        }
+
         public static Domain.DefaultSettings ToDomain(this Model.DefaultSettings defaultSettings)
         {
             if (defaultSettings == null)

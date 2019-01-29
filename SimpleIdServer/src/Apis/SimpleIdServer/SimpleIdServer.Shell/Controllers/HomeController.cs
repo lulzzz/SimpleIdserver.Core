@@ -178,7 +178,7 @@ namespace SimpleIdServer.Shell.Controllers
             var discoveryInformation = await identityServerClientFactory.CreateDiscoveryClient().GetDiscoveryInformationAsync(wellKnownConfiguration).ConfigureAwait(false);
             var state = Guid.NewGuid().ToString();
             var nonce = Guid.NewGuid().ToString();
-            var url = $"{discoveryInformation.AuthorizationEndPoint}?scope=openid profile&state={state}&redirect_uri={issuerName + Url.Action("Callback")}&response_type=code&client_id={_shellModuleOptions.ClientId}&nonce={nonce}&response_mode=query&acr_values=sid::loa-1";
+            var url = $"{discoveryInformation.AuthorizationEndPoint}?scope=openid profile&state={state}&redirect_uri={issuerName + Url.Action("Callback")}&response_type=code&client_id={_shellModuleOptions.ClientId}&nonce={nonce}&response_mode=query";
             return new AuthorizationResponse
             {
                 AuthorizationUrl = url,

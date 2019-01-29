@@ -24,6 +24,7 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Authenticate
         private Mock<IConsentHelper> _consentHelperFake;
         private Mock<IGenerateAuthorizationResponse> _generateAuthorizationResponseFake;
         private Mock<IClientRepository> _clientRepositoryStub;
+        private Mock<IAmrHelper> _amrHelperStub;
         private IAuthenticateHelper _authenticateHelper;
 
         [Fact]
@@ -51,6 +52,45 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Authenticate
             // ACT & ASSERTS
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _authenticateHelper.ProcessRedirection(authorizationParameter, null, null, null, null));
             Assert.True(exception.Message == string.Format(ErrorDescriptions.TheClientIdDoesntExist, authorizationParameter.ClientId));
+        }
+
+        [Fact]
+        public async Task When_Pass_Acr_Then_First_Amr_Is_Returned()
+        {
+            // ARRANGE
+            InitializeFakeObjects();
+            _clientRepositoryStub.Setup(c => c.GetClientByIdAsync(It.IsAny<string>()))
+                .Returns(Task.FromResult(new Client
+                {
+                    ClientId = "clientId"
+                }));
+            var actionResult = new ActionResult
+            {
+                RedirectInstruction = new RedirectInstruction()
+            };
+            _actionResultFactoryFake.Setup(a => a.CreateAnEmptyActionResultWithRedirection())
+                .Returns(actionResult);
+            var authorizationParameter = new AuthorizationParameter
+            {
+                ClientId = "client_id",
+                AcrValues = new List<string>
+                {
+                    "acr1"
+                },
+                AmrValues = new List<string>
+                {
+                    "amr1"
+                }
+            };
+            _amrHelperStub.Setup(a => a.GetNextAmr(It.IsAny<string>(), It.IsAny<IEnumerable<string>>())).Returns(Task.FromResult("amr2"));
+            
+            // ACT
+            var result = await _authenticateHelper.ProcessRedirection(authorizationParameter, null, null, null, null);
+
+            // ASSERT
+            Assert.NotNull(result);
+            Assert.Equal(IdentityServerEndPoints.AuthenticateIndex, result.RedirectInstruction.Action);
+            Assert.Equal(2, result.AmrLst.Count());
         }
 
         [Fact]
@@ -173,12 +213,14 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Authenticate
             _consentHelperFake = new Mock<IConsentHelper>();
             _generateAuthorizationResponseFake = new Mock<IGenerateAuthorizationResponse>();
             _clientRepositoryStub = new Mock<IClientRepository>();
+            _amrHelperStub = new Mock<IAmrHelper>();
             _authenticateHelper = new AuthenticateHelper(
                 _parameterParserHelperFake.Object,
                 _actionResultFactoryFake.Object,
                 _consentHelperFake.Object,
                 _generateAuthorizationResponseFake.Object,
-                _clientRepositoryStub.Object);
+                _clientRepositoryStub.Object,
+                _amrHelperStub.Object);
         }
     }
 }

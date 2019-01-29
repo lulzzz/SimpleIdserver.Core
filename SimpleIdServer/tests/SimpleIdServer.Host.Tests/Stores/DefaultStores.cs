@@ -28,6 +28,45 @@ namespace SimpleIdServer.Host.Tests.Stores
 {
     public static class DefaultStores
     {
+        public static ICollection<AuthenticationContextclassReference> GetAcrs()
+        {
+            return new List<AuthenticationContextclassReference>
+            {
+                new AuthenticationContextclassReference
+                {
+                    AmrLst = new List<string>
+                    {
+                        "pwd"
+                    },
+                    DisplayName = "SID LOA1",
+                    Name = "sid::loa-1",
+                    Type = AuthenticationContextclassReferenceTypes.LOA1,
+                    IsDefault = true
+                },
+                new AuthenticationContextclassReference
+                {
+                    AmrLst = new List<string>
+                    {
+                        "sms"
+                    },
+                    DisplayName = "SID LOA2",
+                    Name = "sid::loa-2",
+                    Type = AuthenticationContextclassReferenceTypes.LOA2
+                },
+                new AuthenticationContextclassReference
+                {
+                    AmrLst = new List<string>
+                    {
+                        "pwd",
+                        "sms"
+                    },
+                    DisplayName = "SID LOA3",
+                    Name = "sid::loa-3",
+                    Type = AuthenticationContextclassReferenceTypes.LOA3
+                }
+            };
+        }
+
         public static List<Consent> Consents()
         {
             return new List<Consent>()

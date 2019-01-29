@@ -123,10 +123,8 @@ namespace SimpleIdServer.Core
             serviceCollection.AddTransient<IGetUserOperation, GetUserOperation>();
             serviceCollection.AddTransient<IUpdateUserClaimsOperation, UpdateUserClaimsOperation>();
             serviceCollection.AddTransient<IAddUserOperation, AddUserOperation>();
-            serviceCollection.AddTransient<IGenerateAndSendCodeAction, GenerateAndSendCodeAction>();
             serviceCollection.AddTransient<IValidateConfirmationCodeAction, ValidateConfirmationCodeAction>();
             serviceCollection.AddTransient<IRemoveConfirmationCodeAction, RemoveConfirmationCodeAction>();
-            serviceCollection.AddTransient<ITwoFactorAuthenticationHandler, TwoFactorAuthenticationHandler>();
             serviceCollection.AddTransient<IPayloadSerializer, PayloadSerializer>();
             serviceCollection.AddTransient<IProfileActions, ProfileActions>();
             serviceCollection.AddTransient<ILinkProfileAction, LinkProfileAction>();

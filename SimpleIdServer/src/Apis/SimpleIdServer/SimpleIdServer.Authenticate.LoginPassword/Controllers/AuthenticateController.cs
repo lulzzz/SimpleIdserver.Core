@@ -55,12 +55,11 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
             IConfigurationService configurationService,
             IAuthenticateHelper authenticateHelper,
             IResourceOwnerAuthenticateHelper resourceOwnerAuthenticateHelper,
-            ITwoFactorAuthenticationHandler twoFactorAuthenticationHandler,
             IChangePasswordAction changePasswordAction,
             LoginPasswordOptions basicAuthenticateOptions) : base(authenticateActions, profileActions, dataProtectionProvider, encoder,
                 translationManager, simpleIdentityServerEventSource, urlHelperFactory, actionContextAccessor, eventPublisher,
                 authenticationService, authenticationSchemeProvider, userActions, payloadSerializer, configurationService,
-                authenticateHelper, twoFactorAuthenticationHandler, basicAuthenticateOptions)
+                authenticateHelper, basicAuthenticateOptions)
         {
             _resourceOwnerAuthenticateHelper = resourceOwnerAuthenticateHelper;
             _changePasswordAction = changePasswordAction;
@@ -98,6 +97,8 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
             }
 
             await SetUser().ConfigureAwait(false);
+            var acrUser = await _authenticationService.GetAuthenticatedUser(this, Host.Constants.CookieNames.AcrCookieName).ConfigureAwait(false);
+            var acrUserSubject = (acrUser == null || acrUser.IsAuthenticated() == false) ? null : acrUser.Claims.First(c => c.Type == Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject).Value;
             var uiLocales = DefaultLanguage;
             try
             {
@@ -128,20 +129,19 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
                 {
                     var encryptedRequest = _dataProtector.Protect(request);
                     actionResult.ActionResult.RedirectInstruction.AddParameter(Core.Constants.StandardAuthorizationResponseNames.AuthorizationCodeName, encryptedRequest);
+                    await SetAcrCookie(actionResult.Claims).ConfigureAwait(false);
                     return this.CreateRedirectionFromActionResult(actionResult.ActionResult, request);
                 }
 
                 var subject = actionResult.Claims.First(c => c.Type == Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject).Value;
                 // 5. Authenticate the user by adding a cookie
+                await _authenticationService.SignOutAsync(HttpContext, Host.Constants.CookieNames.AcrCookieName, new AuthenticationProperties()).ConfigureAwait(false);
                 await SetLocalCookie(actionResult.Claims, request.SessionId).ConfigureAwait(false);
                 _simpleIdentityServerEventSource.AuthenticateResourceOwner(subject);
                 // 6. Redirect the user agent
                 var result = this.CreateRedirectionFromActionResult(actionResult.ActionResult, request);
-                if (result != null)
-                {
-                    LogAuthenticateUser(actionResult.ActionResult, request.ProcessId);
-                    return result;
-                }
+                 LogAuthenticateUser(actionResult.ActionResult, request.ProcessId);
+                 return result;
             }
             catch (IdentityServerUserAccountDoesntExistException)
             {
