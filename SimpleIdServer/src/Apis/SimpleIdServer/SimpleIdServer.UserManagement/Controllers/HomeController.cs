@@ -4,16 +4,15 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using SimpleIdServer.Core.Api.Profile;
+using SimpleIdServer.Core.Api.User;
 using SimpleIdServer.Core.Errors;
 using SimpleIdServer.Core.Exceptions;
 using SimpleIdServer.Core.Extensions;
-using SimpleIdServer.Core.Services;
 using SimpleIdServer.Core.Translation;
-using SimpleIdServer.Core.WebSite.User;
+using SimpleIdServer.Host;
 using SimpleIdServer.Host.Controllers.Website;
 using SimpleIdServer.Host.Extensions;
 using SimpleIdServer.Module;
-using SimpleIdServer.Host;
 using SimpleIdServer.UserManagement.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -87,26 +86,6 @@ namespace SimpleIdServer.UserManagement.Controllers
         {
             var authenticatedUser = await SetUser().ConfigureAwait(false);
             ViewBag.IsUpdated = false;
-            return await DisplayEditView(authenticatedUser).ConfigureAwait(false);
-        }
-        
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(UpdateTwoFactorAuthenticatorViewModel viewModel)
-        {
-            if (viewModel == null)
-            {
-                throw new ArgumentNullException(nameof(viewModel));
-            }
-
-            if (!_userManagementOptions.CanUpdateTwoFactorAuthentication)
-            {
-                return new NotFoundResult();
-            }
-            
-            var authenticatedUser = await SetUser().ConfigureAwait(false);
-            await _userActions.UpdateTwoFactor(authenticatedUser.GetSubject(), viewModel.SelectedTwoFactorAuthType).ConfigureAwait(false);
-            ViewBag.IsUpdated = true;
             return await DisplayEditView(authenticatedUser).ConfigureAwait(false);
         }
 
@@ -275,7 +254,7 @@ namespace SimpleIdServer.UserManagement.Controllers
         private async Task<ActionResult> GetConsents()
         {
             var authenticatedUser = await SetUser();
-            var consents = await _userActions.GetConsents(authenticatedUser);
+            var consents = await _userActions.GetConsents(authenticatedUser.GetSubject()).ConfigureAwait(false);
             var result = new List<ConsentViewModel>();
             if (consents != null)
             {
@@ -334,7 +313,7 @@ namespace SimpleIdServer.UserManagement.Controllers
                 }).ToList();
             }
 
-            var resourceOwner = await _userActions.GetUser(authenticatedUser).ConfigureAwait(false);
+            var resourceOwner = await _userActions.GetUser(authenticatedUser.GetSubject()).ConfigureAwait(false);
             if (_userManagementOptions.CanUpdateTwoFactorAuthentication)
             {
                 viewModel.SelectedTwoFactorAuthType = resourceOwner.TwoFactorAuthentication;

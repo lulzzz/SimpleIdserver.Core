@@ -1,9 +1,9 @@
-﻿using SimpleIdServer.Core.Extensions;
+﻿using SimpleIdServer.Authenticate.Basic.Helpers;
+using SimpleIdServer.Core.Extensions;
 using SimpleIdServer.Core.Factories;
 using SimpleIdServer.Core.Helpers;
 using SimpleIdServer.Core.Parameters;
 using SimpleIdServer.Core.Results;
-using SimpleIdServer.Core.WebSite.Authenticate.Common;
 using System;
 using System.Linq;
 using System.Security.Claims;

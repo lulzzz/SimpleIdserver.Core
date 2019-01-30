@@ -11,8 +11,12 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Services
 {
     internal sealed class PasswordAuthenticateResourceOwnerService : BaseAuthenticateResourceOwnerService
     {
-        public PasswordAuthenticateResourceOwnerService(IResourceOwnerRepository resourceOwnerRepository, ICredentialSettingsRepository passwordSettingsRepository) : base(passwordSettingsRepository, resourceOwnerRepository)
+        private readonly IResourceOwnerRepository _resourceOwnerRepository;
+
+        public PasswordAuthenticateResourceOwnerService(ICredentialSettingsRepository credentialSettingsRepository, IResourceOwnerCredentialRepository resourceOwnerCredentialRepository,
+            IResourceOwnerRepository resourceOwnerRepository) : base(credentialSettingsRepository, resourceOwnerCredentialRepository)
         {
+            _resourceOwnerRepository = resourceOwnerRepository;
         }
 
         public override string Amr

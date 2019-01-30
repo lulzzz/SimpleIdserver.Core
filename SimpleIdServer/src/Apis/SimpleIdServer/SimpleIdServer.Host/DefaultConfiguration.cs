@@ -65,14 +65,6 @@ namespace SimpleIdServer.Host
                 ExpiresIn = TimeSpan.FromDays(2).TotalSeconds,
                 CredentialType = "pwd",
                 Options = "{ IsRegexEnabled : 'false' }"
-            },
-            new CredentialSetting
-            {
-                IsBlockAccountPolicyEnabled = true,
-                NumberOfAuthenticationAttempts = 3,
-                AuthenticationIntervalsInSeconds = 10,
-                ExpiresIn = TimeSpan.FromDays(2).TotalSeconds,
-                CredentialType = "sms"
             }
         };
 
@@ -473,14 +465,6 @@ namespace SimpleIdServer.Host
                         IsBlocked = false,
                         FirstAuthenticationFailureDateTime = null,
                         Type = "pwd",
-                        NumberOfAttempts = 0
-                    },
-                    new ResourceOwnerCredential
-                    {
-                        ExpirationDateTime = DateTime.UtcNow.AddDays(10),
-                        IsBlocked = false,
-                        FirstAuthenticationFailureDateTime = null,
-                        Type = "sms",
                         NumberOfAttempts = 0
                     },
                     new ResourceOwnerCredential

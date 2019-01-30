@@ -1,10 +1,10 @@
-﻿using SimpleIdServer.Authenticate.LoginPassword.Parameters;
+﻿using SimpleIdServer.Authenticate.Basic.Helpers;
+using SimpleIdServer.Authenticate.LoginPassword.Parameters;
 using SimpleIdServer.Core.Exceptions;
 using SimpleIdServer.Core.Extensions;
 using SimpleIdServer.Core.Helpers;
 using SimpleIdServer.Core.Parameters;
 using SimpleIdServer.Core.Results;
-using SimpleIdServer.Core.WebSite.Authenticate.Common;
 using System;
 using System.Collections.Generic;
 using System.Globalization;

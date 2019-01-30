@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using Microsoft.EntityFrameworkCore;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Common.Repositories;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace SimpleIdServer.EF.Repositories
 {
@@ -35,19 +36,64 @@ namespace SimpleIdServer.EF.Repositories
             return true;
         }
 
-        public Task<ResourceOwnerCredential> Get(string type, string value)
+        public async Task<ResourceOwnerCredential> Get(string type, string value)
         {
-            throw new System.NotImplementedException();
+            var record = await _context.ResourceOwnerCredentials.FirstOrDefaultAsync(c => c.Type == type && c.Value == value).ConfigureAwait(false);
+            if (record == null)
+            {
+                return null;
+            }
+
+            return new ResourceOwnerCredential
+            {
+                BlockedDateTime = record.BlockedDateTime,
+                ExpirationDateTime = record.ExpirationDateTime,
+                FirstAuthenticationFailureDateTime = record.FirstAuthenticationFailureDateTime,
+                IsBlocked = record.IsBlocked,
+                NumberOfAttempts = record.NumberOfAttempts,
+                Type = record.Type,
+                UserId = record.ResourceOwnerId,
+                Value = record.Value
+            };
         }
 
-        public Task<ResourceOwnerCredential> GetUserCredential(string subject, string type)
+        public async Task<ResourceOwnerCredential> GetUserCredential(string subject, string type)
         {
-            throw new System.NotImplementedException();
+            var record = await _context.ResourceOwnerCredentials.FirstOrDefaultAsync(c => c.Type == type && c.ResourceOwnerId == subject).ConfigureAwait(false);
+            if (record == null)
+            {
+                return null;
+            }
+
+            return new ResourceOwnerCredential
+            {
+                BlockedDateTime = record.BlockedDateTime,
+                ExpirationDateTime = record.ExpirationDateTime,
+                FirstAuthenticationFailureDateTime = record.FirstAuthenticationFailureDateTime,
+                IsBlocked = record.IsBlocked,
+                NumberOfAttempts = record.NumberOfAttempts,
+                Type = record.Type,
+                UserId = record.ResourceOwnerId,
+                Value = record.Value
+            };
         }
 
-        public Task<bool> Update(ResourceOwnerCredential resourceOwnerCredential)
+        public async Task<bool> Update(ResourceOwnerCredential resourceOwnerCredential)
         {
-            throw new System.NotImplementedException();
+            var record = await _context.ResourceOwnerCredentials.FirstOrDefaultAsync(c => c.ResourceOwnerId == resourceOwnerCredential.UserId && c.Type == resourceOwnerCredential.Type).ConfigureAwait(false);
+            if (record == null)
+            {
+                return false;
+            }
+
+            record.BlockedDateTime = resourceOwnerCredential.BlockedDateTime;
+            record.ExpirationDateTime = resourceOwnerCredential.ExpirationDateTime;
+            record.FirstAuthenticationFailureDateTime = resourceOwnerCredential.FirstAuthenticationFailureDateTime;
+            record.IsBlocked = resourceOwnerCredential.IsBlocked;
+            record.NumberOfAttempts = resourceOwnerCredential.NumberOfAttempts;
+            record.Value = resourceOwnerCredential.Value;
+            await _context.SaveChangesAsync().ConfigureAwait(false);
+            return true;
         }
     }
 }

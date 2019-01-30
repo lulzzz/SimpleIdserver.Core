@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SimpleIdServer.Client;
-using SimpleIdServer.Core;
 using SimpleIdServer.Core.Jwt;
 using SimpleIdServer.Core.Jwt.Extensions;
 using SimpleIdServer.Host.Controllers.Website;
