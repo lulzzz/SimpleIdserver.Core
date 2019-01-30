@@ -25,6 +25,7 @@ namespace SimpleIdServer.EF
             serviceCollection.AddTransient<ICredentialSettingsRepository, CredentialsSettingsRepository>();
             serviceCollection.AddTransient<IDefaultSettingsRepository, DefaultSettingsRepository>();
             serviceCollection.AddTransient<IAuthenticationContextclassReferenceRepository, AuthenticationContextclassReferenceRepository>();
+            serviceCollection.AddTransient<IResourceOwnerCredentialRepository, ResourceOwnerCredentialRepository>();
             return serviceCollection;
         }
     }

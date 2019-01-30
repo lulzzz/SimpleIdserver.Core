@@ -46,6 +46,8 @@ namespace SimpleIdServer.Authenticate.LoginPassword
             services.AddSingleton(basicAuthenticateOptions);
             services.AddTransient<IAuthenticateResourceOwnerService, PasswordAuthenticateResourceOwnerService>();
             services.AddTransient<IChangePasswordAction, ChangePasswordAction>();
+            services.AddTransient<ILoginPwdAuthenticateAction, LoginPwdAuthenticateAction>();
+            services.AddAuthBasic();
             services.AddSingleton<IAuthModule>(new PwdAuthModule(basicAuthenticateOptions.IsEditCredentialEnabled));
             mvcBuilder.AddApplicationPart(assembly);
             return services;

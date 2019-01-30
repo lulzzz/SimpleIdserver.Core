@@ -1,8 +1,10 @@
 ﻿using Newtonsoft.Json;
 using SimpleIdServer.Authenticate.LoginPassword.Parameters;
-using SimpleIdServer.Core.Common.Repositories;
+using SimpleIdServer.Core.Api.CredentialSettings;
+using SimpleIdServer.Core.Api.User;
 using SimpleIdServer.Core.Exceptions;
 using SimpleIdServer.Core.Helpers;
+using SimpleIdServer.Core.Parameters;
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -17,13 +19,13 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Actions
 
     internal sealed class ChangePasswordAction : IChangePasswordAction
     {
-        private readonly ICredentialSettingsRepository _passwordSettingsRepository;
-        private readonly IResourceOwnerRepository _resourceOwnerRepository;
+        private readonly ICredentialSettingActions _credentialSettingActions;
+        private readonly IUserActions _userActions;
 
-        public ChangePasswordAction(ICredentialSettingsRepository passwordSettingsRepository, IResourceOwnerRepository resourceOwnerRepository)
+        public ChangePasswordAction(ICredentialSettingActions credentialSettingActions, IUserActions userActions)
         {
-            _passwordSettingsRepository = passwordSettingsRepository;
-            _resourceOwnerRepository = resourceOwnerRepository;
+            _credentialSettingActions = credentialSettingActions;
+            _userActions = userActions;
         }
 
         public async Task<bool> Execute(ChangePasswordParameter changePasswordParameter)
@@ -33,7 +35,7 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Actions
                 throw new ArgumentNullException(nameof(changePasswordParameter));
             }
 
-            var resourceOwner = await _resourceOwnerRepository.GetAsync(changePasswordParameter.Subject).ConfigureAwait(false);
+            var resourceOwner = await _userActions.GetUser(changePasswordParameter.Subject).ConfigureAwait(false);
             if (resourceOwner == null)
             {
                 throw new IdentityServerException(Core.Errors.ErrorCodes.InternalError, Core.Errors.ErrorDescriptions.TheResourceOwnerDoesntExist);
@@ -45,7 +47,7 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Actions
                 throw new IdentityServerException(Core.Errors.ErrorCodes.InternalError, Core.Errors.ErrorDescriptions.ThePasswordIsNotCorrect);
             }
 
-            var passwordSettings = await _passwordSettingsRepository.Get(Constants.AMR).ConfigureAwait(false);
+            var passwordSettings = await _credentialSettingActions.Get(Constants.AMR).ConfigureAwait(false);
             var opts = JsonConvert.DeserializeObject<PwdCredentialOptions>(passwordSettings.Options);
             if (opts.IsRegexEnabled)
             {
@@ -56,9 +58,12 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Actions
                 }
             }
 
-            credential.Value = PasswordHelper.ComputeHash(changePasswordParameter.NewPassword);
-            credential.ExpirationDateTime = DateTime.UtcNow.AddSeconds(passwordSettings.ExpiresIn);
-            await _resourceOwnerRepository.UpdateCredential(changePasswordParameter.Subject, credential).ConfigureAwait(false);
+            await _userActions.UpdateCredential(new UpdateUserCredentialParameter
+            {
+                CredentialType = Constants.AMR,
+                NewValue = PasswordHelper.ComputeHash(changePasswordParameter.NewPassword),
+                UserId = resourceOwner.Id
+            }).ConfigureAwait(false);
             return true;
         }
     }

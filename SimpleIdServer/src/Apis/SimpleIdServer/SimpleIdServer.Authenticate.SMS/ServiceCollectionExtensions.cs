@@ -1,14 +1,15 @@
-﻿using System;
-using System.Reflection;
-using Microsoft.AspNetCore.Mvc.Razor;
+﻿using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using SimpleIdServer.Authenticate.Basic;
 using SimpleIdServer.Authenticate.SMS.Actions;
 using SimpleIdServer.Authenticate.SMS.Controllers;
 using SimpleIdServer.Authenticate.SMS.Services;
 using SimpleIdServer.Core.Services;
 using SimpleIdServer.Twilio.Client;
+using System;
+using System.Reflection;
 
 namespace SimpleIdServer.Authenticate.SMS
 {
@@ -43,6 +44,7 @@ namespace SimpleIdServer.Authenticate.SMS
                 };
             });
             services.AddSingleton(smsAuthenticationOptions);
+            services.AddAuthBasic();
             services.AddTransient<ITwilioClient, TwilioClient>();
             services.AddTransient<ISmsAuthenticationOperation, SmsAuthenticationOperation>();
             services.AddTransient<IGenerateAndSendSmsCodeOperation, GenerateAndSendSmsCodeOperation>();

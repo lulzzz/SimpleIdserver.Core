@@ -83,9 +83,7 @@ namespace SimpleIdServer.Core.WebSite.Consent.Actions
         /// <param name="authorizationParameter">Authorization code grant-type</param>
         /// <param name="claimsPrincipal">Resource owner's claims</param>
         /// <returns>Redirects the authorization code to the callback.</returns>
-        public async Task<ActionResult> Execute(
-            AuthorizationParameter authorizationParameter,
-            ClaimsPrincipal claimsPrincipal, string issuerName)
+        public async Task<ActionResult> Execute(AuthorizationParameter authorizationParameter, ClaimsPrincipal claimsPrincipal, string issuerName)
         {
             if (authorizationParameter == null)
             {

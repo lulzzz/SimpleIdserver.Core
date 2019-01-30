@@ -12,12 +12,12 @@ namespace SimpleIdServer.Core.Services
         public abstract string Amr { get; }
 
         private readonly ICredentialSettingsRepository _passwordSettingsRepository;
-        protected readonly IResourceOwnerRepository _resourceOwnerRepository;
+        protected readonly IResourceOwnerCredentialRepository _resourceOwnerCredentialRepository;
 
-        public BaseAuthenticateResourceOwnerService(ICredentialSettingsRepository passwordSettingsRepository, IResourceOwnerRepository resourceOwnerRepository)
+        public BaseAuthenticateResourceOwnerService(ICredentialSettingsRepository passwordSettingsRepository, IResourceOwnerCredentialRepository resourceOwnerCredentialRepository)
         {
             _passwordSettingsRepository = passwordSettingsRepository;
-            _resourceOwnerRepository = resourceOwnerRepository;
+            _resourceOwnerCredentialRepository = resourceOwnerCredentialRepository;
         }
 
         public async Task<ResourceOwner> AuthenticateResourceOwnerAsync(string login, string credentialValue)
@@ -74,7 +74,7 @@ namespace SimpleIdServer.Core.Services
                         credential.NumberOfAttempts++;
                     }
 
-                    await _resourceOwnerRepository.UpdateCredential(login, credential).ConfigureAwait(false);
+                    await _resourceOwnerCredentialRepository.Update(credential).ConfigureAwait(false);
                 }
 
                 throw new IdentityServerUserPasswordInvalidException();

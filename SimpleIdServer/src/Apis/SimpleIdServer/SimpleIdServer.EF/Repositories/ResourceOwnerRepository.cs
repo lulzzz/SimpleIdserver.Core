@@ -292,51 +292,5 @@ namespace SimpleIdServer.EF.Repositories
                 return null;
             }
         }
-
-        public async Task<bool> UpdateCredential(string subject, Domains.ResourceOwnerCredential credential)
-        {
-            if (string.IsNullOrWhiteSpace(subject))
-            {
-                throw new ArgumentNullException(nameof(subject));
-            }
-
-            if (credential == null)
-            {
-                throw new ArgumentNullException(nameof(credential));
-            }
-
-            var claimIdentifier = await _context.Claims.FirstOrDefaultAsync(c => c.IsIdentifier).ConfigureAwait(false);
-            if (claimIdentifier == null)
-            {
-                throw new InvalidOperationException("no claim can be used to uniquely identified the resource owner");
-            }
-
-            var user = await _context.ResourceOwners.Include(r => r.Credentials).FirstOrDefaultAsync(r => r.Claims.Any(c => c.ClaimCode == claimIdentifier.Code && c.Value == subject))
-                    .ConfigureAwait(false);
-            if (user == null)
-            {
-                return false;
-            }
-
-            var cred = user.Credentials.FirstOrDefault(c => c.Type == credential.Type);
-            if (cred == null)
-            {
-                cred = new ResourceOwnerCredential
-                {
-                    Type = credential.Type
-                };
-                user.Credentials.Add(cred);
-            }
-
-            cred.BlockedDateTime = credential.BlockedDateTime;
-            cred.ExpirationDateTime = credential.ExpirationDateTime;
-            cred.FirstAuthenticationFailureDateTime = credential.FirstAuthenticationFailureDateTime;
-            cred.IsBlocked = credential.IsBlocked;
-            cred.NumberOfAttempts = credential.NumberOfAttempts;
-            cred.ResourceOwnerId = user.Id;
-            cred.Value = credential.Value;
-            await _context.SaveChangesAsync().ConfigureAwait(false);
-            return true;
-        }
     }
 }

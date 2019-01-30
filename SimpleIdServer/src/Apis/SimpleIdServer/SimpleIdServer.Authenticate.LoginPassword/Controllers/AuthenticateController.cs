@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
+using SimpleIdServer.Authenticate.Basic.Actions;
 using SimpleIdServer.Authenticate.Basic.Controllers;
+using SimpleIdServer.Authenticate.Basic.Helpers;
 using SimpleIdServer.Authenticate.Basic.ViewModels;
 using SimpleIdServer.Authenticate.LoginPassword.Actions;
 using SimpleIdServer.Authenticate.LoginPassword.Parameters;
@@ -11,16 +13,13 @@ using SimpleIdServer.Authenticate.LoginPassword.ViewModels;
 using SimpleIdServer.Bus;
 using SimpleIdServer.Core;
 using SimpleIdServer.Core.Api.Profile;
+using SimpleIdServer.Core.Api.User;
 using SimpleIdServer.Core.Exceptions;
 using SimpleIdServer.Core.Extensions;
 using SimpleIdServer.Core.Helpers;
-using SimpleIdServer.Core.Parameters;
 using SimpleIdServer.Core.Protector;
 using SimpleIdServer.Core.Services;
 using SimpleIdServer.Core.Translation;
-using SimpleIdServer.Core.WebSite.Authenticate;
-using SimpleIdServer.Core.WebSite.Authenticate.Common;
-using SimpleIdServer.Core.WebSite.User;
 using SimpleIdServer.Dtos.Requests;
 using SimpleIdServer.Host.Extensions;
 using SimpleIdServer.OpenId.Logging;
@@ -37,9 +36,10 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
     {
         private readonly IResourceOwnerAuthenticateHelper _resourceOwnerAuthenticateHelper;
         private readonly IChangePasswordAction _changePasswordAction;
+        private readonly ILoginPwdAuthenticateAction _loginPwdAuthenticateAction;
 
         public AuthenticateController(
-            IAuthenticateActions authenticateActions,
+            IOpenidAuthenticateResourceOwnerAction openidAuthenticateResourceOwnerAction,
             IProfileActions profileActions,
             IDataProtectionProvider dataProtectionProvider,
             IEncoder encoder,
@@ -56,13 +56,15 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
             IAuthenticateHelper authenticateHelper,
             IResourceOwnerAuthenticateHelper resourceOwnerAuthenticateHelper,
             IChangePasswordAction changePasswordAction,
-            LoginPasswordOptions basicAuthenticateOptions) : base(authenticateActions, profileActions, dataProtectionProvider, encoder,
+            ILoginPwdAuthenticateAction loginPwdAuthenticateAction,
+            LoginPasswordOptions basicAuthenticateOptions) : base(openidAuthenticateResourceOwnerAction, profileActions, dataProtectionProvider, encoder,
                 translationManager, simpleIdentityServerEventSource, urlHelperFactory, actionContextAccessor, eventPublisher,
                 authenticationService, authenticationSchemeProvider, userActions, payloadSerializer, configurationService,
                 authenticateHelper, basicAuthenticateOptions)
         {
             _resourceOwnerAuthenticateHelper = resourceOwnerAuthenticateHelper;
             _changePasswordAction = changePasswordAction;
+            _loginPwdAuthenticateAction = loginPwdAuthenticateAction;
         }
 
         [HttpGet]
@@ -119,7 +121,7 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
                 // 4. Local authentication
                 var issuerName = Request.GetAbsoluteUriWithVirtualPath();
                 var parameter = request.ToParameter();
-                var actionResult = await _authenticateActions.LocalOpenIdUserAuthentication(new LocalAuthenticationParameter { Password = viewModel.Password, UserName = viewModel.Login }, parameter, viewModel.Code, issuerName).ConfigureAwait(false);
+                var actionResult = await _loginPwdAuthenticateAction.Execute(new LoginPasswordAuthParameter { Password = viewModel.Password, Login = viewModel.Login }, parameter, viewModel.Code, issuerName).ConfigureAwait(false);
                 if (actionResult.ActionResult.AmrLst != null)
                 {
                     request.AmrValues = string.Join(" ", actionResult.ActionResult.AmrLst);

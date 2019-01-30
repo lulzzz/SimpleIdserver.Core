@@ -8,6 +8,7 @@ namespace SimpleIdServer.Core.Common.Repositories
     {
         Task<IEnumerable<CredentialSetting>> Get();
         Task<CredentialSetting> Get(string type);
+        Task<IEnumerable<CredentialSetting>> Get(IEnumerable<string> types);
         Task<bool> Update(CredentialSetting credentialSetting);
     }
 }

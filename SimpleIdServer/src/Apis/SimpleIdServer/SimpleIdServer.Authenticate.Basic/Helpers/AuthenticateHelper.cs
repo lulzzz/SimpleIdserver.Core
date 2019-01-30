@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using SimpleIdServer.Core.Api.Authorization;
+﻿using SimpleIdServer.Core.Api.Authorization;
 using SimpleIdServer.Core.Common;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Common.Repositories;
@@ -13,8 +8,13 @@ using SimpleIdServer.Core.Factories;
 using SimpleIdServer.Core.Helpers;
 using SimpleIdServer.Core.Parameters;
 using SimpleIdServer.Core.Results;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
-namespace SimpleIdServer.Core.WebSite.Authenticate.Common
+namespace SimpleIdServer.Authenticate.Basic.Helpers
 {
     public interface IAuthenticateHelper
     {
@@ -120,7 +120,7 @@ namespace SimpleIdServer.Core.WebSite.Authenticate.Common
                     state);
             }
 
-            var record = Constants.MappingResponseTypesToAuthorizationFlows.Keys
+            var record = SimpleIdServer.Core.Constants.MappingResponseTypesToAuthorizationFlows.Keys
                 .SingleOrDefault(k => k.Count == responseTypes.Count && k.All(key => responseTypes.Contains(key)));
             if (record == null)
             {
@@ -130,12 +130,12 @@ namespace SimpleIdServer.Core.WebSite.Authenticate.Common
                     state);
             }
 
-            return Constants.MappingResponseTypesToAuthorizationFlows[record];
+            return SimpleIdServer.Core.Constants.MappingResponseTypesToAuthorizationFlows[record];
         }
 
         private static ResponseMode GetResponseMode(AuthorizationFlow authorizationFlow)
         {
-            return Constants.MappingAuthorizationFlowAndResponseModes[authorizationFlow];
+            return SimpleIdServer.Core.Constants.MappingAuthorizationFlowAndResponseModes[authorizationFlow];
         }
 
         #endregion

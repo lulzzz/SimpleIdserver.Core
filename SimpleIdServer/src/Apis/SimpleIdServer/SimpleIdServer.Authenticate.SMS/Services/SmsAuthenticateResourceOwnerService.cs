@@ -8,49 +8,40 @@ using System.Threading.Tasks;
 
 namespace SimpleIdServer.Authenticate.SMS.Services
 {
-    internal sealed class SmsAuthenticateResourceOwnerService : BaseAuthenticateResourceOwnerService
+    internal sealed class SmsAuthenticateResourceOwnerService : IAuthenticateResourceOwnerService
     {
         private readonly IConfirmationCodeStore _confirmationCodeStore;
+        private readonly IResourceOwnerRepository _resourceOwnerRepository;
 
-        public SmsAuthenticateResourceOwnerService(IResourceOwnerRepository resourceOwnerRepository, IConfirmationCodeStore confirmationCodeStore,
-            ICredentialSettingsRepository passwordSettingsRepository) : base(passwordSettingsRepository, resourceOwnerRepository)
+        public SmsAuthenticateResourceOwnerService(IConfirmationCodeStore confirmationCodeStore, IResourceOwnerRepository resourceOwnerRepository)
         {
             _confirmationCodeStore = confirmationCodeStore;
+            _resourceOwnerRepository = resourceOwnerRepository;
         }
 
-        public override string Amr
+        public string Amr => Constants.AMR;
+
+        public async Task<ResourceOwner> AuthenticateResourceOwnerAsync(string login, string password)
         {
-            get
+            var resourceOwner = await _resourceOwnerRepository.GetResourceOwnerByClaim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber, login).ConfigureAwait(false);
+            if (resourceOwner == null)
             {
-                return Constants.AMR;
+                return null;
             }
-        }
 
-        public override async Task<bool> Authenticate(ResourceOwner user, string password)
-        {
             var confirmationCode = await _confirmationCodeStore.Get(password).ConfigureAwait(false);
-            if (confirmationCode == null || confirmationCode.Subject != user.Claims.First(c => c.Type == Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber).Value)
+            if (confirmationCode == null || confirmationCode.Subject != resourceOwner.Claims.First(c => c.Type == Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber).Value)
             {
-                return false;
+                return null;
             }
 
             if (confirmationCode.IssueAt.AddSeconds(confirmationCode.ExpiresIn) <= DateTime.UtcNow)
             {
-                return false;
+                return null;
             }
 
             await _confirmationCodeStore.Remove(password).ConfigureAwait(false);
-            return true;
-        }
-
-        public override Task<ResourceOwner> GetResourceOwner(string login)
-        {
-            return _resourceOwnerRepository.GetResourceOwnerByClaim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber, login);
-        }
-
-        public override Task Validate(ResourceOwner user)
-        {
-            return Task.FromResult(0);
+            return resourceOwner;
         }
     }
 }

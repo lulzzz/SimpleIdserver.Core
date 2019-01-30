@@ -25,6 +25,11 @@ namespace SimpleIdServer.Core.Repositories
             return Task.FromResult(_credentialSettings.FirstOrDefault(r => r.CredentialType == type));
         }
 
+        public Task<IEnumerable<CredentialSetting>> Get(IEnumerable<string> types)
+        {
+            return Task.FromResult(_credentialSettings.Where(c => types.Contains(c.CredentialType)));
+        }
+
         public Task<bool> Update(CredentialSetting credentialSetting)
         {
             var record = _credentialSettings.FirstOrDefault(r => r.CredentialType == credentialSetting.CredentialType);

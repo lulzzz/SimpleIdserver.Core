@@ -14,7 +14,6 @@ namespace SimpleIdServer.Core.Common.Repositories
         Task<ICollection<ResourceOwner>> GetAllAsync();
         Task<bool> InsertAsync(ResourceOwner resourceOwner);
         Task<bool> UpdateAsync(ResourceOwner resourceOwner);
-        Task<bool> UpdateCredential(string subject, ResourceOwnerCredential credential);
         Task<bool> DeleteAsync(string subject);
         Task<SearchResourceOwnerResult> Search(SearchResourceOwnerParameter parameter);
     }

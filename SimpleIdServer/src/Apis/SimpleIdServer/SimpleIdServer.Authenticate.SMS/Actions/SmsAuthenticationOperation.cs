@@ -1,13 +1,11 @@
-﻿using System;
+﻿using SimpleIdServer.Core.Api.User;
+using SimpleIdServer.Core.Common.Models;
+using SimpleIdServer.Core.Parameters;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using SimpleIdServer.Core.Common.Models;
-using SimpleIdServer.Core.Common.Repositories;
-using SimpleIdServer.Core.Parameters;
-using SimpleIdServer.Core.Services;
-using SimpleIdServer.Core.WebSite.User;
 
 namespace SimpleIdServer.Authenticate.SMS.Actions
 {
@@ -19,15 +17,12 @@ namespace SimpleIdServer.Authenticate.SMS.Actions
     internal sealed class SmsAuthenticationOperation : ISmsAuthenticationOperation
     {
         private readonly IGenerateAndSendSmsCodeOperation _generateAndSendSmsCodeOperation;
-        private readonly IResourceOwnerRepository _resourceOwnerRepository;
         private readonly IUserActions _userActions; 
 		private readonly SmsAuthenticationOptions _smsAuthenticationOptions;
 		
-        public SmsAuthenticationOperation(IGenerateAndSendSmsCodeOperation generateAndSendSmsCodeOperation, IResourceOwnerRepository resourceOwnerRepository, IUserActions userActions, ISubjectBuilder subjectBuilder,
-            SmsAuthenticationOptions smsAuthenticationOptions)
+        public SmsAuthenticationOperation(IGenerateAndSendSmsCodeOperation generateAndSendSmsCodeOperation,IUserActions userActions, SmsAuthenticationOptions smsAuthenticationOptions)
         {
             _generateAndSendSmsCodeOperation = generateAndSendSmsCodeOperation;
-            _resourceOwnerRepository = resourceOwnerRepository;
             _userActions = userActions;
 			_smsAuthenticationOptions = smsAuthenticationOptions;
         }
@@ -43,7 +38,7 @@ namespace SimpleIdServer.Authenticate.SMS.Actions
             ResourceOwner resourceOwner = null;
             if (!string.IsNullOrWhiteSpace(authenticatedUserSubject))
             {
-                resourceOwner = await _resourceOwnerRepository.GetAsync(authenticatedUserSubject).ConfigureAwait(false);
+                resourceOwner = await _userActions.GetUser(authenticatedUserSubject).ConfigureAwait(false);
                 if (!resourceOwner.Claims.Any(c => c.Type == Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber && c.Value == phoneNumber))
                 {
                     throw new InvalidOperationException("the phone number is not valid");
@@ -51,7 +46,7 @@ namespace SimpleIdServer.Authenticate.SMS.Actions
             }
 			else
             {
-                resourceOwner = await _resourceOwnerRepository.GetResourceOwnerByClaim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber, phoneNumber);
+                resourceOwner = await _userActions.GetUserByClaim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber, phoneNumber);
             }
 
 			if (!_smsAuthenticationOptions.IsSelfProvisioningEnabled && resourceOwner == null)
@@ -72,9 +67,9 @@ namespace SimpleIdServer.Authenticate.SMS.Actions
                 new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber, phoneNumber),
                 new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumberVerified, "false")
             };
-            var record = new AddUserParameter(Guid.NewGuid().ToString(), claims);
+            var record = new AddUserParameter(claims);
             await _userActions.AddUser(record).ConfigureAwait(false);            
-            return await _resourceOwnerRepository.GetResourceOwnerByClaim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber, phoneNumber);
+            return await _userActions.GetUserByClaim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber, phoneNumber);
         }
     }
 }

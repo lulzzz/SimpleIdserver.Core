@@ -145,5 +145,6 @@ namespace SimpleIdServer.Core.Errors
         public const string TheUserAccountIsBlocked = "the user account is blocked";
         public const string TooManyAuthAttemps = "too many authentication attemps";
         public const string PasswordHasExpired = "password has expired";
+        public const string SomeCredentialsAreNotValid = "some credentials are not valid";
     }
 }

@@ -1,10 +1,10 @@
-﻿using System;
-using System.Threading.Tasks;
-using SimpleIdServer.Core.Errors;
+﻿using SimpleIdServer.Core.Errors;
 using SimpleIdServer.Core.Exceptions;
 using SimpleIdServer.OpenId.Logging;
 using SimpleIdServer.Store;
 using SimpleIdServer.Twilio.Client;
+using System;
+using System.Threading.Tasks;
 
 namespace SimpleIdServer.Authenticate.SMS.Actions
 {
@@ -20,8 +20,7 @@ namespace SimpleIdServer.Authenticate.SMS.Actions
         private readonly ITwilioClient _twilioClient;
         private readonly IOpenIdEventSource _eventSource;
 
-        public GenerateAndSendSmsCodeOperation(IConfirmationCodeStore confirmationCodeStore, SmsAuthenticationOptions smsAuthenticationOptions,
-            ITwilioClient twilioClient, IOpenIdEventSource eventSource)
+        public GenerateAndSendSmsCodeOperation(IConfirmationCodeStore confirmationCodeStore, SmsAuthenticationOptions smsAuthenticationOptions, ITwilioClient twilioClient, IOpenIdEventSource eventSource)
         {
             _confirmationCodeStore = confirmationCodeStore;
             _smsAuthenticationOptions = smsAuthenticationOptions;

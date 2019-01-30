@@ -43,9 +43,7 @@ namespace SimpleIdServer.Core.WebSite.Consent.Actions
         /// <param name="claimsPrincipal"></param>
         /// <param name="originUrl"></param>
         /// <returns>Action result.</returns>
-        Task<DisplayContentResult> Execute(
-            AuthorizationParameter authorizationParameter,
-            ClaimsPrincipal claimsPrincipal, string issuerName);
+        Task<DisplayContentResult> Execute(AuthorizationParameter authorizationParameter, ClaimsPrincipal claimsPrincipal, string issuerName);
     }
 
     public class DisplayContentResult

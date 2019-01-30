@@ -30,6 +30,7 @@ namespace SimpleIdServer.EF
         public virtual DbSet<CredentialSetting> CredentialSettings { get; set; }
         public virtual DbSet<DefaultSettings> DefaultSettings { get; set; }
         public virtual DbSet<AuthenticationContextclassReference> AuthenticationContextclassReferences { get; set; }
+        public virtual DbSet<ResourceOwnerCredential> ResourceOwnerCredentials { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

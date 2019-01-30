@@ -3,12 +3,15 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
+using SimpleIdServer.Authenticate.Basic.Actions;
 using SimpleIdServer.Authenticate.Basic.Controllers;
+using SimpleIdServer.Authenticate.Basic.Helpers;
 using SimpleIdServer.Authenticate.SMS.Actions;
 using SimpleIdServer.Authenticate.SMS.ViewModels;
 using SimpleIdServer.Bus;
 using SimpleIdServer.Core;
 using SimpleIdServer.Core.Api.Profile;
+using SimpleIdServer.Core.Api.User;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Errors;
 using SimpleIdServer.Core.Exceptions;
@@ -17,9 +20,6 @@ using SimpleIdServer.Core.Helpers;
 using SimpleIdServer.Core.Protector;
 using SimpleIdServer.Core.Services;
 using SimpleIdServer.Core.Translation;
-using SimpleIdServer.Core.WebSite.Authenticate;
-using SimpleIdServer.Core.WebSite.Authenticate.Common;
-using SimpleIdServer.Core.WebSite.User;
 using SimpleIdServer.Dtos.Requests;
 using SimpleIdServer.Host.Extensions;
 using SimpleIdServer.OpenId.Logging;
@@ -40,7 +40,7 @@ namespace SimpleIdServer.Authenticate.SMS.Controllers
         private readonly IResourceOwnerAuthenticateHelper _resourceOwnerAuthenticateHelper;
 
         public AuthenticateController(
-            IAuthenticateActions authenticateActions,
+            IOpenidAuthenticateResourceOwnerAction openidAuthenticateResourceOwnerAction,
             IProfileActions profileActions,
             IDataProtectionProvider dataProtectionProvider,
             IEncoder encoder,
@@ -58,7 +58,7 @@ namespace SimpleIdServer.Authenticate.SMS.Controllers
             ISmsAuthenticationOperation smsAuthenticationOperation,
             IGenerateAndSendSmsCodeOperation generateAndSendSmsCodeOperation,
             IResourceOwnerAuthenticateHelper resourceOwnerAuthenticateHelper,
-            SmsAuthenticationOptions basicAuthenticateOptions) : base(authenticateActions, profileActions, dataProtectionProvider, encoder,
+            SmsAuthenticationOptions basicAuthenticateOptions) : base(openidAuthenticateResourceOwnerAction, profileActions, dataProtectionProvider, encoder,
                 translationManager, simpleIdentityServerEventSource, urlHelperFactory, actionContextAccessor, eventPublisher,
                 authenticationService, authenticationSchemeProvider, userActions, payloadSerializer, configurationService,
                 authenticateHelper, basicAuthenticateOptions)

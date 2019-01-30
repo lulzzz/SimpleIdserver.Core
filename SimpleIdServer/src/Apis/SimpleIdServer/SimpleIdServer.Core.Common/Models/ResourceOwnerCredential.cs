@@ -5,6 +5,10 @@ namespace SimpleIdServer.Core.Common.Models
     public class ResourceOwnerCredential
     {
         /// <summary>
+        /// Gets or sets the user id.
+        /// </summary>
+        public string UserId { get; set; }
+        /// <summary>
         /// Gets or sets the type.
         /// </summary>
         public string Type { get; set; }

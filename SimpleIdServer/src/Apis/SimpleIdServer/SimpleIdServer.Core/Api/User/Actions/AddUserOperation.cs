@@ -1,19 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using SimpleIdServer.AccountFilter;
+﻿using SimpleIdServer.AccountFilter;
 using SimpleIdServer.Core.Api.Profile.Actions;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.Core.Exceptions;
-using SimpleIdServer.Core.Helpers;
 using SimpleIdServer.Core.Parameters;
 using SimpleIdServer.Core.Services;
 using SimpleIdServer.OpenId.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
-namespace SimpleIdServer.Core.WebSite.User.Actions
+namespace SimpleIdServer.Core.Api.User.Actions
 {
     public interface IAddUserOperation
     {
@@ -29,6 +28,7 @@ namespace SimpleIdServer.Core.WebSite.User.Actions
         private readonly IOpenIdEventSource _openidEventSource;
         private readonly IEnumerable<IUserClaimsEnricher> _userClaimsEnricherLst;
         private readonly ISubjectBuilder _subjectBuilder;
+        private readonly IAddUserCredentialsOperation _addUserCredentialsOperation;
 
         public AddUserOperation(IResourceOwnerRepository resourceOwnerRepository, 
             IClaimRepository claimRepository,
@@ -36,7 +36,8 @@ namespace SimpleIdServer.Core.WebSite.User.Actions
             IAccountFilter accountFilter, 
             IOpenIdEventSource openIdEventSource,
             IEnumerable<IUserClaimsEnricher> userClaimsEnricherLst,
-            ISubjectBuilder subjectBuilder)
+            ISubjectBuilder subjectBuilder,
+            IAddUserCredentialsOperation addUserCredentialsOperation)
         {
             _resourceOwnerRepository = resourceOwnerRepository;
             _claimRepository = claimRepository;
@@ -45,6 +46,7 @@ namespace SimpleIdServer.Core.WebSite.User.Actions
             _openidEventSource = openIdEventSource;
             _userClaimsEnricherLst = userClaimsEnricherLst;
             _subjectBuilder = subjectBuilder;
+            _addUserCredentialsOperation = addUserCredentialsOperation;
         }
 
         public async Task<string> Execute(AddUserParameter addUserParameter, string issuer = null)
@@ -52,11 +54,6 @@ namespace SimpleIdServer.Core.WebSite.User.Actions
             if (addUserParameter == null)
             {
                 throw new ArgumentNullException(nameof(addUserParameter));
-            }
-
-            if (string.IsNullOrWhiteSpace(addUserParameter.Password))
-            {
-                throw new ArgumentNullException(nameof(addUserParameter.Password));
             }
             
             var subject = await _subjectBuilder.BuildSubject().ConfigureAwait(false);
@@ -125,13 +122,25 @@ namespace SimpleIdServer.Core.WebSite.User.Actions
                 TwoFactorAuthentication = string.Empty,
                 CreateDateTime = DateTime.UtcNow,
                 UpdateDateTime = DateTime.UtcNow,
+                IsBlocked = false
             };                        
-            if (!await _resourceOwnerRepository.InsertAsync(newResourceOwner))
+            if (!await _resourceOwnerRepository.InsertAsync(newResourceOwner).ConfigureAwait(false))
             {
                 throw new IdentityServerException(Errors.ErrorCodes.UnhandledExceptionCode, Errors.ErrorDescriptions.TheResourceOwnerCannotBeAdded);
             }
 
-            // 5. Link to a profile.
+            // 5. Add credentials.
+            if (addUserParameter.Credentials != null)
+            {
+                foreach(var c in addUserParameter.Credentials)
+                {
+                    c.UserId = subject;
+                }
+
+                await _addUserCredentialsOperation.Execute(addUserParameter.Credentials).ConfigureAwait(false);
+            }
+
+            // 6. Link to a profile.
             if (!string.IsNullOrWhiteSpace(issuer))
             {
                 await _linkProfileAction.Execute(subject, addUserParameter.ExternalLogin, issuer).ConfigureAwait(false);

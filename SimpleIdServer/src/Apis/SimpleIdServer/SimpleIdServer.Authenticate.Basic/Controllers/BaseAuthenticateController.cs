@@ -4,10 +4,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
+using SimpleIdServer.Authenticate.Basic.Actions;
+using SimpleIdServer.Authenticate.Basic.Helpers;
 using SimpleIdServer.Authenticate.Basic.ViewModels;
 using SimpleIdServer.Bus;
 using SimpleIdServer.Core;
 using SimpleIdServer.Core.Api.Profile;
+using SimpleIdServer.Core.Api.User;
 using SimpleIdServer.Core.Errors;
 using SimpleIdServer.Core.Exceptions;
 using SimpleIdServer.Core.Extensions;
@@ -16,9 +19,6 @@ using SimpleIdServer.Core.Parameters;
 using SimpleIdServer.Core.Protector;
 using SimpleIdServer.Core.Services;
 using SimpleIdServer.Core.Translation;
-using SimpleIdServer.Core.WebSite.Authenticate;
-using SimpleIdServer.Core.WebSite.Authenticate.Common;
-using SimpleIdServer.Core.WebSite.User;
 using SimpleIdServer.Dtos.Requests;
 using SimpleIdServer.Host.Controllers.Website;
 using SimpleIdServer.Host.Extensions;
@@ -37,7 +37,7 @@ namespace SimpleIdServer.Authenticate.Basic.Controllers
         protected const string ExternalAuthenticateCookieName = "SimpleIdentityServer-{0}";        
         protected const string DefaultLanguage = "en";
         protected readonly IAuthenticateHelper _authenticateHelper;
-        protected readonly IAuthenticateActions _authenticateActions;
+        protected readonly IOpenidAuthenticateResourceOwnerAction _openidAuthenticateResourceOwnerAction;
         protected readonly IProfileActions _profileActions;
         protected readonly IDataProtector _dataProtector;
         protected readonly IEncoder _encoder;
@@ -52,7 +52,7 @@ namespace SimpleIdServer.Authenticate.Basic.Controllers
         protected readonly BasicAuthenticateOptions _basicAuthenticateOptions;
 
         public BaseAuthenticateController(
-            IAuthenticateActions authenticateActions,
+            IOpenidAuthenticateResourceOwnerAction openidAuthenticateResourceOwnerAction,
             IProfileActions profileActions,
             IDataProtectionProvider dataProtectionProvider,
             IEncoder encoder,
@@ -69,7 +69,7 @@ namespace SimpleIdServer.Authenticate.Basic.Controllers
             IAuthenticateHelper authenticateHelper,
             BasicAuthenticateOptions basicAuthenticateOptions) : base(authenticationService)
         {
-            _authenticateActions = authenticateActions;
+            _openidAuthenticateResourceOwnerAction = openidAuthenticateResourceOwnerAction;
             _profileActions = profileActions;
             _dataProtector = dataProtectionProvider.CreateProtector("Request");
             _encoder = encoder;
@@ -98,7 +98,7 @@ namespace SimpleIdServer.Authenticate.Basic.Controllers
             var authenticatedUser = await SetUser().ConfigureAwait(false);
             var request = _dataProtector.Unprotect<AuthorizationRequest>(code);
             var issuerName = Request.GetAbsoluteUriWithVirtualPath();
-            var actionResult = await _authenticateActions.AuthenticateResourceOwnerOpenId(request.ToParameter(), authenticatedUser, code, issuerName).ConfigureAwait(false);
+            var actionResult = await _openidAuthenticateResourceOwnerAction.Execute(request.ToParameter(), authenticatedUser, code, issuerName).ConfigureAwait(false);
             var result = this.CreateRedirectionFromActionResult(actionResult, request);
             if (result != null)
             {
@@ -384,7 +384,7 @@ namespace SimpleIdServer.Authenticate.Basic.Controllers
                 }
             }
             
-            var record = new AddUserParameter(Guid.NewGuid().ToString(), openidClaims)
+            var record = new AddUserParameter(openidClaims)
             {
                 ExternalLogin = authenticatedUser.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value
             };
