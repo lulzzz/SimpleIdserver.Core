@@ -61,7 +61,6 @@ namespace SimpleIdServer.Core.Extensions
                 CreateDateTime = user.CreateDateTime,
                 Id = user.Id,
                 IsBlocked = user.IsBlocked,
-                TwoFactorAuthentication = user.TwoFactorAuthentication,
                 UpdateDateTime = user.UpdateDateTime,
                 Credentials = user.Credentials == null ? new List<ResourceOwnerCredential>() : user.Credentials.Select(c =>
                 

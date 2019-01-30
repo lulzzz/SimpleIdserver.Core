@@ -168,7 +168,6 @@ namespace SimpleIdServer.Core.Repositories
             }
             
             user.IsBlocked = resourceOwner.IsBlocked;
-            user.TwoFactorAuthentication = resourceOwner.TwoFactorAuthentication;
             user.UpdateDateTime = DateTime.UtcNow;
             user.Claims = resourceOwner.Claims;
             return Task.FromResult(true);

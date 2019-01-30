@@ -161,7 +161,6 @@ namespace SimpleIdServer.EF.Extensions
             {
                 Id = resourceOwner.Id,
                 IsBlocked = resourceOwner.IsBlocked,
-                TwoFactorAuthentication = resourceOwner.TwoFactorAuthentication,
                 Claims = claims,
                 CreateDateTime = resourceOwner.CreateDateTime,
                 UpdateDateTime = resourceOwner.UpdateDateTime,

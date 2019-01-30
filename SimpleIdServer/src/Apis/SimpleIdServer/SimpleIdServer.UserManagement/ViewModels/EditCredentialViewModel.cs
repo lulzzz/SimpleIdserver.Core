@@ -17,7 +17,5 @@ namespace SimpleIdServer.UserManagement.ViewModels
         }
 
         public IEnumerable<EditCredentialLinkViewModel> Links { get; set; }
-        public bool CanUpdateTwoFactorAuthentication { get; set; }
-        public string SelectedTwoFactorAuthType { get; set; }
     }
 }

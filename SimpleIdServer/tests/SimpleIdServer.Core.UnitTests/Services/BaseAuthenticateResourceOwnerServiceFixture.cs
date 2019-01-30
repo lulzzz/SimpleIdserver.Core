@@ -12,7 +12,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Services
     public class BaseAuthenticateResourceOwnerServiceFixture
     {
         private Mock<ICredentialSettingsRepository> _credentialSettingsRepositoryStub;
-        private Mock<IResourceOwnerRepository> _resourceOwnerRepositoryStub;
+        private Mock<IResourceOwnerCredentialRepository> _resourceOwnerCredentialsRepositoryStub;
         private Mock<BaseAuthenticateResourceOwnerService> _baseAuthenticateResourceOwnerServiceStub;
 
         [Fact]
@@ -40,11 +40,29 @@ namespace SimpleIdentityServer.Core.UnitTests.Services
             Assert.NotNull(ex);
         }
 
+        [Fact]
+        public async Task When_User_Account_Is_Blocked_Then_Exception_Is_Thrown()
+        {
+            // ARRANGE
+            InitializeFakeObjects();
+            _baseAuthenticateResourceOwnerServiceStub.Setup(b => b.GetResourceOwner(It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwner
+            {
+                IsBlocked = true
+            }));
+
+
+            // ACT
+            var ex = await Assert.ThrowsAsync<IdentityServerUserAccountBlockedException>(() => _baseAuthenticateResourceOwnerServiceStub.Object.AuthenticateResourceOwnerAsync("login", "cred")).ConfigureAwait(false);
+
+            // ASSERT
+            Assert.NotNull(ex);
+        }
+
         private void InitializeFakeObjects()
         {
             _credentialSettingsRepositoryStub = new Mock<ICredentialSettingsRepository>();
-            _resourceOwnerRepositoryStub = new Mock<IResourceOwnerRepository>();
-            var mock = new Mock<BaseAuthenticateResourceOwnerService>(MockBehavior.Loose, _credentialSettingsRepositoryStub.Object, _resourceOwnerRepositoryStub.Object);
+            _resourceOwnerCredentialsRepositoryStub = new Mock<IResourceOwnerCredentialRepository>();
+            var mock = new Mock<BaseAuthenticateResourceOwnerService>(MockBehavior.Loose, _credentialSettingsRepositoryStub.Object, _resourceOwnerCredentialsRepositoryStub.Object);
             mock.CallBase = true;
             _baseAuthenticateResourceOwnerServiceStub = mock;
         }

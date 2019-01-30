@@ -10,10 +10,6 @@ namespace SimpleIdServer.EF.Models
         /// </summary>
         public string Id { get; set; }
         /// <summary>
-        /// Gets or sets the two factor authentication
-        /// </summary>
-        public string TwoFactorAuthentication { get; set; }
-        /// <summary>
         /// Gets or sets the list of claims.
         /// </summary>
         public virtual ICollection<ResourceOwnerClaim> Claims { get; set; }

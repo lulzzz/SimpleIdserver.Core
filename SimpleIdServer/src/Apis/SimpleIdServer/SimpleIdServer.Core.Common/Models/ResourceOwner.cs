@@ -15,10 +15,6 @@ namespace SimpleIdServer.Core.Common.Models
         /// </summary>
         public IList<Claim> Claims { get; set; }
         /// <summary>
-        /// Gets or sets the two factor authentications
-        /// </summary>
-        public string TwoFactorAuthentication { get; set; }
-        /// <summary>
         /// Gets or sets the create datetime.
         /// </summary>
         public DateTime CreateDateTime { get; set; }

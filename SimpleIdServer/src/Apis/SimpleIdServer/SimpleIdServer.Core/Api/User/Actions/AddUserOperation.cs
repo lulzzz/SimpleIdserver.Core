@@ -119,7 +119,6 @@ namespace SimpleIdServer.Core.Api.User.Actions
             {
                 Id = subject,
                 Claims = newClaims,
-                TwoFactorAuthentication = string.Empty,
                 CreateDateTime = DateTime.UtcNow,
                 UpdateDateTime = DateTime.UtcNow,
                 IsBlocked = false

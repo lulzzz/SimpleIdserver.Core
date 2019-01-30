@@ -17,7 +17,6 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Services
     {
         private Mock<IResourceOwnerRepository> _resourceOwnerRepositoryStub;
         private Mock<IConfirmationCodeStore> _confirmationCodeStoreStub;
-        private Mock<ICredentialSettingsRepository> _passwordSettingsRepositoryStub;
         private IAuthenticateResourceOwnerService _authenticateResourceOwnerService;
 
         [Fact]
@@ -29,45 +28,6 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Services
             // ACTS & ASSERTS
             await Assert.ThrowsAsync<ArgumentNullException>(() => _authenticateResourceOwnerService.AuthenticateResourceOwnerAsync(null, null));
             await Assert.ThrowsAsync<ArgumentNullException>(() => _authenticateResourceOwnerService.AuthenticateResourceOwnerAsync("login", null));
-        }
-
-        [Fact]
-        public async Task When_ResourceOwner_DoesntExist_Then_Exception_Is_Returned()
-        {
-            // ARRANGE
-            InitializeFakeObjects();
-            _resourceOwnerRepositoryStub.Setup(r => r.GetResourceOwnerByClaim(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult((ResourceOwner)null));
-
-            // ACT
-            var exception = await Assert.ThrowsAsync<IdentityServerUserAccountDoesntExistException>(() => _authenticateResourceOwnerService.AuthenticateResourceOwnerAsync("login", "password"));
-
-            // ASSERT
-            Assert.NotNull(exception);
-        }
-        
-        [Fact]
-        public async Task When_ConfirmationCode_Doesnt_Exist_Then_Exception_Is_Returned()
-        {
-            // ARRANGE
-            InitializeFakeObjects();
-            _resourceOwnerRepositoryStub.Setup(r => r.GetResourceOwnerByClaim(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwner
-            {
-                Credentials = new List<ResourceOwnerCredential>
-                {
-                    new ResourceOwnerCredential
-                    {
-                        Type = "sms"
-                    }
-                }
-            }));
-            _passwordSettingsRepositoryStub.Setup(p => p.Get(It.IsAny<string>())).Returns(Task.FromResult(new CredentialSetting()));
-            _confirmationCodeStoreStub.Setup(c => c.Get(It.IsAny<string>())).Returns(() => Task.FromResult((ConfirmationCode)null));
-            
-            // ACT
-            var result = await Assert.ThrowsAsync<IdentityServerUserPasswordInvalidException>(() => _authenticateResourceOwnerService.AuthenticateResourceOwnerAsync("login", "password"));
-
-            // ASSERT
-            Assert.NotNull(result);
         }
 
         [Fact]
@@ -89,17 +49,16 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Services
                     }
                 }
             }));
-            _passwordSettingsRepositoryStub.Setup(p => p.Get(It.IsAny<string>())).Returns(Task.FromResult(new CredentialSetting()));
             _confirmationCodeStoreStub.Setup(c => c.Get(It.IsAny<string>())).Returns(() => Task.FromResult(new ConfirmationCode
             {
                 Subject = "notcorrectphone"
             }));
 
             // ACT
-            var result = await Assert.ThrowsAsync<IdentityServerUserPasswordInvalidException>(() => _authenticateResourceOwnerService.AuthenticateResourceOwnerAsync("login", "password"));
+            var result = await _authenticateResourceOwnerService.AuthenticateResourceOwnerAsync("login", "password").ConfigureAwait(false);
 
             // ASSERT
-            Assert.NotNull(result);
+            Assert.Null(result);
         }
 
         [Fact]
@@ -126,13 +85,12 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Services
                 IssueAt = DateTime.UtcNow.AddDays(-1),
                 ExpiresIn = 100
             }));
-            _passwordSettingsRepositoryStub.Setup(p => p.Get(It.IsAny<string>())).Returns(Task.FromResult(new CredentialSetting()));
 
             // ACT
-            var result = await Assert.ThrowsAsync< IdentityServerUserPasswordInvalidException>(() => _authenticateResourceOwnerService.AuthenticateResourceOwnerAsync("phone", "password"));
+            var result = await _authenticateResourceOwnerService.AuthenticateResourceOwnerAsync("phone", "password").ConfigureAwait(false);
 
             // ASSERT
-            Assert.NotNull(result);
+            Assert.Null(result);
         }
 
         [Fact]
@@ -160,7 +118,6 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Services
                 IssueAt = DateTime.UtcNow,
                 ExpiresIn = 100
             }));
-            _passwordSettingsRepositoryStub.Setup(p => p.Get(It.IsAny<string>())).Returns(Task.FromResult(new CredentialSetting()));
 
 
             // ACT
@@ -175,9 +132,7 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Services
         {
             _resourceOwnerRepositoryStub = new Mock<IResourceOwnerRepository>();
             _confirmationCodeStoreStub = new Mock<IConfirmationCodeStore>();
-            _passwordSettingsRepositoryStub = new Mock<ICredentialSettingsRepository>();
-            _authenticateResourceOwnerService = new SmsAuthenticateResourceOwnerService(_resourceOwnerRepositoryStub.Object,
-                _confirmationCodeStoreStub.Object, _passwordSettingsRepositoryStub.Object);
+            _authenticateResourceOwnerService = new SmsAuthenticateResourceOwnerService(_confirmationCodeStoreStub.Object, _resourceOwnerRepositoryStub.Object);
         }
     }
 }

@@ -11,11 +11,11 @@ using SimpleIdServer.Core.Errors;
 using SimpleIdServer.Core.Exceptions;
 using SimpleIdServer.Core.Parameters;
 using SimpleIdServer.Core.Services;
-using SimpleIdServer.Core.WebSite.User.Actions;
 using SimpleIdServer.OpenId.Logging;
 using Xunit;
+using SimpleIdServer.Core.Api.User.Actions;
 
-namespace SimpleIdentityServer.Core.UnitTests.WebSite.User
+namespace SimpleIdentityServer.Core.UnitTests.Api.User
 {
     public class AddUserOperationFixture
     {
@@ -26,6 +26,7 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.User
         private Mock<ISubjectBuilder> _subjectBuilderStub;
         private Mock<IAccountFilter> _accountFilterStub;
         private Mock<IUserClaimsEnricher> _userClaimsEnricherStub;
+        private Mock<IAddUserCredentialsOperation> _addUserCredentialsOperationStub;
         private IAddUserOperation _addResourceOwnerAction;
         
         [Fact]
@@ -44,7 +45,7 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.User
         {
             // ARRANGE
             InitializeFakeObjects();
-            var parameter = new AddUserParameter("password");
+            var parameter = new AddUserParameter(null);
 
             _resourceOwnerRepositoryStub.Setup(r => r.GetAsync(It.IsAny<string>()))
                 .Returns(Task.FromResult(new ResourceOwner()));
@@ -68,7 +69,7 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.User
                 IsValid = true
             }));
             _resourceOwnerRepositoryStub.Setup(r => r.InsertAsync(It.IsAny<ResourceOwner>())).Returns(Task.FromResult(false));
-            var parameter = new AddUserParameter("password");
+            var parameter = new AddUserParameter(null);
 
             // ACT
             var exception = await Assert.ThrowsAsync<IdentityServerException>(() => _addResourceOwnerAction.Execute(parameter, null));
@@ -84,7 +85,7 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.User
         {
             // ARRANGE
             InitializeFakeObjects();
-            var parameter = new AddUserParameter("password", new List<Claim>());
+            var parameter = new AddUserParameter(new List<Claim>());
             _accountFilterStub.Setup(s => s.Check(It.IsAny<IEnumerable<Claim>>())).Returns(Task.FromResult(new AccountFilterResult
             {
                 IsValid = true
@@ -111,6 +112,7 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.User
             _subjectBuilderStub = new Mock<ISubjectBuilder>();
             _accountFilterStub = new Mock<IAccountFilter>();
             _userClaimsEnricherStub = new Mock<IUserClaimsEnricher>();
+            _addUserCredentialsOperationStub = new Mock<IAddUserCredentialsOperation>();
 
             _addResourceOwnerAction = new AddUserOperation(
                 _resourceOwnerRepositoryStub.Object,
@@ -119,7 +121,8 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.User
                 _accountFilterStub.Object,
                 _openidEventSourceStub.Object,
                 new List<IUserClaimsEnricher> { _userClaimsEnricherStub.Object },
-                _subjectBuilderStub.Object);
+                _subjectBuilderStub.Object,
+                _addUserCredentialsOperationStub.Object);
         }
     }
 }

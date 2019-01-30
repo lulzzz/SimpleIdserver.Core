@@ -1,12 +1,12 @@
-﻿using System;
-using System.Threading.Tasks;
-using Moq;
+﻿using Moq;
 using SimpleIdServer.Authenticate.SMS.Actions;
+using SimpleIdServer.Core.Api.User;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.Core.Parameters;
 using SimpleIdServer.Core.Services;
-using SimpleIdServer.Core.WebSite.User;
+using System;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace SimpleIdServer.Authenticate.SMS.Tests.Actions
@@ -14,9 +14,7 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Actions
     public class SmsAuthenticationOperationFixture
     {
         private Mock<IGenerateAndSendSmsCodeOperation> _generateAndSendSmsCodeOperationStub;
-        private Mock<IResourceOwnerRepository> _resourceOwnerRepositoryStub;
         private Mock<IUserActions> _userActionsStub;
-        private Mock<ISubjectBuilder> _subjectBuilderStub;
         private SmsAuthenticationOptions _smsAuthenticationOptions;
         private ISmsAuthenticationOperation _smsAuthenticationOperation;
 
@@ -42,7 +40,7 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Actions
             };
             InitializeFakeObjects();
             _smsAuthenticationOptions.IsSelfProvisioningEnabled = false;
-            _resourceOwnerRepositoryStub.Setup(p => p.GetResourceOwnerByClaim("phone_number", phone)).Returns(() => Task.FromResult((ResourceOwner)null));
+            _userActionsStub.Setup(p => p.GetUserByClaim("phone_number", phone)).Returns(() => Task.FromResult((ResourceOwner)null));
 
             // ACT 
             var result = await Assert.ThrowsAsync<InvalidOperationException>(() => _smsAuthenticationOperation.Execute(phone));
@@ -61,7 +59,7 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Actions
                 Id = "id"
             };
             InitializeFakeObjects();
-            _resourceOwnerRepositoryStub.Setup(p => p.GetResourceOwnerByClaim("phone_number", phone)).Returns(() => Task.FromResult(resourceOwner));
+            _userActionsStub.Setup(p => p.GetUserByClaim("phone_number", phone)).Returns(() => Task.FromResult(resourceOwner));
 
             // ACT
             var result = await _smsAuthenticationOperation.Execute(phone);
@@ -79,7 +77,7 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Actions
             const string phone = "phone";
             InitializeFakeObjects();
             _smsAuthenticationOptions.IsSelfProvisioningEnabled = true;
-            _resourceOwnerRepositoryStub.Setup(p => p.GetResourceOwnerByClaim("phone", phone)).Returns(() => Task.FromResult((ResourceOwner)null));
+            _userActionsStub.Setup(p => p.GetUserByClaim("phone", phone)).Returns(() => Task.FromResult((ResourceOwner)null));
             
             // ACT
             await _smsAuthenticationOperation.Execute(phone);
@@ -92,13 +90,9 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Actions
         private void InitializeFakeObjects()
         {
             _generateAndSendSmsCodeOperationStub = new Mock<IGenerateAndSendSmsCodeOperation>();
-            _resourceOwnerRepositoryStub = new Mock<IResourceOwnerRepository>();
-            _subjectBuilderStub = new Mock<ISubjectBuilder>();
             _userActionsStub = new Mock<IUserActions>();
             _smsAuthenticationOptions = new SmsAuthenticationOptions();
-            _smsAuthenticationOperation = new SmsAuthenticationOperation(
-                _generateAndSendSmsCodeOperationStub.Object,
-                _resourceOwnerRepositoryStub.Object, _userActionsStub.Object, _subjectBuilderStub.Object, _smsAuthenticationOptions);
+            _smsAuthenticationOperation = new SmsAuthenticationOperation(_generateAndSendSmsCodeOperationStub.Object, _userActionsStub.Object, _smsAuthenticationOptions);
         }
     }
 }

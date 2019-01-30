@@ -1,17 +1,17 @@
 ﻿using Moq;
+using SimpleIdServer.Core.Api.User.Actions;
+using SimpleIdServer.Core.Common.Models;
+using SimpleIdServer.Core.Common.Repositories;
+using SimpleIdServer.Core.Errors;
+using SimpleIdServer.Core.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using SimpleIdServer.Core.Common.Models;
-using SimpleIdServer.Core.Common.Repositories;
-using SimpleIdServer.Core.Errors;
-using SimpleIdServer.Core.Exceptions;
-using SimpleIdServer.Core.WebSite.User.Actions;
 using Xunit;
 
-namespace SimpleIdentityServer.Core.UnitTests.WebSite.User
+namespace SimpleIdentityServer.Core.UnitTests.Api.User
 {
     public class UpdateUserClaimsOperationFixture
     {

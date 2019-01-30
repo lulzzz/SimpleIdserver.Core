@@ -143,7 +143,6 @@ namespace SimpleIdServer.EF.Repositories
                 {
                     Id = resourceOwner.Id,
                     IsBlocked = resourceOwner.IsBlocked,
-                    TwoFactorAuthentication = resourceOwner.TwoFactorAuthentication,
                     Claims = new List<ResourceOwnerClaim>(),
                     CreateDateTime = DateTime.UtcNow,
                     UpdateDateTime = DateTime.UtcNow
@@ -190,7 +189,6 @@ namespace SimpleIdServer.EF.Repositories
                     }
 
                     record.IsBlocked = resourceOwner.IsBlocked;
-                    record.TwoFactorAuthentication = resourceOwner.TwoFactorAuthentication;
                     record.UpdateDateTime = DateTime.UtcNow;
                     record.Claims = new List<ResourceOwnerClaim>();
                     _context.ResourceOwnerClaims.RemoveRange(record.Claims);

@@ -23,6 +23,16 @@ namespace SimpleIdServer.Authenticate.SMS.Services
 
         public async Task<ResourceOwner> AuthenticateResourceOwnerAsync(string login, string password)
         {
+            if (string.IsNullOrWhiteSpace(login))
+            {
+                throw new ArgumentNullException(nameof(login));
+            }
+
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                throw new ArgumentNullException(nameof(password));
+            }
+
             var resourceOwner = await _resourceOwnerRepository.GetResourceOwnerByClaim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber, login).ConfigureAwait(false);
             if (resourceOwner == null)
             {

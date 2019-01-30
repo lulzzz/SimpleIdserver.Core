@@ -1,30 +1,12 @@
-﻿#region copyright
-// Copyright 2015 Habart Thierry
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-#endregion
-
-using Moq;
+﻿using Moq;
+using SimpleIdServer.Core.Api.User.Actions;
+using SimpleIdServer.Core.Common.Repositories;
 using System;
 using System.Collections.Generic;
-using System.Security.Claims;
 using System.Threading.Tasks;
-using SimpleIdServer.Core.Common.Repositories;
-using SimpleIdServer.Core.Jwt;
-using SimpleIdServer.Core.WebSite.User.Actions;
 using Xunit;
 
-namespace SimpleIdentityServer.Core.UnitTests.WebSite.User
+namespace SimpleIdentityServer.Core.UnitTests.Api.User
 {
     public class GetConsentsOperationFixture
     {
@@ -47,10 +29,6 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.User
             // ARRANGE
             const string subject = "subject";
             InitializeFakeObjects();
-            var claims = new List<Claim>
-            {
-                new Claim(Constants.StandardResourceOwnerClaimNames.Subject, subject)
-            };
             IEnumerable<SimpleIdServer.Core.Common.Models.Consent> consents = new List<SimpleIdServer.Core.Common.Models.Consent>
             {
                 new SimpleIdServer.Core.Common.Models.Consent
@@ -58,13 +36,11 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.User
                     Id = "consent_id"
                 }
             };
-            var claimsIdentity = new ClaimsIdentity(claims);
-            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
             _consentRepositoryStub.Setup(c => c.GetConsentsForGivenUserAsync(subject))
                 .Returns(Task.FromResult(consents));
 
             // ACT
-            var result = await _getConsentsOperation.Execute(claimsPrincipal);
+            var result = await _getConsentsOperation.Execute(subject);
 
             // ASSERTS
             Assert.NotNull(result);

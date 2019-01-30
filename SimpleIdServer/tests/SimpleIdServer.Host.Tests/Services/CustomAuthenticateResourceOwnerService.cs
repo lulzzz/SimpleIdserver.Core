@@ -11,8 +11,12 @@ namespace SimpleIdServer.Host.Tests.Services
 {
     public class CustomAuthenticateResourceOwnerService : BaseAuthenticateResourceOwnerService
     {
-        public CustomAuthenticateResourceOwnerService(IResourceOwnerRepository resourceOwnerRepository, ICredentialSettingsRepository passwordSettingsRepository) : base(passwordSettingsRepository, resourceOwnerRepository)
+        private readonly IResourceOwnerRepository _resourceOwnerRepository;
+
+        public CustomAuthenticateResourceOwnerService(IResourceOwnerRepository resourceOwnerRepository, ICredentialSettingsRepository passwordSettingsRepository,
+            IResourceOwnerCredentialRepository resourceOwnerCredentialRepository) : base(passwordSettingsRepository, resourceOwnerCredentialRepository)
         {
+            _resourceOwnerRepository = resourceOwnerRepository;
         }
 
         public override string Amr

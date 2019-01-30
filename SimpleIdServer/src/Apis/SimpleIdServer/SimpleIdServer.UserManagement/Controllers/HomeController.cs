@@ -314,12 +314,6 @@ namespace SimpleIdServer.UserManagement.Controllers
             }
 
             var resourceOwner = await _userActions.GetUser(authenticatedUser.GetSubject()).ConfigureAwait(false);
-            if (_userManagementOptions.CanUpdateTwoFactorAuthentication)
-            {
-                viewModel.SelectedTwoFactorAuthType = resourceOwner.TwoFactorAuthentication;
-            }
-
-            viewModel.CanUpdateTwoFactorAuthentication = _userManagementOptions.CanUpdateTwoFactorAuthentication;
             return View("Edit", viewModel);
         }
 
