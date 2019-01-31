@@ -65,6 +65,15 @@ namespace SimpleIdServer.Host
                 ExpiresIn = TimeSpan.FromDays(2).TotalSeconds,
                 CredentialType = "pwd",
                 Options = "{ IsRegexEnabled : 'false' }"
+            },
+            new CredentialSetting
+            {
+                IsBlockAccountPolicyEnabled = true,
+                NumberOfAuthenticationAttempts = 3,
+                AuthenticationIntervalsInSeconds = 10,
+                ExpiresIn = TimeSpan.FromDays(2).TotalSeconds,
+                CredentialType = "eid",
+                Options = ""
             }
         };
 

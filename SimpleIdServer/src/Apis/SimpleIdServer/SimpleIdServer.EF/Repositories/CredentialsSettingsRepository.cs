@@ -39,6 +39,12 @@ namespace SimpleIdServer.EF.Repositories
             return result.ToDomain();
         }
 
+        public async Task<IEnumerable<CredentialSetting>> Get(IEnumerable<string> types)
+        {
+            var result = await _context.CredentialSettings.Where(p => types.Contains(p.CredentialType)).ToListAsync().ConfigureAwait(false);
+            return result.Select(r => r.ToDomain());
+        }
+
         public async Task<bool> Update(CredentialSetting passwordSettings)
         {
             var record = await _context.CredentialSettings.FirstOrDefaultAsync().ConfigureAwait(false);
