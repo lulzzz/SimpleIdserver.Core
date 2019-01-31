@@ -48,6 +48,26 @@ namespace SimpleIdServer.Core.Repositories
             return Task.FromResult(true);
         }
 
+        public Task<bool> Delete(string subject, string type)
+        {
+            var user = _users.FirstOrDefault(u => u.Id == subject);
+            if (user == null)
+            {
+                return Task.FromResult(false);
+            }
+
+            var creds = user.Credentials.ToList();
+            var credential = creds.FirstOrDefault(c => c.Type == type);
+            if (credential == null)
+            {
+                return Task.FromResult(false);
+            }
+
+            creds.Remove(credential);
+            user.Credentials = creds;
+            return Task.FromResult(true);
+        }
+
         public Task<ResourceOwnerCredential> Get(string type, string value)
         {
             foreach(var user in _users)
@@ -69,21 +89,14 @@ namespace SimpleIdServer.Core.Repositories
 
         public Task<ResourceOwnerCredential> GetUserCredential(string subject, string type)
         {
-            foreach (var user in _users)
+            var user = _users.FirstOrDefault(u => u.Id == subject);
+            if (user == null)
             {
-                if (user.Credentials == null)
-                {
-                    continue;
-                }
-
-                var credential = user.Credentials.FirstOrDefault(c => c.Type == type && c.UserId == subject);
-                if (credential != null)
-                {
-                    return Task.FromResult(credential);
-                }
+                return Task.FromResult((ResourceOwnerCredential)null);
             }
-
-            return Task.FromResult((ResourceOwnerCredential)null);
+            
+            var credential = user.Credentials.FirstOrDefault(c => c.Type == type);
+            return Task.FromResult(credential);
         }
 
         public async Task<bool> Update(ResourceOwnerCredential resourceOwnerCredential)

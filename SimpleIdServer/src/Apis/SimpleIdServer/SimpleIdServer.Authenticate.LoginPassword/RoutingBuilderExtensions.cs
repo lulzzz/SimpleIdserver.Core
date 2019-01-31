@@ -34,6 +34,10 @@ namespace SimpleIdServer.Authenticate.LoginPassword
                 Constants.AMR + "/Configuration",
                 new { controller = "Configuration", action = "Index", area = Constants.AMR },
                 constraints: new { area = Constants.AMR });
+            routeBuilder.MapRoute("PwdEditCredentialApi",
+                Constants.AMR + "/Credentials/{action}/{id?}",
+                new { controller = "Credentials", action = "Index", area = Constants.AMR },
+                constraints: new { area = Constants.AMR });
             return routeBuilder;
         }
     }

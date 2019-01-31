@@ -64,7 +64,7 @@ namespace SimpleIdServer.Host
                 AuthenticationIntervalsInSeconds = 10,
                 ExpiresIn = TimeSpan.FromDays(2).TotalSeconds,
                 CredentialType = "pwd",
-                Options = "{ IsRegexEnabled : 'false' }"
+                Options = "{ \"is_regex_enabled\" : \"false\", \"regex\": \"\", \"pwd_description\": \"\" }"
             },
             new CredentialSetting
             {

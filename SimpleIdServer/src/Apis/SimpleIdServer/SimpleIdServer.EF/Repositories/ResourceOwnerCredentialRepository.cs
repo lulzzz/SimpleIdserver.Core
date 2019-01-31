@@ -36,6 +36,19 @@ namespace SimpleIdServer.EF.Repositories
             return true;
         }
 
+        public async Task<bool> Delete(string subject, string type)
+        {
+            var record = await _context.ResourceOwnerCredentials.FirstOrDefaultAsync(c => c.Type == type && c.ResourceOwnerId == subject).ConfigureAwait(false);
+            if (record == null)
+            {
+                return false;
+            }
+
+            _context.ResourceOwnerCredentials.Remove(record);
+            await _context.SaveChangesAsync().ConfigureAwait(false);
+            return true;
+        }
+
         public async Task<ResourceOwnerCredential> Get(string type, string value)
         {
             var record = await _context.ResourceOwnerCredentials.FirstOrDefaultAsync(c => c.Type == type && c.Value == value).ConfigureAwait(false);

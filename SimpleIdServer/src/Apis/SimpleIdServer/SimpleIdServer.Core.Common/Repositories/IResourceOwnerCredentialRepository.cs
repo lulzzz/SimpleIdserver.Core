@@ -11,5 +11,6 @@ namespace SimpleIdServer.Core.Common.Repositories
         Task<ResourceOwnerCredential> Get(string type, string value);
         Task<ResourceOwnerCredential> GetUserCredential(string subject, string type);
         Task<bool> Update(ResourceOwnerCredential resourceOwnerCredential);
+        Task<bool> Delete(string subject, string type);
     }
 }

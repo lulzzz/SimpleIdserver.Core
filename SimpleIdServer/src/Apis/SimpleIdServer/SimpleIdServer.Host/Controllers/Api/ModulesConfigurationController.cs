@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SimpleIdServer.Host.Extensions;
 using SimpleIdServer.Module;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace SimpleIdServer.Host.Controllers.Api
 {
@@ -21,9 +21,10 @@ namespace SimpleIdServer.Host.Controllers.Api
             var dic = new Dictionary<string, string>();
             if (_authModules != null)
             {
-                foreach(var authModule in _authModules)
+                var issuer = Request.GetAbsoluteUriWithVirtualPath();
+                foreach (var authModule in _authModules)
                 {
-                    dic.Add(authModule.Name, Url.Action(authModule.ConfigurationUrl.ActionName, authModule.ConfigurationUrl.ControllerName,
+                    dic.Add(authModule.Name, issuer + Url.Action(authModule.ConfigurationUrl.ActionName, authModule.ConfigurationUrl.ControllerName,
                         new { area = authModule.ConfigurationUrl.Area }));
                 }
             }

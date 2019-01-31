@@ -124,6 +124,26 @@ namespace SimpleIdServer.Host.Extensions
                     return claimRoles.Any(s => s.Value == "administrator") || claimScopes.Any(s => s.Value == "manage_account_filtering");
                 });
             });
+            authenticateOptions.AddPolicy("edit_credentials", policy => // Access token with scope = edit_credentials or role = administrator
+            {
+                policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
+                policy.RequireAssertion(p =>
+                {
+                    if (p.User == null || p.User.Identity == null || !p.User.Identity.IsAuthenticated)
+                    {
+                        return false;
+                    }
+
+                    var claimRoles = p.User.Claims.Where(c => c.Type == ClaimTypes.Role);
+                    var claimScopes = p.User.Claims.Where(c => c.Type == "scope");
+                    if (!claimRoles.Any() && !claimScopes.Any())
+                    {
+                        return false;
+                    }
+
+                    return claimRoles.Any(s => s.Value == "administrator") || claimScopes.Any(s => s.Value == "edit_credentials");
+                });
+            });
             return authenticateOptions;
         }
 
