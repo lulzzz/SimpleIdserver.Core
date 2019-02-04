@@ -18,6 +18,33 @@ namespace SimpleIdServer.EF.Repositories
             _context = context;
         }
 
+        public async Task<bool> Add(AuthenticationContextclassReference acr)
+        {
+            _context.AuthenticationContextclassReferences.Add(new Models.AuthenticationContextclassReference
+            {
+                AmrLst = acr.AmrLst == null ? string.Empty : string.Join(",", acr.AmrLst),
+                DisplayName =  acr.DisplayName,
+                Name = acr.Name,
+                IsDefault = acr.IsDefault,
+                Type = (int)acr.Type
+            });
+            await _context.SaveChangesAsync().ConfigureAwait(false);
+            return true;
+        }
+
+        public async Task<bool> Delete(string name)
+        {
+            var result = await _context.AuthenticationContextclassReferences.FirstOrDefaultAsync(c => c.Name == name).ConfigureAwait(false);
+            if (result == null)
+            {
+                return false;
+            }
+
+            _context.AuthenticationContextclassReferences.Remove(result);
+            await _context.SaveChangesAsync().ConfigureAwait(false);
+            return true;
+        }
+
         public async Task<IEnumerable<AuthenticationContextclassReference>> Get()
         {
             var result = await _context.AuthenticationContextclassReferences.ToListAsync().ConfigureAwait(false);
@@ -60,6 +87,20 @@ namespace SimpleIdServer.EF.Repositories
             }
 
             return result.ToDomain();
+        }
+
+        public async Task<bool> Update(AuthenticationContextclassReference acr)
+        {
+            var result = await _context.AuthenticationContextclassReferences.FirstOrDefaultAsync(a => a.Name == acr.Name).ConfigureAwait(false);
+            if (result == null)
+            {
+                return false;
+            }
+
+            result.AmrLst = acr.AmrLst == null ? string.Empty : string.Join(",", acr.AmrLst);
+            result.DisplayName = acr.DisplayName;
+            result.Type = (int)acr.Type;
+            return true;
         }
     }
 }

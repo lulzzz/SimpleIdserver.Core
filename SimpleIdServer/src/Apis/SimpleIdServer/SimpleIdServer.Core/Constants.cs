@@ -320,12 +320,12 @@ namespace SimpleIdServer.Core
             public const string EditResourceOwner = "edit_resource_owner";
             public const string YourName = "your_name";
             public const string YourPassword = "your_password";
-            public const string Email = "email";
             public const string YourEmail = "your_email";
             public const string TwoAuthenticationFactor = "two_authentication_factor";
             public const string UserIsUpdated = "user_is_updated";
             public const string SendConfirmationCode = "send_confirmation_code";
             public const string Phone = "phone";
+            public const string Email = "email";
             public const string HashedPassword = "hashed_password";
             public const string CreateResourceOwner = "create_resource_owner";
             public const string Credentials = "credentials";

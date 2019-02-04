@@ -322,6 +322,7 @@ namespace SimpleIdServer.Authenticate.Basic.Controllers
                 Constants.StandardTranslationCodes.ResetConfirmationCode,
                 Constants.StandardTranslationCodes.ValidateConfirmationCode,
                 Constants.StandardTranslationCodes.Phone,
+                Constants.StandardTranslationCodes.Email,
                 Constants.StandardTranslationCodes.ActualPassword,
                 Constants.StandardTranslationCodes.ConfirmActualPassword,
                 Constants.StandardTranslationCodes.NewPassword,

@@ -52,7 +52,18 @@ namespace SimpleIdServer.Host
                 DisplayName = "SID LOA3-1",
                 Name = "sid::loa-3-1",
                 Type = AuthenticationContextclassReferenceTypes.LOA3
-            }
+            },
+            new AuthenticationContextclassReference
+            {
+                AmrLst = new List<string>
+                {
+                    "pwd",
+                    "mail"
+                },
+                DisplayName = "SID LOA3-2",
+                Name = "sid::loa-3-2",
+                Type = AuthenticationContextclassReferenceTypes.LOA3
+            },
         };
 
         public static IEnumerable<CredentialSetting> DEFAULT_CREDENTIAL_SETTINGS = new List<CredentialSetting>
@@ -463,7 +474,8 @@ namespace SimpleIdServer.Host
                 {
                     new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject, "administrator"),
                     new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Role, "['administrator']"),
-                    new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber, "+32485350536")
+                    new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber, "+32485350536"),
+                    new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Email, "habarthierry@hotmail.fr")
                 },
                 Credentials = new List<ResourceOwnerCredential>
                 {

@@ -10,5 +10,8 @@ namespace SimpleIdServer.Core.Common.Repositories
         Task<AuthenticationContextclassReference> Get(string name);
         Task<AuthenticationContextclassReference> GetDefault();
         Task<IEnumerable<AuthenticationContextclassReference>> Get(IEnumerable<string> names);
+        Task<bool> Add(AuthenticationContextclassReference acr);
+        Task<bool> Update(AuthenticationContextclassReference acr);
+        Task<bool> Delete(string name);
     }
 }

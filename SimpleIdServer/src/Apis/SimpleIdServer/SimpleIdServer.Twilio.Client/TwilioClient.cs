@@ -34,7 +34,6 @@ namespace SimpleIdServer.Twilio.Client
                 throw new ArgumentException(nameof(message));
             }
             
-            /*
             var client = _httpClientFactory.GetHttpClient();
             var keyValues = new List<KeyValuePair<string, string>>();
             keyValues.Add(new KeyValuePair<string, string>("To", toPhoneNumber));
@@ -62,7 +61,6 @@ namespace SimpleIdServer.Twilio.Client
                 var json = await response.Content.ReadAsStringAsync();
                 throw new TwilioException(json);
             }
-            */
 
             return true;
         }
