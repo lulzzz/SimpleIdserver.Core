@@ -42,7 +42,7 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Actions
             }
 
             var credential = resourceOwner.Credentials.First(c => c.Type == Constants.AMR);
-            if (credential.Value != PasswordHelper.ComputeHash(changePasswordParameter.ActualPassword))
+            if (!string.IsNullOrWhiteSpace(credential.Value) && credential.Value != PasswordHelper.ComputeHash(changePasswordParameter.ActualPassword))
             {
                 throw new IdentityServerException(Core.Errors.ErrorCodes.InternalError, Core.Errors.ErrorDescriptions.ThePasswordIsNotCorrect);
             }

@@ -8,7 +8,7 @@ namespace SimpleIdServer.EF.Mappings
         public static ModelBuilder AddDefaultSettingsMapping(this ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<DefaultSettings>()
-                .ToTable("defaultSettings")
+                .ToTable("sidDefaultSettings")
                 .HasKey(d => d.Id);
             return modelBuilder;
         }
