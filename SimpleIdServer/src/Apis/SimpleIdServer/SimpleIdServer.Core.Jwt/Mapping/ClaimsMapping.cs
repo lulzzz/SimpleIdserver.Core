@@ -15,6 +15,7 @@
 #endregion
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using SimpleIdServer.Core.Jwt.Extensions;
 
@@ -30,15 +31,32 @@ namespace SimpleIdServer.Core.Jwt.Mapping
         public Dictionary<string, object> MapToOpenIdClaims(IEnumerable<Claim> claims)
         {
             var result = new Dictionary<string, object>();
-            foreach (var claim in claims)
+            foreach(var groupedClaim in claims.GroupBy(c => c.Type))
             {
-                if (Constants.MapWifClaimsToOpenIdClaims.ContainsKey(claim.Type))
+                object record;
+                if (groupedClaim.Count() == 1)
                 {
-                    result.Add(Constants.MapWifClaimsToOpenIdClaims[claim.Type], claim.GetClaimValue());
+                    record = groupedClaim.First().GetClaimValue();
                 }
                 else
                 {
-                    result.Add(claim.Type, claim.GetClaimValue());
+                    var lst = new List<object>();
+                    foreach (var gClaim in groupedClaim)
+                    {
+                        lst.Add(gClaim.GetClaimValue());
+                    }
+
+                    record = lst;
+                }
+
+                var claim = groupedClaim.First();
+                if (Constants.MapWifClaimsToOpenIdClaims.ContainsKey(claim.Type))
+                {
+                    result.Add(Constants.MapWifClaimsToOpenIdClaims[claim.Type], record);
+                }
+                else
+                {
+                    result.Add(claim.Type, record);
                 }
             }
             

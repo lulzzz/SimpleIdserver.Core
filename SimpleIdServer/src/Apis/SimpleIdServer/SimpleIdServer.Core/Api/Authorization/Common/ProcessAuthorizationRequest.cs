@@ -39,7 +39,7 @@ namespace SimpleIdServer.Core.Api.Authorization.Common
 {
     public interface IProcessAuthorizationRequest
     {
-        Task<ActionResult> ProcessAsync(AuthorizationParameter authorizationParameter, ClaimsPrincipal claimsPrincipal, Core.Common.Models.Client client, string issuerName);
+        Task<ActionResult> ProcessAsync(AuthorizationParameter authorizationParameter, string authenticatedUserSubject, Core.Common.Models.Client client, string issuerName);
     }
 
     public class ProcessAuthorizationRequest : IProcessAuthorizationRequest
@@ -76,7 +76,7 @@ namespace SimpleIdServer.Core.Api.Authorization.Common
             _authenticationContextclassReferenceRepository = authenticationContextclassReferenceRepository;
         }
 
-        public async Task<ActionResult> ProcessAsync(AuthorizationParameter authorizationParameter, ClaimsPrincipal claimsPrincipal, Client client, string issuerName)
+        public async Task<ActionResult> ProcessAsync(AuthorizationParameter authorizationParameter, string authenticatedUserSubject, Client client, string issuerName)
         {
             if (authorizationParameter == null)
             {
@@ -88,11 +88,11 @@ namespace SimpleIdServer.Core.Api.Authorization.Common
                 throw new ArgumentNullException(nameof(client));
             }
 
-            var endUserIsAuthenticated = IsAuthenticated(claimsPrincipal);
+            var endUserIsAuthenticated = !string.IsNullOrWhiteSpace(authenticatedUserSubject);
             Consent confirmedConsent = null;
             if (endUserIsAuthenticated)
             {
-                confirmedConsent = await GetResourceOwnerConsent(claimsPrincipal, authorizationParameter).ConfigureAwait(false);
+                confirmedConsent = await GetResourceOwnerConsent(authenticatedUserSubject, authorizationParameter).ConfigureAwait(false);
             }
 
             var serializedAuthorizationParameter = JsonConvert.SerializeObject(authorizationParameter);
@@ -368,10 +368,9 @@ namespace SimpleIdServer.Core.Api.Authorization.Common
                 authorizationParameter.State);
         }
 
-        private async Task<Consent> GetResourceOwnerConsent(ClaimsPrincipal claimsPrincipal, AuthorizationParameter authorizationParameter)
+        private async Task<Consent> GetResourceOwnerConsent(string authenticatedUserSubject, AuthorizationParameter authorizationParameter)
         {
-            var subject = claimsPrincipal.GetSubject();
-            return await _consentHelper.GetConfirmedConsentsAsync(subject, authorizationParameter);
+            return await _consentHelper.GetConfirmedConsentsAsync(authenticatedUserSubject, authorizationParameter);
         }
 
         private static bool IsAuthenticated(ClaimsPrincipal principal)
