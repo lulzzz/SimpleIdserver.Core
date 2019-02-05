@@ -1,20 +1,4 @@
-﻿#region copyright
-// Copyright 2015 Habart Thierry
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-#endregion
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -31,12 +15,13 @@ using SimpleIdServer.Core.Results;
 using SimpleIdServer.OAuth.Logging;
 using SimpleIdServer.Store;
 using Newtonsoft.Json;
+using SimpleIdServer.Core.Common.Repositories;
 
 namespace SimpleIdServer.Core.Common
 {
     public interface IGenerateAuthorizationResponse
     {
-        Task ExecuteAsync(ActionResult actionResult, AuthorizationParameter authorizationParameter, ClaimsPrincipal claimsPrincipal, Core.Common.Models.Client client, string issuerName);
+        Task ExecuteAsync(ActionResult actionResult, AuthorizationParameter authorizationParameter, Client client, string issuerName, string authenticatedSubject);
     }
 
     public class GenerateAuthorizationResponse : IGenerateAuthorizationResponse
@@ -51,6 +36,7 @@ namespace SimpleIdServer.Core.Common
         private readonly IOAuthEventSource _oauthEventSource;
         private readonly IClientHelper _clientHelper;
         private readonly IGrantedTokenHelper _grantedTokenHelper;
+        private readonly IResourceOwnerRepository _resourceOwnerRepository;
 
         public GenerateAuthorizationResponse(
             IAuthorizationCodeStore authorizationCodeStore,
@@ -62,7 +48,8 @@ namespace SimpleIdServer.Core.Common
             IOAuthEventSource oauthEventSource,
             IAuthorizationFlowHelper authorizationFlowHelper,
             IClientHelper clientHelper,
-            IGrantedTokenHelper grantedTokenHelper)
+            IGrantedTokenHelper grantedTokenHelper,
+            IResourceOwnerRepository resourceOwnerRepository)
         {
             _authorizationCodeStore = authorizationCodeStore;
             _tokenStore = tokenStore;
@@ -74,9 +61,10 @@ namespace SimpleIdServer.Core.Common
             _authorizationFlowHelper = authorizationFlowHelper;
             _clientHelper = clientHelper;
             _grantedTokenHelper = grantedTokenHelper;
+            _resourceOwnerRepository = resourceOwnerRepository;
         }
 
-        public async Task ExecuteAsync(ActionResult actionResult, AuthorizationParameter authorizationParameter, ClaimsPrincipal claimsPrincipal, Core.Common.Models.Client client, string issuerName)
+        public async Task ExecuteAsync(ActionResult actionResult, AuthorizationParameter authorizationParameter, Client client, string issuerName, string authenticatedSubject)
         {
             if (actionResult == null || actionResult.RedirectInstruction == null)
             {
@@ -88,14 +76,14 @@ namespace SimpleIdServer.Core.Common
                 throw new ArgumentNullException(nameof(authorizationParameter));
             }
 
-            if (claimsPrincipal == null)
-            {
-                throw new ArgumentNullException(nameof(claimsPrincipal));
-            }
-
             if (client == null)
             {
                 throw new ArgumentNullException(nameof(client));
+            }
+
+            if (string.IsNullOrWhiteSpace(authenticatedSubject))
+            {
+                throw new ArgumentNullException(nameof(authenticatedSubject));
             }
 
             var newAccessTokenGranted = false;
@@ -106,8 +94,10 @@ namespace SimpleIdServer.Core.Common
             _oauthEventSource.StartGeneratingAuthorizationResponseToClient(authorizationParameter.ClientId,
                 authorizationParameter.ResponseType);
             var responses = _parameterParserHelper.ParseResponseTypes(authorizationParameter.ResponseType);
-            var idTokenPayload = await GenerateIdTokenPayload(claimsPrincipal, authorizationParameter, issuerName);
-            var userInformationPayload = await GenerateUserInformationPayload(claimsPrincipal, authorizationParameter);
+            var user = await _resourceOwnerRepository.GetAsync(authenticatedSubject).ConfigureAwait(false);
+            var claims = user.Claims;
+            var idTokenPayload = await GenerateIdTokenPayload(claims, authorizationParameter, issuerName).ConfigureAwait(false);
+            var userInformationPayload = await GenerateUserInformationPayload(claims, authorizationParameter).ConfigureAwait(false);
             if (responses.Contains(ResponseType.token)) // 1. Generate an access token.
             {
                 if (!string.IsNullOrWhiteSpace(authorizationParameter.Scope))
@@ -131,8 +121,7 @@ namespace SimpleIdServer.Core.Common
 
             if (responses.Contains(ResponseType.code)) // 2. Generate an authorization code.
             {
-                var subject = claimsPrincipal == null ? string.Empty : claimsPrincipal.GetSubject();
-                var assignedConsent = await _consentHelper.GetConfirmedConsentsAsync(subject, authorizationParameter);
+                var assignedConsent = await _consentHelper.GetConfirmedConsentsAsync(authenticatedSubject, authorizationParameter).ConfigureAwait(false);
                 if (assignedConsent != null)
                 {
                     // Insert a temporary authorization code 
@@ -278,28 +267,23 @@ namespace SimpleIdServer.Core.Common
         /// <param name="jwsPayload"></param>
         /// <param name="authorizationParameter"></param>
         /// <returns></returns>
-        private async Task<string> GenerateIdToken(
-            JwsPayload jwsPayload,
-            AuthorizationParameter authorizationParameter)
+        private async Task<string> GenerateIdToken(JwsPayload jwsPayload, AuthorizationParameter authorizationParameter)
         {
             return await _clientHelper.GenerateIdTokenAsync(authorizationParameter.ClientId,
                 jwsPayload);
         }
 
-        private async Task<JwsPayload> GenerateIdTokenPayload(
-            ClaimsPrincipal claimsPrincipal,
-            AuthorizationParameter authorizationParameter,
-            string issuerName)
+        private async Task<JwsPayload> GenerateIdTokenPayload(IList<Claim> claims, AuthorizationParameter authorizationParameter, string issuerName)
         {
             JwsPayload jwsPayload;
             if (authorizationParameter.Claims != null && 
                 authorizationParameter.Claims.IsAnyIdentityTokenClaimParameter())
             {
-                jwsPayload = await _jwtGenerator.GenerateFilteredIdTokenPayloadAsync(claimsPrincipal, authorizationParameter, Clone(authorizationParameter.Claims.IdToken), issuerName);
+                jwsPayload = await _jwtGenerator.GenerateFilteredIdTokenPayloadAsync(claims, authorizationParameter, Clone(authorizationParameter.Claims.IdToken), issuerName);
             }
             else
             {
-                jwsPayload = await _jwtGenerator.GenerateIdTokenPayloadForScopesAsync(claimsPrincipal, authorizationParameter, issuerName);
+                jwsPayload = await _jwtGenerator.GenerateIdTokenPayloadForScopesAsync(claims, authorizationParameter, issuerName);
             }
 
             return jwsPayload;
@@ -313,18 +297,16 @@ namespace SimpleIdServer.Core.Common
         /// <param name="claimsPrincipal"></param>
         /// <param name="authorizationParameter"></param>
         /// <returns></returns>
-        private async Task<JwsPayload> GenerateUserInformationPayload(ClaimsPrincipal claimsPrincipal, AuthorizationParameter authorizationParameter)
+        private async Task<JwsPayload> GenerateUserInformationPayload(IList<Claim> claims, AuthorizationParameter authorizationParameter)
         {
             JwsPayload jwsPayload;
             if (authorizationParameter.Claims != null && authorizationParameter.Claims.IsAnyUserInfoClaimParameter())
             {
-                jwsPayload = _jwtGenerator.GenerateFilteredUserInfoPayload(Clone(authorizationParameter.Claims.UserInfo),
-                    claimsPrincipal,
-                    authorizationParameter);
+                jwsPayload = _jwtGenerator.GenerateFilteredUserInfoPayload(Clone(authorizationParameter.Claims.UserInfo), authorizationParameter, claims);
             }
             else
             {
-                jwsPayload = await _jwtGenerator.GenerateUserInfoPayloadForScopeAsync(claimsPrincipal, authorizationParameter);
+                jwsPayload = await _jwtGenerator.GenerateUserInfoPayloadForScopeAsync(authorizationParameter, claims);
             }
 
             return jwsPayload;

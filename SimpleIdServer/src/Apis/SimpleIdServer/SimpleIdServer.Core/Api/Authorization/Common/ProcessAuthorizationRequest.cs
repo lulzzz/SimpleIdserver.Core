@@ -1,26 +1,6 @@
-﻿#region copyright
-// Copyright 2015 Habart Thierry
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-#endregion
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using SimpleIdServer.Lib;
+﻿using Newtonsoft.Json;
 using SimpleIdServer.Core.Common.Models;
+using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.Core.Errors;
 using SimpleIdServer.Core.Exceptions;
 using SimpleIdServer.Core.Extensions;
@@ -32,14 +12,16 @@ using SimpleIdServer.Core.Results;
 using SimpleIdServer.Core.Services;
 using SimpleIdServer.Core.Validators;
 using SimpleIdServer.OAuth.Logging;
-using Newtonsoft.Json;
-using SimpleIdServer.Core.Common.Repositories;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SimpleIdServer.Core.Api.Authorization.Common
 {
     public interface IProcessAuthorizationRequest
     {
-        Task<ActionResult> ProcessAsync(AuthorizationParameter authorizationParameter, string authenticatedUserSubject, Core.Common.Models.Client client, string issuerName);
+        Task<ActionResult> ProcessAsync(AuthorizationParameter authorizationParameter, Client client, string issuerName, string authenticatedUserSubject = null, double? authInstant = null);
     }
 
     public class ProcessAuthorizationRequest : IProcessAuthorizationRequest
@@ -76,7 +58,7 @@ namespace SimpleIdServer.Core.Api.Authorization.Common
             _authenticationContextclassReferenceRepository = authenticationContextclassReferenceRepository;
         }
 
-        public async Task<ActionResult> ProcessAsync(AuthorizationParameter authorizationParameter, string authenticatedUserSubject, Client client, string issuerName)
+        public async Task<ActionResult> ProcessAsync(AuthorizationParameter authorizationParameter, Client client, string issuerName, string authenticatedUserSubject = null, double? authInstant = null)
         {
             if (authorizationParameter == null)
             {
@@ -167,13 +149,11 @@ namespace SimpleIdServer.Core.Api.Authorization.Common
             // Check if the user connection is still valid.
             if (endUserIsAuthenticated && !authorizationParameter.MaxAge.Equals(default(double)))
             {
-                var authenticationDateTimeClaim = claimsPrincipal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.AuthenticationInstant);
-                if (authenticationDateTimeClaim != null)
+                if (authInstant != null)
                 {
                     var maxAge = authorizationParameter.MaxAge;
                     var currentDateTimeUtc = DateTimeOffset.UtcNow.ConvertToUnixTimestamp();
-                    var authenticationDateTime = long.Parse(authenticationDateTimeClaim.Value);
-                    if (maxAge < currentDateTimeUtc - authenticationDateTime)
+                    if (maxAge < currentDateTimeUtc - authInstant.Value)
                     {
                         result = _actionResultFactory.CreateAnEmptyActionResultWithRedirection();
                         result.RedirectInstruction.Action = IdentityServerEndPoints.AuthenticateIndex;
@@ -184,8 +164,8 @@ namespace SimpleIdServer.Core.Api.Authorization.Common
 
             if (result == null)
             {
-                result = await ProcessPromptParameters(prompts, claimsPrincipal, authorizationParameter, confirmedConsent).ConfigureAwait(false);
-                await ProcessIdTokenHint(result, authorizationParameter, prompts, claimsPrincipal, issuerName).ConfigureAwait(false);
+                result = await ProcessPromptParameters(prompts, endUserIsAuthenticated, authorizationParameter, confirmedConsent).ConfigureAwait(false);
+                await ProcessIdTokenHint(result, authorizationParameter, prompts, authenticatedUserSubject, issuerName).ConfigureAwait(false);
             }
 
             var actionTypeName = Enum.GetName(typeof(TypeActionResult), result.Type);
@@ -203,7 +183,7 @@ namespace SimpleIdServer.Core.Api.Authorization.Common
         private async Task ProcessIdTokenHint(ActionResult actionResult, 
             AuthorizationParameter authorizationParameter, 
             ICollection<PromptParameter> prompts, 
-            ClaimsPrincipal claimsPrincipal,
+            string currentSubject,
             string issuerName)
         {
             if (!string.IsNullOrWhiteSpace(authorizationParameter.IdTokenHint) &&
@@ -255,14 +235,8 @@ namespace SimpleIdServer.Core.Api.Authorization.Common
                         ErrorDescriptions.TheIdentityTokenDoesntContainSimpleIdentityServerAsAudience,
                         authorizationParameter.State);
                 }
-
-                var currentSubject = string.Empty;
+                
                 var expectedSubject = jwsPayload.GetClaimValue(Jwt.Constants.StandardResourceOwnerClaimNames.Subject);
-                if (claimsPrincipal != null && claimsPrincipal.IsAuthenticated())
-                {
-                    currentSubject = claimsPrincipal.GetSubject();
-                }
-
                 if (currentSubject != expectedSubject)
                 {
                     throw new IdentityServerExceptionWithState(
@@ -301,7 +275,7 @@ namespace SimpleIdServer.Core.Api.Authorization.Common
             actionResult.AmrLst = new List<string> { acr.AmrLst.First() };
         }
 
-        private async Task<ActionResult> ProcessPromptParameters(ICollection<PromptParameter> prompts, ClaimsPrincipal principal, AuthorizationParameter authorizationParameter, Consent confirmedConsent)
+        private async Task<ActionResult> ProcessPromptParameters(ICollection<PromptParameter> prompts, bool isAuthenticated, AuthorizationParameter authorizationParameter, Consent confirmedConsent)
         {
             if (prompts == null || !prompts.Any())
             {
@@ -311,13 +285,11 @@ namespace SimpleIdServer.Core.Api.Authorization.Common
                     authorizationParameter.State);
             }
 
-            var endUserIsAuthenticated = IsAuthenticated(principal);
-
             // Raise "login_required" exception : if the prompt authorizationParameter is "none" AND the user is not authenticated
             // Raise "interaction_required" exception : if there's no consent from the user.
             if (prompts.Contains(PromptParameter.none))
             {
-                if (!endUserIsAuthenticated)
+                if (!isAuthenticated)
                 {
                     throw new IdentityServerExceptionWithState(
                         ErrorCodes.LoginRequiredCode,
@@ -351,7 +323,7 @@ namespace SimpleIdServer.Core.Api.Authorization.Common
             if (prompts.Contains(PromptParameter.consent))
             {
                 var result = _actionResultFactory.CreateAnEmptyActionResultWithRedirection();
-                if (!endUserIsAuthenticated)
+                if (!isAuthenticated)
                 {
                     result.RedirectInstruction.Action = IdentityServerEndPoints.AuthenticateIndex;
                     await SetAcr(authorizationParameter, result).ConfigureAwait(false);
@@ -371,13 +343,6 @@ namespace SimpleIdServer.Core.Api.Authorization.Common
         private async Task<Consent> GetResourceOwnerConsent(string authenticatedUserSubject, AuthorizationParameter authorizationParameter)
         {
             return await _consentHelper.GetConfirmedConsentsAsync(authenticatedUserSubject, authorizationParameter);
-        }
-
-        private static bool IsAuthenticated(ClaimsPrincipal principal)
-        {
-            return principal == null || principal.Identity == null ?
-                false :
-                principal.Identity.IsAuthenticated;
         }
     }
 }

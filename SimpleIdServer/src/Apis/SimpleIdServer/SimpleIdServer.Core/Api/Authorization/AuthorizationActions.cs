@@ -1,25 +1,6 @@
-﻿#region copyright
-// Copyright 2015 Habart Thierry
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-#endregion
-
-using System;
-using System.Security.Principal;
-using System.Threading.Tasks;
+﻿using Newtonsoft.Json;
 using SimpleIdServer.Bus;
 using SimpleIdServer.Core.Api.Authorization.Actions;
-using SimpleIdServer.Lib;
 using SimpleIdServer.Core.Errors;
 using SimpleIdServer.Core.Exceptions;
 using SimpleIdServer.Core.Helpers;
@@ -28,13 +9,14 @@ using SimpleIdServer.Core.Results;
 using SimpleIdServer.Core.Validators;
 using SimpleIdServer.OAuth.Events;
 using SimpleIdServer.OAuth.Logging;
-using Newtonsoft.Json;
+using System;
+using System.Threading.Tasks;
 
 namespace SimpleIdServer.Core.Api.Authorization
 {
     public interface IAuthorizationActions
     {
-        Task<ActionResult> GetAuthorization(AuthorizationParameter parameter, IPrincipal claimsPrincipal, string issuerName);
+        Task<ActionResult> GetAuthorization(AuthorizationParameter parameter, string issuerName, string authenticatedSubject = null, long? authInstant = null);
     }
 
     public class AuthorizationActions : IAuthorizationActions
@@ -79,7 +61,7 @@ namespace SimpleIdServer.Core.Api.Authorization
             _resourceOwnerAuthenticateHelper = resourceOwnerAuthenticateHelper;
         }
 
-        public async Task<ActionResult> GetAuthorization(AuthorizationParameter parameter, IPrincipal claimsPrincipal, string issuerName)
+        public async Task<ActionResult> GetAuthorization(AuthorizationParameter parameter, string issuerName, string authenticatedSubject = null, long? authInstant = null)
         {
             var processId = Guid.NewGuid().ToString();
             _eventPublisher.Publish(new AuthorizationRequestReceived(Guid.NewGuid().ToString(), processId,  _payloadSerializer.GetPayload(parameter), 0));
@@ -104,13 +86,13 @@ namespace SimpleIdServer.Core.Api.Authorization
                 switch (authorizationFlow)
                 {
                     case AuthorizationFlow.AuthorizationCodeFlow:
-                        actionResult = await _getAuthorizationCodeOperation.Execute(parameter, claimsPrincipal, client, issuerName);
+                        actionResult = await _getAuthorizationCodeOperation.Execute(parameter, client, issuerName, authenticatedSubject, authInstant);
                         break;
                     case AuthorizationFlow.ImplicitFlow:
-                        actionResult = await _getTokenViaImplicitWorkflowOperation.Execute(parameter, claimsPrincipal, client, issuerName);
+                        actionResult = await _getTokenViaImplicitWorkflowOperation.Execute(parameter, client, issuerName, authenticatedSubject, authInstant);
                         break;
                     case AuthorizationFlow.HybridFlow:
-                        actionResult = await _getAuthorizationCodeAndTokenViaHybridWorkflowOperation.Execute(parameter, claimsPrincipal, client, issuerName);
+                        actionResult = await _getAuthorizationCodeAndTokenViaHybridWorkflowOperation.Execute(parameter, client, issuerName, authenticatedSubject, authInstant);
                         break;
                 }
 

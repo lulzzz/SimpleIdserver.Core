@@ -32,7 +32,7 @@ namespace SimpleIdServer.Core.Api.Authorization.Actions
 {
     public interface IGetTokenViaImplicitWorkflowOperation
     {
-        Task<ActionResult> Execute(AuthorizationParameter authorizationParameter, IPrincipal principal, Core.Common.Models.Client client, string issuerName);
+        Task<ActionResult> Execute(AuthorizationParameter authorizationParameter, Client client, string issuerName, string authenticatedSubject = null, double? authInst = null);
     }
 
     public class GetTokenViaImplicitWorkflowOperation : IGetTokenViaImplicitWorkflowOperation
@@ -54,7 +54,7 @@ namespace SimpleIdServer.Core.Api.Authorization.Actions
             _clientValidator = clientValidator;
         }
 
-        public async Task<ActionResult> Execute(AuthorizationParameter authorizationParameter, IPrincipal principal, Core.Common.Models.Client client, string issuerName)
+        public async Task<ActionResult> Execute(AuthorizationParameter authorizationParameter, Client client, string issuerName, string authenticatedSubject = null, double? authInst = null)
         {
             if (authorizationParameter == null)
             {
@@ -89,11 +89,10 @@ namespace SimpleIdServer.Core.Api.Authorization.Actions
                     authorizationParameter.State);
             }
 
-            var result = await _processAuthorizationRequest.ProcessAsync(authorizationParameter, principal as ClaimsPrincipal, client, issuerName).ConfigureAwait(false);
+            var result = await _processAuthorizationRequest.ProcessAsync(authorizationParameter, client, issuerName, authenticatedSubject, authInst).ConfigureAwait(false);
             if (result.Type == TypeActionResult.RedirectToCallBackUrl)
             {
-                var claimsPrincipal = principal as ClaimsPrincipal;
-                await _generateAuthorizationResponse.ExecuteAsync(result, authorizationParameter, claimsPrincipal, client, issuerName);
+                await _generateAuthorizationResponse.ExecuteAsync(result, authorizationParameter, client, issuerName, authenticatedSubject).ConfigureAwait(false);
             }
             
             var actionTypeName = Enum.GetName(typeof(TypeActionResult), result.Type);

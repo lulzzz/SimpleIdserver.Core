@@ -1,20 +1,4 @@
-﻿#region copyright
-// Copyright 2015 Habart Thierry
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-#endregion
-
-using SimpleIdServer.Core.Common;
+﻿using SimpleIdServer.Core.Common;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.Core.Errors;
@@ -45,10 +29,10 @@ namespace SimpleIdServer.Core.JwtToken
         Task<JwsPayload> UpdatePayloadDate(JwsPayload jwsPayload);
         Task<JwsPayload> GenerateAccessToken(Client client, IEnumerable<string> scopes, string issuerName);
         Task<JwsPayload> GenerateAccessToken(IEnumerable<string> audiences, IEnumerable<string> scopes, string issuerName);
-        Task<JwsPayload> GenerateIdTokenPayloadForScopesAsync(ClaimsPrincipal claimsPrincipal, AuthorizationParameter authorizationParameter, string issuerName);
-        Task<JwsPayload> GenerateFilteredIdTokenPayloadAsync(ClaimsPrincipal claimsPrincipal, AuthorizationParameter authorizationParameter, List<ClaimParameter> claimParameters, string issuerName);
-        Task<JwsPayload> GenerateUserInfoPayloadForScopeAsync(ClaimsPrincipal claimsPrincipal, AuthorizationParameter authorizationParameter);
-        JwsPayload GenerateFilteredUserInfoPayload(List<ClaimParameter> claimParameters, ClaimsPrincipal claimsPrincipal, AuthorizationParameter authorizationParameter);
+        Task<JwsPayload> GenerateIdTokenPayloadForScopesAsync(IList<Claim> claims, AuthorizationParameter authorizationParameter, string issuerName, double? authInstant = null);
+        Task<JwsPayload> GenerateFilteredIdTokenPayloadAsync(IList<Claim> claims, AuthorizationParameter authorizationParameter, List<ClaimParameter> claimParameters, string issuerName, double? authInstant = null);
+        Task<JwsPayload> GenerateUserInfoPayloadForScopeAsync(AuthorizationParameter authorizationParameter, IList<Claim> claims);
+        JwsPayload GenerateFilteredUserInfoPayload(List<ClaimParameter> claimParameters, AuthorizationParameter authorizationParameter, IList<Claim> claims);
         void FillInOtherClaimsIdentityTokenPayload(JwsPayload jwsPayload, string authorizationCode, string accessToken, AuthorizationParameter authorizationParameter, Core.Common.Models.Client client);
         Task<string> SignAsync(JwsPayload jwsPayload, JwsAlg alg);
         Task<string> EncryptAsync(string jwe, JweAlg jweAlg, JweEnc jweEnc);
@@ -190,33 +174,29 @@ namespace SimpleIdServer.Core.JwtToken
             return jwsPayload;
         }
 
-        public async Task<JwsPayload> GenerateIdTokenPayloadForScopesAsync(ClaimsPrincipal claimsPrincipal, AuthorizationParameter authorizationParameter, string issuerName)
+        public async Task<JwsPayload> GenerateIdTokenPayloadForScopesAsync(IList<Claim> claims, AuthorizationParameter authorizationParameter, string issuerName, double? authInstant = null)
         {
+            if (claims == null)
+            {
+                throw new ArgumentNullException(nameof(claims));
+            }
+
             if (authorizationParameter == null)
             {
-                throw new ArgumentNullException("authorizationParameter");
+                throw new ArgumentNullException(nameof(claims));
             }
-
-            if (claimsPrincipal == null ||
-                claimsPrincipal.Identity == null ||
-                !claimsPrincipal.IsAuthenticated())
-            {
-                throw new ArgumentNullException("claimsPrincipal");
-            }
-
+            
             var result = new JwsPayload();
-            await FillInIdentityTokenClaims(result, authorizationParameter, new List<ClaimParameter>(), claimsPrincipal, issuerName);
-            await FillInResourceOwnerClaimsFromScopes(result, authorizationParameter, claimsPrincipal);
+            await FillInIdentityTokenClaims(result, authorizationParameter, new List<ClaimParameter>(), issuerName, authInstant).ConfigureAwait(false);
+            await FillInResourceOwnerClaimsFromScopes(result, authorizationParameter, claims).ConfigureAwait(false);
             return result;
         }
 
-        public async Task<JwsPayload> GenerateFilteredIdTokenPayloadAsync(ClaimsPrincipal claimsPrincipal, AuthorizationParameter authorizationParameter, List<ClaimParameter> claimParameters, string issuerName)
+        public async Task<JwsPayload> GenerateFilteredIdTokenPayloadAsync(IList<Claim> claims, AuthorizationParameter authorizationParameter, List<ClaimParameter> claimParameters, string issuerName, double? authInstant = null)
         {
-            if (claimsPrincipal == null ||
-                claimsPrincipal.Identity == null ||
-                !claimsPrincipal.IsAuthenticated())
+            if (claims == null)
             {
-                throw new ArgumentNullException(nameof(claimsPrincipal));
+                throw new ArgumentNullException(nameof(claims));
             }
 
             if (authorizationParameter == null)
@@ -225,18 +205,16 @@ namespace SimpleIdServer.Core.JwtToken
             }
 
             var result = new JwsPayload();
-            await FillInIdentityTokenClaims(result, authorizationParameter, claimParameters, claimsPrincipal, issuerName);
-            FillInResourceOwnerClaimsByClaimsParameter(result, claimParameters, claimsPrincipal, authorizationParameter);
+            await FillInIdentityTokenClaims(result, authorizationParameter, claimParameters, issuerName, authInstant).ConfigureAwait(false);
+            FillInResourceOwnerClaimsByClaimsParameter(result, claimParameters, authorizationParameter, claims);
             return result;
         }
         
-        public async Task<JwsPayload> GenerateUserInfoPayloadForScopeAsync(ClaimsPrincipal claimsPrincipal, AuthorizationParameter authorizationParameter)
+        public async Task<JwsPayload> GenerateUserInfoPayloadForScopeAsync(AuthorizationParameter authorizationParameter, IList<Claim> claims)
         {
-            if (claimsPrincipal == null ||
-                claimsPrincipal.Identity == null ||
-                !claimsPrincipal.IsAuthenticated())
+            if (claims == null)
             {
-                throw new ArgumentNullException(nameof(claimsPrincipal));
+                throw new ArgumentNullException(nameof(claims));
             }
 
             if (authorizationParameter == null)
@@ -245,17 +223,15 @@ namespace SimpleIdServer.Core.JwtToken
             }
 
             var result = new JwsPayload();
-            await FillInResourceOwnerClaimsFromScopes(result, authorizationParameter, claimsPrincipal);
+            await FillInResourceOwnerClaimsFromScopes(result, authorizationParameter, claims);
             return result;
         }
 
-        public JwsPayload GenerateFilteredUserInfoPayload(List<ClaimParameter> claimParameters, ClaimsPrincipal claimsPrincipal, AuthorizationParameter authorizationParameter)
+        public JwsPayload GenerateFilteredUserInfoPayload(List<ClaimParameter> claimParameters,AuthorizationParameter authorizationParameter, IList<Claim> claims)
         {
-            if (claimsPrincipal == null ||
-                claimsPrincipal.Identity == null ||
-                !claimsPrincipal.IsAuthenticated())
+            if (claims == null)
             {
-                throw new ArgumentNullException(nameof(claimParameters));
+                throw new ArgumentNullException(nameof(claims));
             }
 
             if (authorizationParameter == null)
@@ -264,7 +240,7 @@ namespace SimpleIdServer.Core.JwtToken
             }
 
             var result = new JwsPayload();
-            FillInResourceOwnerClaimsByClaimsParameter(result, claimParameters, claimsPrincipal, authorizationParameter);
+            FillInResourceOwnerClaimsByClaimsParameter(result, claimParameters, authorizationParameter, claims);
             return result;
         }
 
@@ -342,13 +318,10 @@ namespace SimpleIdServer.Core.JwtToken
 
         #region Private methods
 
-        private async Task FillInResourceOwnerClaimsFromScopes(
-            JwsPayload jwsPayload,
-            AuthorizationParameter authorizationParameter,
-            ClaimsPrincipal claimsPrincipal)
+        private async Task FillInResourceOwnerClaimsFromScopes(JwsPayload jwsPayload, AuthorizationParameter authorizationParameter, IList<Claim> cls)
         {
             // 1. Fill-in the subject claim
-            var subject = claimsPrincipal.GetSubject();
+            var subject = cls.First(c => c.Type == Jwt.Constants.StandardResourceOwnerClaimNames.Subject).Value;
             jwsPayload.Add(Jwt.Constants.StandardResourceOwnerClaimNames.Subject, subject);
 
             if (authorizationParameter == null ||
@@ -359,7 +332,7 @@ namespace SimpleIdServer.Core.JwtToken
 
             // 2. Fill-in the other claims
             var scopes = _parameterParserHelper.ParseScopes(authorizationParameter.Scope);
-            var claims = await GetClaimsFromRequestedScopes(scopes, claimsPrincipal);
+            var claims = await GetClaimsFromRequestedScopes(scopes, cls);
             foreach (var claim in claims)
             {
                 if (claim.Key == Jwt.Constants.StandardResourceOwnerClaimNames.Subject)
@@ -371,11 +344,7 @@ namespace SimpleIdServer.Core.JwtToken
             }
         }
 
-        private void FillInResourceOwnerClaimsByClaimsParameter(
-            JwsPayload jwsPayload,
-            List<ClaimParameter> claimParameters,
-            ClaimsPrincipal claimsPrincipal,
-            AuthorizationParameter authorizationParameter)
+        private void FillInResourceOwnerClaimsByClaimsParameter(JwsPayload jwsPayload, List<ClaimParameter> claimParameters, AuthorizationParameter authorizationParameter, IList<Claim> claims)
         {
             var state = authorizationParameter == null ? string.Empty : authorizationParameter.State;
 
@@ -410,7 +379,7 @@ namespace SimpleIdServer.Core.JwtToken
             if (resourceOwnerClaimParameters.Any())
             {
                 var requestedClaimNames = resourceOwnerClaimParameters.Select(r => r.Name);
-                var resourceOwnerClaims = GetClaims(requestedClaimNames, claimsPrincipal);
+                var resourceOwnerClaims = GetClaims(requestedClaimNames, claims);
                 foreach (var resourceOwnerClaimParameter in resourceOwnerClaimParameters)
                 {
                     var resourceOwnerClaim = resourceOwnerClaims.FirstOrDefault(c => c.Key == resourceOwnerClaimParameter.Name);
@@ -428,12 +397,7 @@ namespace SimpleIdServer.Core.JwtToken
             }
         }
 
-        private async Task FillInIdentityTokenClaims(
-            JwsPayload jwsPayload,
-            AuthorizationParameter authorizationParameter,
-            List<ClaimParameter> claimParameters,
-            ClaimsPrincipal claimsPrincipal,
-            string issuerName)
+        private async Task FillInIdentityTokenClaims(JwsPayload jwsPayload, AuthorizationParameter authorizationParameter, List<ClaimParameter> claimParameters, string issuerName, double? authInstant = null)
         {
             var nonce = authorizationParameter.Nonce;
             var state = authorizationParameter.State;
@@ -481,12 +445,7 @@ namespace SimpleIdServer.Core.JwtToken
             {
                 audiences.Add(issuerName);
             }
-
-            var authenticationInstant = claimsPrincipal.Claims.SingleOrDefault(c => c.Type == ClaimTypes.AuthenticationInstant);
-            var authenticationInstantValue = authenticationInstant == null
-                ? string.Empty
-                : authenticationInstant.Value;
-
+            
             if (issuerClaimParameter != null)
             {
                 var issuerIsValid = ValidateClaimValue(issuerName, issuerClaimParameter);
@@ -540,7 +499,7 @@ namespace SimpleIdServer.Core.JwtToken
 
             if (authenticationTimeParameter != null)
             {
-                var isAuthenticationTimeValid = ValidateClaimValue(authenticationInstantValue, authenticationTimeParameter);
+                var isAuthenticationTimeValid = ValidateClaimValue(authInstant, authenticationTimeParameter);
                 if (!isAuthenticationTimeValid)
                 {
                     throw new IdentityServerExceptionWithState(ErrorCodes.InvalidGrant,
@@ -600,10 +559,9 @@ namespace SimpleIdServer.Core.JwtToken
             jwsPayload.Add(StandardClaimNames.Iat, issuedAtTime);
 
             // Set the auth_time if it's requested as an essential claim OR the max_age request is specified
-            if (((authenticationTimeParameter != null && authenticationTimeParameter.Essential) ||
-                !maxAge.Equals(default(double))) && !string.IsNullOrWhiteSpace(authenticationInstantValue))
+            if (((authenticationTimeParameter != null && authenticationTimeParameter.Essential) || !maxAge.Equals(default(double))) && authInstant != null)
             {
-                jwsPayload.Add(StandardClaimNames.AuthenticationTime, double.Parse(authenticationInstantValue));
+                jwsPayload.Add(StandardClaimNames.AuthenticationTime, authInstant.Value);
             }
 
             if (!string.IsNullOrWhiteSpace(nonce))
@@ -641,9 +599,7 @@ namespace SimpleIdServer.Core.JwtToken
             return true;
         }
 		
-        private bool ValidateClaimValues(
-            string[] claimValues,
-            ClaimParameter claimParameter)
+        private bool ValidateClaimValues(string[] claimValues, ClaimParameter claimParameter)
         {
             if (claimParameter.EssentialParameterExist && 
                 (claimValues == null || claimValues.Any()) 
@@ -668,24 +624,23 @@ namespace SimpleIdServer.Core.JwtToken
             return true;
         }
 
-         private async Task<Dictionary<string, object>> GetClaimsFromRequestedScopes(IEnumerable<string> scopes, ClaimsPrincipal claimsPrincipal)
+         private async Task<Dictionary<string, object>> GetClaimsFromRequestedScopes(IEnumerable<string> scopes, IList<Claim> claims)
         {
             var result = new Dictionary<string, object>();
             var returnedScopes = await _scopeRepository.SearchByNamesAsync(scopes);
             foreach (var returnedScope in returnedScopes)
             {
-                result.AddRange(GetClaims(returnedScope.Claims, claimsPrincipal));
+                result.AddRange(GetClaims(returnedScope.Claims, claims));
             }
 
             return result;
         }
 
-        private Dictionary<string, object> GetClaims(IEnumerable<string> claims, ClaimsPrincipal claimsPrincipal)
+        private Dictionary<string, object> GetClaims(IEnumerable<string> claims, IList<Claim> openIdClaims)
         {
             var result = new Dictionary<string, object>();
-            var openIdClaims = _claimsMapping.MapToOpenIdClaims(claimsPrincipal.Claims);
-            var tmp = openIdClaims.Where(oc => claims.Contains(oc.Key))
-                .Select(oc => new { key = oc.Key, val = oc.Value });
+            var tmp = openIdClaims.Where(oc => claims.Contains(oc.Type))
+                .Select(oc => new { key = oc.Type, val = oc.Value });
             var roles = new List<string>();
             foreach(var r in tmp)
             {
@@ -695,10 +650,7 @@ namespace SimpleIdServer.Core.JwtToken
             return result;
         }
 
-        private async Task<JsonWebKey> GetJsonWebKey(
-            AllAlg alg,
-            KeyOperations operation,
-            Use use)
+        private async Task<JsonWebKey> GetJsonWebKey(AllAlg alg, KeyOperations operation, Use use)
         {
             JsonWebKey result = null;
             var jsonWebKeys = await _jsonWebKeyRepository.GetByAlgorithmAsync(

@@ -5,6 +5,7 @@ using SimpleIdServer.Common.Dtos.Responses;
 using SimpleIdServer.Core.Api.Authorization;
 using SimpleIdServer.Core.Errors;
 using SimpleIdServer.Core.Exceptions;
+using SimpleIdServer.Core.Extensions;
 using SimpleIdServer.Core.JwtToken;
 using SimpleIdServer.Core.Parameters;
 using SimpleIdServer.Core.Protector;
@@ -67,7 +68,19 @@ namespace SimpleIdServer.Host.Controllers.Api
             var authenticatedUser = await _authenticationService.GetAuthenticatedUser(this, Constants.CookieNames.CookieName);
             var parameter = authorizationRequest.ToParameter();
             var issuerName = Request.GetAbsoluteUriWithVirtualPath();
-            var actionResult = await _authorizationActions.GetAuthorization(parameter, authenticatedUser, issuerName);
+            string authenticatedSubject = null;
+            double? authInstant = null;
+            if (authenticatedSubject != null)
+            {
+                authenticatedSubject = authenticatedUser.GetSubject();
+                var authInstantClaim = authenticatedUser.Claims.FirstOrDefault(c => c.Type == SimpleIdServer.Core.Common.StandardClaimNames.AuthenticationTime);
+                if (authInstantClaim != null)
+                {
+                    // TODO : PASS AUTH INSTANT.
+                }
+            }
+
+            var actionResult = await _authorizationActions.GetAuthorization(parameter, issuerName, authenticatedSubject, );
             if (actionResult.Type == TypeActionResult.RedirectToCallBackUrl)
             {
                 var redirectUrl = new Uri(authorizationRequest.RedirectUri);
