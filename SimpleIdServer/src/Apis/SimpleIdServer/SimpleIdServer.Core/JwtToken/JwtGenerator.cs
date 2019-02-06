@@ -7,6 +7,7 @@ using SimpleIdServer.Core.Extensions;
 using SimpleIdServer.Core.Helpers;
 using SimpleIdServer.Core.Jwt;
 using SimpleIdServer.Core.Jwt.Encrypt;
+using SimpleIdServer.Core.Jwt.Extensions;
 using SimpleIdServer.Core.Jwt.Mapping;
 using SimpleIdServer.Core.Jwt.Signature;
 using SimpleIdServer.Core.Parameters;
@@ -640,7 +641,7 @@ namespace SimpleIdServer.Core.JwtToken
         {
             var result = new Dictionary<string, object>();
             var tmp = openIdClaims.Where(oc => claims.Contains(oc.Type))
-                .Select(oc => new { key = oc.Type, val = oc.Value });
+                .Select(oc => new { key = oc.Type, val = oc.GetClaimValue() });
             var roles = new List<string>();
             foreach(var r in tmp)
             {

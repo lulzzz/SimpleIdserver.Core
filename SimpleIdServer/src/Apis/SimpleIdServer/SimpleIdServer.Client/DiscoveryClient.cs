@@ -15,6 +15,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using SimpleIdServer.Client.Errors;
 using SimpleIdServer.Client.Operations;
@@ -56,7 +57,7 @@ namespace SimpleIdServer.Client
         /// <param name="discoveryDocumentationUri">Absolute URI of the open-id contract</param>
         /// <exception cref="ArgumentNullException">Thrown when parameter is null</exception>
         /// <returns>Open-id contract</returns>
-        Task<DiscoveryInformation> GetDiscoveryInformationAsync(Uri discoveryDocumentationUrl);
+        Task<DiscoveryInformation> GetDiscoveryInformationAsync(Uri discoveryDocumentationUrl); 
     }
 
     internal class DiscoveryClient : IDiscoveryClient

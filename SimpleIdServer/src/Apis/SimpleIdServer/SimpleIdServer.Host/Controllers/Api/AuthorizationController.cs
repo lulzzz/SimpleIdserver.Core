@@ -18,6 +18,7 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace SimpleIdServer.Host.Controllers.Api
@@ -73,7 +74,7 @@ namespace SimpleIdServer.Host.Controllers.Api
             if (authenticatedUser != null)
             {
                 authenticatedSubject = authenticatedUser.GetSubject();
-                var authInstantClaim = authenticatedUser.Claims.FirstOrDefault(c => c.Type == Core.Common.StandardClaimNames.AuthenticationTime);
+                var authInstantClaim = authenticatedUser.Claims.FirstOrDefault(c => c.Type == Core.Common.StandardClaimNames.AuthenticationTime || c.Type == ClaimTypes.AuthenticationInstant);
                 if (authInstantClaim != null)
                 {
                     authInstant = double.Parse(authInstantClaim.Value);
