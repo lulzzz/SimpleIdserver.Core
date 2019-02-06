@@ -1,20 +1,4 @@
-﻿#region copyright
-// Copyright 2015 Habart Thierry
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-#endregion
-
-using Moq;
+﻿using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,6 +19,7 @@ using SimpleIdServer.OAuth.Logging;
 using SimpleIdServer.Store;
 using Xunit;
 using Newtonsoft.Json;
+using SimpleIdServer.Core.Common.Repositories;
 
 namespace SimpleIdentityServer.Core.UnitTests.Common
 {
@@ -50,6 +35,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Common
         private Mock<IAuthorizationFlowHelper> _authorizationFlowHelperFake;                
         private Mock<IClientHelper> _clientHelperFake;
         private Mock<IGrantedTokenHelper> _grantedTokenHelperStub;
+        private Mock<IResourceOwnerRepository> _resourceOwnerRepoStub;
         private IGenerateAuthorizationResponse _generateAuthorizationResponse;
 
         public static string ToHexString(IEnumerable<byte> arr)
@@ -139,7 +125,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Common
             var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity("fake"));
 
             // ACT & ASSERT
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _generateAuthorizationResponse.ExecuteAsync(redirectInstruction, new AuthorizationParameter(), claimsPrincipal, null, null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _generateAuthorizationResponse.ExecuteAsync(redirectInstruction, new AuthorizationParameter(), null, null, null));
         }
 
         [Fact]
@@ -147,7 +133,6 @@ namespace SimpleIdentityServer.Core.UnitTests.Common
         {
             // ARRANGE
             InitializeFakeObjects();
-            var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity("fake"));
             const string idToken = "idToken";
             var authorizationParameter = new AuthorizationParameter();
             var actionResult = new ActionResult
@@ -160,11 +145,18 @@ namespace SimpleIdentityServer.Core.UnitTests.Common
                 {
                     ResponseType.id_token  
                 });
+            _resourceOwnerRepoStub.Setup(r => r.GetAsync(It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwner
+            {
+                Claims = new List<Claim>
+                {
+                    new Claim("sub", "fake")
+                }
+            }));
             _jwtGeneratorFake.Setup(
-                j => j.GenerateIdTokenPayloadForScopesAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthorizationParameter>(), null))
+                j => j.GenerateIdTokenPayloadForScopesAsync(It.IsAny<IList<Claim>>(), It.IsAny<AuthorizationParameter>(), null, null))
                 .Returns(Task.FromResult(jwsPayload));
             _jwtGeneratorFake.Setup(
-                j => j.GenerateUserInfoPayloadForScopeAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthorizationParameter>()))
+                j => j.GenerateUserInfoPayloadForScopeAsync(It.IsAny<AuthorizationParameter>(), It.IsAny<IList<Claim>>()))
                 .Returns(Task.FromResult(jwsPayload));
             _jwtGeneratorFake.Setup(j => j.EncryptAsync(It.IsAny<string>(), It.IsAny<JweAlg>(), It.IsAny<JweEnc>()))
                 .Returns(Task.FromResult(idToken));
@@ -173,7 +165,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Common
                 .Returns(Task.FromResult(idToken));
 
             // ACT
-            await _generateAuthorizationResponse.ExecuteAsync(actionResult, authorizationParameter, claimsPrincipal, new Client(), null);
+            await _generateAuthorizationResponse.ExecuteAsync(actionResult, authorizationParameter, new Client(), null, "fake");
 
             // ASSERT
             Assert.True(actionResult.RedirectInstruction.Parameters.Any(p => p.Name == Constants.StandardAuthorizationResponseNames.IdTokenName));
@@ -188,7 +180,6 @@ namespace SimpleIdentityServer.Core.UnitTests.Common
             const string idToken = "idToken";
             const string clientId = "clientId";
             const string scope = "openid";
-            var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity("fake"));
             var authorizationParameter = new AuthorizationParameter
             {
                 ClientId = clientId,
@@ -209,10 +200,10 @@ namespace SimpleIdentityServer.Core.UnitTests.Common
                     ResponseType.token  
                 });
             _jwtGeneratorFake.Setup(
-                j => j.GenerateIdTokenPayloadForScopesAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthorizationParameter>(), null))
+                j => j.GenerateIdTokenPayloadForScopesAsync(It.IsAny<IList<Claim>>(), It.IsAny<AuthorizationParameter>(), null, null))
                 .Returns(Task.FromResult(jwsPayload));
             _jwtGeneratorFake.Setup(
-                j => j.GenerateUserInfoPayloadForScopeAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthorizationParameter>()))
+                j => j.GenerateUserInfoPayloadForScopeAsync(It.IsAny<AuthorizationParameter>(), It.IsAny<IList<Claim>>()))
                 .Returns(Task.FromResult(jwsPayload));
             _jwtGeneratorFake.Setup(j => j.EncryptAsync(It.IsAny<string>(), It.IsAny<JweAlg>(), It.IsAny<JweEnc>()))
                 .Returns(Task.FromResult(idToken));
@@ -229,9 +220,16 @@ namespace SimpleIdentityServer.Core.UnitTests.Common
                 It.IsAny<JwsPayload>(),
                 It.IsAny<JwsPayload>()))
                 .Returns(Task.FromResult(grantedToken));
+            _resourceOwnerRepoStub.Setup(r => r.GetAsync(It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwner
+            {
+                Claims = new List<Claim>
+                {
+                    new Claim("sub", "fake")
+                }
+            }));
 
             // ACT
-            await _generateAuthorizationResponse.ExecuteAsync(actionResult, authorizationParameter, claimsPrincipal, new Client(), null);
+            await _generateAuthorizationResponse.ExecuteAsync(actionResult, authorizationParameter, new Client(), null, "fake");
 
             // ASSERTS
             Assert.True(actionResult.RedirectInstruction.Parameters.Any(p => p.Name == Constants.StandardAuthorizationResponseNames.AccessTokenName));
@@ -248,7 +246,6 @@ namespace SimpleIdentityServer.Core.UnitTests.Common
             const string idToken = "idToken";
             const string clientId = "clientId";
             const string scope = "openid";
-            var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity("fake"));
             var authorizationParameter = new AuthorizationParameter
             {
                 ClientId = clientId,
@@ -269,10 +266,10 @@ namespace SimpleIdentityServer.Core.UnitTests.Common
                     ResponseType.token  
                 });
             _jwtGeneratorFake.Setup(
-                j => j.GenerateIdTokenPayloadForScopesAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthorizationParameter>(), null))
+                j => j.GenerateIdTokenPayloadForScopesAsync(It.IsAny<IList<Claim>>(), It.IsAny<AuthorizationParameter>(), null, null))
                 .Returns(Task.FromResult(jwsPayload));
             _jwtGeneratorFake.Setup(
-                j => j.GenerateUserInfoPayloadForScopeAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthorizationParameter>()))
+                j => j.GenerateUserInfoPayloadForScopeAsync(It.IsAny<AuthorizationParameter>(), It.IsAny<IList<Claim>>()))
                 .Returns(Task.FromResult(jwsPayload));
             _jwtGeneratorFake.Setup(j => j.EncryptAsync(It.IsAny<string>(), It.IsAny<JweAlg>(), It.IsAny<JweEnc>()))
                 .Returns(Task.FromResult(idToken));
@@ -283,9 +280,16 @@ namespace SimpleIdentityServer.Core.UnitTests.Common
                 It.IsAny<JwsPayload>(),
                 It.IsAny<JwsPayload>()))
                 .Returns(() => Task.FromResult(grantedToken));
+            _resourceOwnerRepoStub.Setup(r => r.GetAsync(It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwner
+            {
+                Claims = new List<Claim>
+                {
+                    new Claim("sub", "fake")
+                }
+            }));
 
             // ACT
-            await _generateAuthorizationResponse.ExecuteAsync(actionResult, authorizationParameter, claimsPrincipal, new Client(), null);
+            await _generateAuthorizationResponse.ExecuteAsync(actionResult, authorizationParameter, new Client(), null, "fake");
 
             // ASSERTS
             Assert.True(actionResult.RedirectInstruction.Parameters.Any(p => p.Name == Constants.StandardAuthorizationResponseNames.AccessTokenName));
@@ -300,7 +304,6 @@ namespace SimpleIdentityServer.Core.UnitTests.Common
             const string idToken = "idToken";
             const string clientId = "clientId";
             const string scope = "openid";
-            var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity("fake"));
             var authorizationParameter = new AuthorizationParameter
             {
                 ClientId = clientId,
@@ -318,19 +321,26 @@ namespace SimpleIdentityServer.Core.UnitTests.Common
                     ResponseType.code  
                 });
             _jwtGeneratorFake.Setup(
-                j => j.GenerateIdTokenPayloadForScopesAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthorizationParameter>(), null))
+                j => j.GenerateIdTokenPayloadForScopesAsync(It.IsAny<IList<Claim>>(), It.IsAny<AuthorizationParameter>(), null, null))
                 .Returns(Task.FromResult(jwsPayload));
             _jwtGeneratorFake.Setup(
-                j => j.GenerateUserInfoPayloadForScopeAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthorizationParameter>()))
+                j => j.GenerateUserInfoPayloadForScopeAsync(It.IsAny<AuthorizationParameter>(), It.IsAny<IList<Claim>>()))
                 .Returns(Task.FromResult(jwsPayload));
             _jwtGeneratorFake.Setup(j => j.EncryptAsync(It.IsAny<string>(), It.IsAny<JweAlg>(), It.IsAny<JweEnc>()))
                 .Returns(Task.FromResult(idToken));
             _consentHelperFake.Setup(c => c.GetConfirmedConsentsAsync(It.IsAny<string>(),
                 It.IsAny<AuthorizationParameter>()))
                 .Returns(Task.FromResult(consent));
+            _resourceOwnerRepoStub.Setup(r => r.GetAsync(It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwner
+            {
+                Claims = new List<Claim>
+                {
+                    new Claim("sub", "fake")
+                }
+            }));
 
             // ACT
-            await _generateAuthorizationResponse.ExecuteAsync(actionResult, authorizationParameter, claimsPrincipal, new Client(), null);
+            await _generateAuthorizationResponse.ExecuteAsync(actionResult, authorizationParameter, new Client(), null, "fake");
 
             // ASSERTS
             Assert.True(actionResult.RedirectInstruction.Parameters.Any(p => p.Name == Constants.StandardAuthorizationResponseNames.AuthorizationCodeName));
@@ -347,7 +357,6 @@ namespace SimpleIdentityServer.Core.UnitTests.Common
             const string clientId = "clientId";
             const string scope = "scope";
             const string responseType = "id_token";
-            var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity("fake"));
             var authorizationParameter = new AuthorizationParameter
             {
                 ClientId = clientId,
@@ -371,16 +380,23 @@ namespace SimpleIdentityServer.Core.UnitTests.Common
                     ResponseType.id_token  
                 });
             _jwtGeneratorFake.Setup(
-                j => j.GenerateIdTokenPayloadForScopesAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthorizationParameter>(), null))
+                j => j.GenerateIdTokenPayloadForScopesAsync(It.IsAny<IList<Claim>>(), It.IsAny<AuthorizationParameter>(), null, null))
                 .Returns(Task.FromResult(jwsPayload));
             _jwtGeneratorFake.Setup(
-                j => j.GenerateUserInfoPayloadForScopeAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthorizationParameter>()))
+                j => j.GenerateUserInfoPayloadForScopeAsync(It.IsAny<AuthorizationParameter>(), It.IsAny<IList<Claim>>()))
                 .Returns(Task.FromResult(jwsPayload));
             _jwtGeneratorFake.Setup(j => j.EncryptAsync(It.IsAny<string>(), It.IsAny<JweAlg>(), It.IsAny<JweEnc>()))
                 .Returns(Task.FromResult(idToken));
+            _resourceOwnerRepoStub.Setup(r => r.GetAsync(It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwner
+            {
+                Claims = new List<Claim>
+                {
+                    new Claim("sub", "fake")
+                }
+            }));
 
             // ACT
-            await _generateAuthorizationResponse.ExecuteAsync(actionResult, authorizationParameter, claimsPrincipal, new Client(), null);
+            await _generateAuthorizationResponse.ExecuteAsync(actionResult, authorizationParameter, new Client(), null, "fake");
 
             // ASSERT
             _oauthEventSource.Verify(s => s.StartGeneratingAuthorizationResponseToClient(clientId, responseType));
@@ -396,7 +412,6 @@ namespace SimpleIdentityServer.Core.UnitTests.Common
             const string clientId = "clientId";
             const string scope = "scope";
             const string responseType = "id_token";
-            var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity("fake"));
             var authorizationParameter = new AuthorizationParameter
             {
                 ClientId = clientId,
@@ -422,19 +437,26 @@ namespace SimpleIdentityServer.Core.UnitTests.Common
                     ResponseType.id_token  
                 });
             _jwtGeneratorFake.Setup(
-                j => j.GenerateIdTokenPayloadForScopesAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthorizationParameter>(), null))
+                j => j.GenerateIdTokenPayloadForScopesAsync(It.IsAny<IList<Claim>>(), It.IsAny<AuthorizationParameter>(), null, null))
                 .Returns(Task.FromResult(jwsPayload));
             _jwtGeneratorFake.Setup(
-                j => j.GenerateUserInfoPayloadForScopeAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthorizationParameter>()))
+                j => j.GenerateUserInfoPayloadForScopeAsync(It.IsAny<AuthorizationParameter>(), It.IsAny<IList<Claim>>()))
                 .Returns(Task.FromResult(jwsPayload));
             _jwtGeneratorFake.Setup(j => j.EncryptAsync(It.IsAny<string>(), It.IsAny<JweAlg>(), It.IsAny<JweEnc>()))
                 .Returns(Task.FromResult(idToken));
             _authorizationFlowHelperFake.Setup(
                 a => a.GetAuthorizationFlow(It.IsAny<ICollection<ResponseType>>(), It.IsAny<string>()))
                 .Returns(AuthorizationFlow.ImplicitFlow);
+            _resourceOwnerRepoStub.Setup(r => r.GetAsync(It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwner
+            {
+                Claims = new List<Claim>
+                {
+                    new Claim("sub", "fake")
+                }
+            }));
 
             // ACT
-            await _generateAuthorizationResponse.ExecuteAsync(actionResult, authorizationParameter, claimsPrincipal, new Client(), null);
+            await _generateAuthorizationResponse.ExecuteAsync(actionResult, authorizationParameter, new Client(), null, "fake");
 
             // ASSERT
             Assert.True(actionResult.RedirectInstruction.ResponseMode == ResponseMode.fragment);
@@ -452,6 +474,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Common
             _authorizationFlowHelperFake = new Mock<IAuthorizationFlowHelper>();
             _clientHelperFake = new Mock<IClientHelper>();
             _grantedTokenHelperStub = new Mock<IGrantedTokenHelper>();
+            _resourceOwnerRepoStub = new Mock<IResourceOwnerRepository>();
             _generateAuthorizationResponse = new GenerateAuthorizationResponse(
                 _authorizationCodeRepositoryFake.Object,
                 _grantedTokenRepositoryFake.Object,
@@ -462,7 +485,8 @@ namespace SimpleIdentityServer.Core.UnitTests.Common
                 _oauthEventSource.Object,
                 _authorizationFlowHelperFake.Object,
                 _clientHelperFake.Object,
-                _grantedTokenHelperStub.Object);
+                _grantedTokenHelperStub.Object,
+                _resourceOwnerRepoStub.Object);
         }
     }
 }

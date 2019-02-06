@@ -70,17 +70,17 @@ namespace SimpleIdServer.Host.Controllers.Api
             var issuerName = Request.GetAbsoluteUriWithVirtualPath();
             string authenticatedSubject = null;
             double? authInstant = null;
-            if (authenticatedSubject != null)
+            if (authenticatedUser != null)
             {
                 authenticatedSubject = authenticatedUser.GetSubject();
-                var authInstantClaim = authenticatedUser.Claims.FirstOrDefault(c => c.Type == SimpleIdServer.Core.Common.StandardClaimNames.AuthenticationTime);
+                var authInstantClaim = authenticatedUser.Claims.FirstOrDefault(c => c.Type == Core.Common.StandardClaimNames.AuthenticationTime);
                 if (authInstantClaim != null)
                 {
-                    // TODO : PASS AUTH INSTANT.
+                    authInstant = double.Parse(authInstantClaim.Value);
                 }
             }
 
-            var actionResult = await _authorizationActions.GetAuthorization(parameter, issuerName, authenticatedSubject, );
+            var actionResult = await _authorizationActions.GetAuthorization(parameter, issuerName, authenticatedSubject, authInstant);
             if (actionResult.Type == TypeActionResult.RedirectToCallBackUrl)
             {
                 var redirectUrl = new Uri(authorizationRequest.RedirectUri);

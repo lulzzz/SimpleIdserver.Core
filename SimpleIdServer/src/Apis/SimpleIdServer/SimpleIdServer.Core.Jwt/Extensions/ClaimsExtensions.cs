@@ -29,7 +29,7 @@ namespace SimpleIdServer.Core.Jwt.Extensions
             }
 
             var result = new List<Claim>();
-            foreach(var claim in claims)
+            foreach (var claim in claims)
             {
                 if (_mappingToOpenidClaims.ContainsKey(claim.Type))
                 {
@@ -67,16 +67,16 @@ namespace SimpleIdServer.Core.Jwt.Extensions
 
             return result;
         }
-		
-		public static object GetClaimValue(this Claim claim)
+
+        public static object GetClaimValue(this Claim claim)
         {
             try
             {
                 return JsonConvert.DeserializeObject(claim.Value);
             }
             catch { }
-			
-             return claim.Value;
+
+            return claim.Value;
         }
     }
 }

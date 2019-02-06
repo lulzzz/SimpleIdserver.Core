@@ -14,7 +14,7 @@ namespace SimpleIdServer.Core.Api.Authorization.Actions
 {
     public interface IGetAuthorizationCodeOperation
     {
-        Task<ActionResult> Execute(AuthorizationParameter authorizationParameter, Client client, string issuerName, string authenticatedSubject = null, long? authInstant = null);
+        Task<ActionResult> Execute(AuthorizationParameter authorizationParameter, Client client, string issuerName, string authenticatedSubject = null, double? authInstant = null);
     }
 
     public class GetAuthorizationCodeOperation : IGetAuthorizationCodeOperation
@@ -36,7 +36,7 @@ namespace SimpleIdServer.Core.Api.Authorization.Actions
             _oAuthEventSource = oAuthEventSource;
         }
 
-        public async Task<ActionResult> Execute(AuthorizationParameter authorizationParameter, Core.Common.Models.Client client, string issuerName, string authenticatedSubject = null, long? authInst = null)
+        public async Task<ActionResult> Execute(AuthorizationParameter authorizationParameter, Core.Common.Models.Client client, string issuerName, string authenticatedSubject = null, double? authInst = null)
         {
             if (authorizationParameter == null)
             {

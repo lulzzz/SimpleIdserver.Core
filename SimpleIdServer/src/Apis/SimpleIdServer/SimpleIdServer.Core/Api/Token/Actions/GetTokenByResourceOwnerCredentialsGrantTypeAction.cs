@@ -136,13 +136,11 @@ namespace SimpleIdServer.Core.Api.Token.Actions
 
             // 5. Generate the user information payload and store it.
             var claims = resourceOwner.Claims;
-            var claimsIdentity = new ClaimsIdentity(claims, "simpleIdentityServer");
-            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
             var authorizationParameter = new AuthorizationParameter
             {
                 Scope = resourceOwnerGrantTypeParameter.Scope
             };
-            var payload = await _jwtGenerator.GenerateIdTokenPayloadForScopesAsync(claimsPrincipal, authorizationParameter, issuerName).ConfigureAwait(false);
+            var payload = await _jwtGenerator.GenerateIdTokenPayloadForScopesAsync(claims, authorizationParameter, issuerName).ConfigureAwait(false);
             var generatedToken = await _grantedTokenHelper.GetValidGrantedTokenAsync(allowedTokenScopes, client.ClientId, payload, payload).ConfigureAwait(false);
             if (generatedToken == null)
             {

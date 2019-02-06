@@ -14,7 +14,7 @@ namespace SimpleIdServer.Core.Api.Authorization.Actions
 {
     public interface IGetAuthorizationCodeAndTokenViaHybridWorkflowOperation
     {
-        Task<ActionResult> Execute(AuthorizationParameter authorizationParameter, Client client, string issuerName, string authenticatedSubject = null, long? authInstant = null);
+        Task<ActionResult> Execute(AuthorizationParameter authorizationParameter, Client client, string issuerName, string authenticatedSubject = null, double? authInstant = null);
     }
 
     public sealed class GetAuthorizationCodeAndTokenViaHybridWorkflowOperation : IGetAuthorizationCodeAndTokenViaHybridWorkflowOperation
@@ -36,7 +36,7 @@ namespace SimpleIdServer.Core.Api.Authorization.Actions
             _generateAuthorizationResponse = generateAuthorizationResponse;
         }
 
-        public async Task<ActionResult> Execute(AuthorizationParameter authorizationParameter, Client client, string issuerName, string authenticatedSubject = null, long? authInstant = null)
+        public async Task<ActionResult> Execute(AuthorizationParameter authorizationParameter, Client client, string issuerName, string authenticatedSubject = null, double? authInstant = null)
         {
             if (authorizationParameter == null)
             {

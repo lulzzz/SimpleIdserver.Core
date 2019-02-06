@@ -314,7 +314,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Token
                     Scopes = new List<string> { invalidScope }
                 });
             _jwtGeneratorFake.Setup(
-                j => j.GenerateIdTokenPayloadForScopesAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthorizationParameter>(), It.IsAny<string>()))
+                j => j.GenerateIdTokenPayloadForScopesAsync(It.IsAny<IList<Claim>>(), It.IsAny<AuthorizationParameter>(), It.IsAny<string>(), null))
                 .Returns(() => Task.FromResult(userInformationJwsPayload));
             _grantedTokenHelperStub.Setup(g => g.GetValidGrantedTokenAsync(It.IsAny<string>(),
                 It.IsAny<string>(),

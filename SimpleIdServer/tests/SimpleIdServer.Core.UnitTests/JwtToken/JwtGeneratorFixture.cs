@@ -112,8 +112,6 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
                 new Claim(ClaimTypes.AuthenticationInstant, currentDateTimeOffset.ToString()),
                 new Claim(Constants.StandardResourceOwnerClaimNames.Subject, subject)
             };
-            var claimIdentity = new ClaimsIdentity(claims, "fake");
-            var claimsPrincipal = new ClaimsPrincipal(claimIdentity);
             var authorizationParameter = new AuthorizationParameter
             {
                 MaxAge = 2
@@ -121,9 +119,7 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
             _clientRepositoryStub.Setup(c => c.GetAllAsync()).Returns(Task.FromResult(FakeOpenIdAssets.GetClients()));
 
             // ACT
-            var result = await _jwtGenerator.GenerateIdTokenPayloadForScopesAsync(
-                claimsPrincipal,
-                authorizationParameter, null);
+            var result = await _jwtGenerator.GenerateIdTokenPayloadForScopesAsync(claims, authorizationParameter, null, currentDateTimeOffset);
 
             // ASSERT
             Assert.NotNull(result);
@@ -145,8 +141,6 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
             {
                 new Claim(Constants.StandardResourceOwnerClaimNames.Subject, subject)
             };
-            var claimIdentity = new ClaimsIdentity(claims, "fake");
-            var claimsPrincipal = new ClaimsPrincipal(claimIdentity);
             var authorizationParameter = new AuthorizationParameter
             {
                 ClientId = clientId
@@ -154,9 +148,7 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
             _clientRepositoryStub.Setup(c => c.GetAllAsync()).Returns(Task.FromResult(FakeOpenIdAssets.GetClients()));
 
             // ACT
-            var result = await _jwtGenerator.GenerateIdTokenPayloadForScopesAsync(
-                claimsPrincipal,
-                authorizationParameter, issuerName);
+            var result = await _jwtGenerator.GenerateIdTokenPayloadForScopesAsync(claims, authorizationParameter, issuerName);
 
             // ASSERT
             Assert.NotNull(result);
@@ -177,8 +169,6 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
             {
                 new Claim(Constants.StandardResourceOwnerClaimNames.Subject, subject)
             };
-            var claimIdentity = new ClaimsIdentity(claims, "fake");
-            var claimsPrincipal = new ClaimsPrincipal(claimIdentity);
             var authorizationParameter = new AuthorizationParameter
             {
                 ClientId = clientId
@@ -186,9 +176,7 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
             _clientRepositoryStub.Setup(c => c.GetAllAsync()).Returns(Task.FromResult((IEnumerable<Client>)new List<Client>()));
 
             // ACT
-            var result = await _jwtGenerator.GenerateIdTokenPayloadForScopesAsync(
-                claimsPrincipal,
-                authorizationParameter, issuerName);
+            var result = await _jwtGenerator.GenerateIdTokenPayloadForScopesAsync(claims, authorizationParameter, issuerName);
 
             // ASSERT
             Assert.NotNull(result);
@@ -209,14 +197,10 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
             {
                 new Claim(Constants.StandardResourceOwnerClaimNames.Subject, subject)
             };
-            var claimIdentity = new ClaimsIdentity(claims, "fake");
-            var claimsPrincipal = new ClaimsPrincipal(claimIdentity);
             _clientRepositoryStub.Setup(c => c.GetAllAsync()).Returns(Task.FromResult(FakeOpenIdAssets.GetClients()));
 
             // ACT
-            var result = await _jwtGenerator.GenerateIdTokenPayloadForScopesAsync(
-                claimsPrincipal,
-                authorizationParameter, null);
+            var result = await _jwtGenerator.GenerateIdTokenPayloadForScopesAsync(claims, authorizationParameter, null);
 
             // ASSERT
             Assert.NotNull(result);
@@ -256,8 +240,6 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
                 new Claim(ClaimTypes.AuthenticationInstant, currentDateTimeOffset.ToString()),
                 new Claim(Constants.StandardResourceOwnerClaimNames.Subject, subject)
             };
-            var claimIdentity = new ClaimsIdentity(claims, "fake");
-            var claimsPrincipal = new ClaimsPrincipal(claimIdentity);
             var authorizationParameter = new AuthorizationParameter
             {
                 State = state
@@ -284,7 +266,7 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
 
             // ACT & ASSERT
             var exception = await Assert.ThrowsAsync<IdentityServerExceptionWithState>(() => _jwtGenerator.GenerateFilteredIdTokenPayloadAsync(
-                    claimsPrincipal,
+                    claims,
                     authorizationParameter,
                     claimsParameter, null));
             Assert.NotNull(exception);
@@ -306,8 +288,6 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
                 new Claim(ClaimTypes.AuthenticationInstant, currentDateTimeOffset.ToString()),
                 new Claim(Constants.StandardResourceOwnerClaimNames.Subject, subject)
             };
-            var claimIdentity = new ClaimsIdentity(claims, "fake");
-            var claimsPrincipal = new ClaimsPrincipal(claimIdentity);
             var authorizationParameter = new AuthorizationParameter
             {
                 State = state
@@ -334,7 +314,7 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
 
             // ACT & ASSERT
             var exception = await Assert.ThrowsAsync<IdentityServerExceptionWithState>(() => _jwtGenerator.GenerateFilteredIdTokenPayloadAsync(
-                    claimsPrincipal,
+                    claims,
                     authorizationParameter,
                     claimsParameter, null));
             Assert.NotNull(exception);
@@ -356,8 +336,6 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
                 new Claim(ClaimTypes.AuthenticationInstant, currentDateTimeOffset.ToString()),
                 new Claim(Constants.StandardResourceOwnerClaimNames.Subject, subject)
             };
-            var claimIdentity = new ClaimsIdentity(claims, "fake");
-            var claimsPrincipal = new ClaimsPrincipal(claimIdentity);
             var authorizationParameter = new AuthorizationParameter
             {
                 State = state
@@ -384,7 +362,7 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
 
             // ACT & ASSERT
             var exception = await Assert.ThrowsAsync<IdentityServerExceptionWithState>(() => _jwtGenerator.GenerateFilteredIdTokenPayloadAsync(
-                    claimsPrincipal,
+                    claims,
                     authorizationParameter,
                     claimsParameter, null));
             Assert.NotNull(exception);
@@ -405,9 +383,6 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
                 new Claim(Constants.StandardResourceOwnerClaimNames.Subject, subject)
             };
             var authorizationParameter = new AuthorizationParameter();
-
-            var claimIdentity = new ClaimsIdentity(claims, "fake");
-            var claimsPrincipal = new ClaimsPrincipal(claimIdentity);
             var claimsParameter = new List<ClaimParameter>
             {
                 new ClaimParameter
@@ -430,7 +405,7 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
 
             // ACT & ASSERTS
             var result = await Assert.ThrowsAsync<IdentityServerExceptionWithState>(() => _jwtGenerator.GenerateFilteredIdTokenPayloadAsync(
-                claimsPrincipal,
+                claims,
                 authorizationParameter,
                 claimsParameter, null));
 
@@ -456,8 +431,6 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
             {
                 Nonce = nonce
             };
-            var claimIdentity = new ClaimsIdentity(claims, "fake");
-            var claimsPrincipal = new ClaimsPrincipal(claimIdentity);
             var claimsParameter = new List<ClaimParameter>
             {
                 new ClaimParameter
@@ -509,9 +482,9 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
 
             // ACT
             var result = await _jwtGenerator.GenerateFilteredIdTokenPayloadAsync(
-                claimsPrincipal,
+                claims,
                 authorizationParameter,
-                claimsParameter, null);
+                claimsParameter, null, currentDateTimeOffset);
 
             // ASSERT
             Assert.NotNull(result);
@@ -536,7 +509,7 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
 
             // ACT & ASSERT
             await Assert.ThrowsAsync<ArgumentNullException>(() => _jwtGenerator.GenerateUserInfoPayloadForScopeAsync(null, null));
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _jwtGenerator.GenerateUserInfoPayloadForScopeAsync(null, authorizationParameter));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _jwtGenerator.GenerateUserInfoPayloadForScopeAsync(new AuthorizationParameter(), null));
         }
 
         [Fact]
@@ -551,8 +524,6 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
                 new Claim(Constants.StandardResourceOwnerClaimNames.Name, name),
                 new Claim(Constants.StandardResourceOwnerClaimNames.Subject, subject)
             };
-            var claimIdentity = new ClaimsIdentity(claims, "fake");
-            var claimsPrincipal = new ClaimsPrincipal(claimIdentity);
             var authorizationParameter = new AuthorizationParameter
             {
                 Scope = "profile"
@@ -563,7 +534,7 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
                 .Returns(Task.FromResult(scopes));
 
             // ACT
-            var result = await _jwtGenerator.GenerateUserInfoPayloadForScopeAsync(claimsPrincipal, authorizationParameter);
+            var result = await _jwtGenerator.GenerateUserInfoPayloadForScopeAsync(authorizationParameter, claims);
 
             // ASSERT
             Assert.NotNull(result);
@@ -586,7 +557,7 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
             
             // ACT & ASSERT
             Assert.Throws<ArgumentNullException>(() => _jwtGenerator.GenerateFilteredUserInfoPayload(null, null, null));
-            Assert.Throws<ArgumentNullException>(() => _jwtGenerator.GenerateFilteredUserInfoPayload(null, null, authorizationParameter));
+            Assert.Throws<ArgumentNullException>(() => _jwtGenerator.GenerateFilteredUserInfoPayload(null, authorizationParameter, null));
         }
 
         [Fact]
@@ -600,8 +571,6 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
             {
                 new Claim(Constants.StandardResourceOwnerClaimNames.Subject, subject)
             };
-            var claimIdentity = new ClaimsIdentity(claims, "fake");
-            var claimsPrincipal = new ClaimsPrincipal(claimIdentity);
             var claimsParameter = new List<ClaimParameter>
             {
                 new ClaimParameter
@@ -628,10 +597,7 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
                 .Returns(Task.FromResult(scopes));
 
             // ACT & ASSERT
-            var exception = Assert.Throws<IdentityServerExceptionWithState>(() => _jwtGenerator.GenerateFilteredUserInfoPayload(
-                claimsParameter,
-                claimsPrincipal,
-                authorizationParameter));
+            var exception = Assert.Throws<IdentityServerExceptionWithState>(() => _jwtGenerator.GenerateFilteredUserInfoPayload(claimsParameter, authorizationParameter, claims));
             Assert.NotNull(exception);
             Assert.True(exception.Code == ErrorCodes.InvalidGrant);
             Assert.True(exception.Message == string.Format(ErrorDescriptions.TheClaimIsNotValid, Constants.StandardResourceOwnerClaimNames.Subject));
@@ -649,8 +615,6 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
             {
                 new Claim(Constants.StandardResourceOwnerClaimNames.Subject, subject)
             };
-            var claimIdentity = new ClaimsIdentity(claims, "fake");
-            var claimsPrincipal = new ClaimsPrincipal(claimIdentity);
             var claimsParameter = new List<ClaimParameter>
             {
                 new ClaimParameter
@@ -679,8 +643,7 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
             // ACT & ASSERT
             var exception = Assert.Throws<IdentityServerExceptionWithState>(() => _jwtGenerator.GenerateFilteredUserInfoPayload(
                 claimsParameter,
-                claimsPrincipal,
-                authorizationParameter));
+                authorizationParameter, claims));
             Assert.NotNull(exception);
             Assert.True(exception.Code == ErrorCodes.InvalidGrant);
             Assert.True(exception.Message == string.Format(ErrorDescriptions.TheClaimIsNotValid, Constants.StandardResourceOwnerClaimNames.Subject));
@@ -698,8 +661,6 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
             {
                 new Claim(Constants.StandardResourceOwnerClaimNames.Subject, subject)
             };
-            var claimIdentity = new ClaimsIdentity(claims, "fake");
-            var claimsPrincipal = new ClaimsPrincipal(claimIdentity);
             var claimsParameter = new List<ClaimParameter>
             {
                 new ClaimParameter
@@ -728,8 +689,7 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
             // ACT & ASSERT
             var exception = Assert.Throws<IdentityServerExceptionWithState>(() => _jwtGenerator.GenerateFilteredUserInfoPayload(
                 claimsParameter,
-                claimsPrincipal,
-                authorizationParameter));
+                authorizationParameter, claims));
             Assert.NotNull(exception);
             Assert.True(exception.Code == ErrorCodes.InvalidGrant);
             Assert.True(exception.Message == string.Format(ErrorDescriptions.TheClaimIsNotValid, Constants.StandardResourceOwnerClaimNames.Name));
@@ -748,8 +708,6 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
                 new Claim(Constants.StandardResourceOwnerClaimNames.Subject, subject),
                 new Claim(Constants.StandardResourceOwnerClaimNames.Name, "invalid_name")
             };
-            var claimIdentity = new ClaimsIdentity(claims, "fake");
-            var claimsPrincipal = new ClaimsPrincipal(claimIdentity);
             var claimsParameter = new List<ClaimParameter>
             {
                 new ClaimParameter
@@ -789,8 +747,7 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
             // ACT & ASSERT
             var exception = Assert.Throws<IdentityServerExceptionWithState>(() => _jwtGenerator.GenerateFilteredUserInfoPayload(
                 claimsParameter,
-                claimsPrincipal,
-                authorizationParameter));
+                authorizationParameter, claims));
             Assert.NotNull(exception);
             Assert.True(exception.Code == ErrorCodes.InvalidGrant);
             Assert.True(exception.Message == string.Format(ErrorDescriptions.TheClaimIsNotValid, Constants.StandardResourceOwnerClaimNames.Name));
@@ -809,8 +766,6 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
                 new Claim(Constants.StandardResourceOwnerClaimNames.Name, name),
                 new Claim(Constants.StandardResourceOwnerClaimNames.Subject, subject)
             };
-            var claimIdentity = new ClaimsIdentity(claims, "fake");
-            var claimsPrincipal = new ClaimsPrincipal(claimIdentity);
             var claimsParameter = new List<ClaimParameter>
             {
                 new ClaimParameter
@@ -853,8 +808,7 @@ namespace SimpleIdentityServer.Core.UnitTests.JwtToken
             // ACT
             var result = _jwtGenerator.GenerateFilteredUserInfoPayload(
                 claimsParameter,
-                claimsPrincipal,
-                authorizationParameter);
+                authorizationParameter, claims);
 
             // ASSERT
             Assert.NotNull(result);

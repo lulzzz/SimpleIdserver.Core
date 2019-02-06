@@ -16,7 +16,7 @@ namespace SimpleIdServer.Core.Api.Authorization
 {
     public interface IAuthorizationActions
     {
-        Task<ActionResult> GetAuthorization(AuthorizationParameter parameter, string issuerName, string authenticatedSubject = null, long? authInstant = null);
+        Task<ActionResult> GetAuthorization(AuthorizationParameter parameter, string issuerName, string authenticatedSubject = null, double? authInstant = null);
     }
 
     public class AuthorizationActions : IAuthorizationActions
@@ -61,7 +61,7 @@ namespace SimpleIdServer.Core.Api.Authorization
             _resourceOwnerAuthenticateHelper = resourceOwnerAuthenticateHelper;
         }
 
-        public async Task<ActionResult> GetAuthorization(AuthorizationParameter parameter, string issuerName, string authenticatedSubject = null, long? authInstant = null)
+        public async Task<ActionResult> GetAuthorization(AuthorizationParameter parameter, string issuerName, string authenticatedSubject = null, double? authInstant = null)
         {
             var processId = Guid.NewGuid().ToString();
             _eventPublisher.Publish(new AuthorizationRequestReceived(Guid.NewGuid().ToString(), processId,  _payloadSerializer.GetPayload(parameter), 0));

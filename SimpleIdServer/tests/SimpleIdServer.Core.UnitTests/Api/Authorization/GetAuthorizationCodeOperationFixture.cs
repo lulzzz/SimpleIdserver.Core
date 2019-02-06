@@ -54,7 +54,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Authorization
                 .Returns(false);
 
             // ACT & ASSERTS
-            var exception = await Assert.ThrowsAsync<IdentityServerExceptionWithState>(() => _getAuthorizationCodeOperation.Execute(authorizationParameter, null, new Client(), null));
+            var exception = await Assert.ThrowsAsync<IdentityServerExceptionWithState>(() => _getAuthorizationCodeOperation.Execute(authorizationParameter, new Client(), null));
 
             Assert.NotNull(exception);
             Assert.True(exception.Code.Equals(ErrorCodes.InvalidRequestCode));
@@ -76,15 +76,13 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Authorization
                 Type = TypeActionResult.RedirectToCallBackUrl
             };
 
-            _processAuthorizationRequestFake.Setup(p => p.ProcessAsync(It.IsAny<AuthorizationParameter>(),
-                It.IsAny<ClaimsPrincipal>(), It.IsAny<Client>(), null))
+            _processAuthorizationRequestFake.Setup(p => p.ProcessAsync(It.IsAny<AuthorizationParameter>(), It.IsAny<Client>(), null, null, null))
                 .Returns(Task.FromResult(actionResult));
             _clientValidatorFake.Setup(c => c.CheckGrantTypes(It.IsAny<Client>(), It.IsAny<GrantType[]>()))
                 .Returns(true);
 
             // ACT & ASSERT
-            var ex = await Assert.ThrowsAsync<IdentityServerExceptionWithState>(
-                () => _getAuthorizationCodeOperation.Execute(authorizationParameter, null, new Client(), null));
+            var ex = await Assert.ThrowsAsync<IdentityServerExceptionWithState>(() => _getAuthorizationCodeOperation.Execute(authorizationParameter, new Client(), null));
             Assert.True(ex.Code == ErrorCodes.InvalidRequestCode);
             Assert.True(ex.Message ==
                           ErrorDescriptions.TheResponseCannotBeGeneratedBecauseResourceOwnerNeedsToBeAuthenticated);
@@ -115,13 +113,12 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Authorization
             };
             var jsonAuthorizationParameter = JsonConvert.SerializeObject(authorizationParameter);
             _processAuthorizationRequestFake.Setup(p => p.ProcessAsync(
-                It.IsAny<AuthorizationParameter>(),
-                It.IsAny<ClaimsPrincipal>(), It.IsAny<Client>(), null)).Returns(Task.FromResult(actionResult));
+                It.IsAny<AuthorizationParameter>(), It.IsAny<Client>(), null, null, null)).Returns(Task.FromResult(actionResult));
             _clientValidatorFake.Setup(c => c.CheckGrantTypes(It.IsAny<Client>(), It.IsAny<GrantType[]>()))
                 .Returns(true);
 
             // ACT
-            await _getAuthorizationCodeOperation.Execute(authorizationParameter, null, client, null);
+            await _getAuthorizationCodeOperation.Execute(authorizationParameter, client, null);
 
             // ASSERTS
             _oauthEventSource.Verify(s => s.StartAuthorizationCodeFlow(clientId, scope, string.Empty));

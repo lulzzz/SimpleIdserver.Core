@@ -49,8 +49,6 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Consent
         {
             // ARRANGE
             InitializeFakeObjects();
-            var claimsIdentity = new ClaimsIdentity();
-            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
             var actionResult = new ActionResult
             {
                 RedirectInstruction = new RedirectInstruction()
@@ -69,7 +67,7 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Consent
                 .Returns(actionResult);
 
             // ACT
-            var result = await _displayConsentAction.Execute(authorizationParameter, claimsPrincipal, null);
+            var result = await _displayConsentAction.Execute(authorizationParameter, "subject", null);
 
             // ASSERT
             _actionResultFactoryFake.Verify(a => a.CreateAnEmptyActionResultWithRedirectionToCallBackUrl());
@@ -83,8 +81,6 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Consent
             InitializeFakeObjects();
             const string clientId = "clientId";
             const string state = "state";
-            var claimsIdentity = new ClaimsIdentity();
-            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
             var responseTypes = new List<ResponseType>();
             var authorizationParameter = new AuthorizationParameter
             {
@@ -103,7 +99,7 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Consent
 
             // ACT & ASSERTS
             var exception = await Assert.ThrowsAsync<IdentityServerExceptionWithState>(() => _displayConsentAction.Execute(authorizationParameter,
-               claimsPrincipal, null));
+               "subject", null));
             Assert.True(exception.Code == ErrorCodes.InvalidRequestCode);
             Assert.True(exception.Message == ErrorDescriptions.TheAuthorizationFlowIsNotSupported);
             Assert.True(exception.State == state);
@@ -117,8 +113,6 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Consent
             InitializeFakeObjects();
             const string clientId = "clientId";
             const string state = "state";
-            var claimsIdentity = new ClaimsIdentity();
-            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
             var authorizationParameter = new AuthorizationParameter
             {
                 ClientId = clientId,
@@ -132,7 +126,7 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Consent
 
             // ACT & ASSERTS
             var exception = await Assert.ThrowsAsync<IdentityServerExceptionWithState>(() => _displayConsentAction.Execute(authorizationParameter,
-               claimsPrincipal, null));
+               "subject", null));
             Assert.True(exception.Code == ErrorCodes.InvalidRequestCode);
             Assert.True(exception.Message == string.Format(ErrorDescriptions.ClientIsNotValid, clientId));
             Assert.True(exception.State == state);
@@ -171,7 +165,7 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Consent
 
             // ACT
             await _displayConsentAction.Execute(authorizationParameter,
-               claimsPrincipal, null);
+               "subject", null);
 
             // ASSERTS
             Assert.True(scopes.Any(s => s.Name == scopeName));

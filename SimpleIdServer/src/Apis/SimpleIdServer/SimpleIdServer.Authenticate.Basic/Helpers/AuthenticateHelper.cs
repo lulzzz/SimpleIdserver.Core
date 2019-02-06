@@ -4,6 +4,7 @@ using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.Core.Errors;
 using SimpleIdServer.Core.Exceptions;
+using SimpleIdServer.Core.Extensions;
 using SimpleIdServer.Core.Factories;
 using SimpleIdServer.Core.Helpers;
 using SimpleIdServer.Core.Parameters;
@@ -87,7 +88,7 @@ namespace SimpleIdServer.Authenticate.Basic.Helpers
                 result.AmrLst = authorizationParameter.AmrValues == null ? new List<string>() : authorizationParameter.AmrValues.ToList();
                 var claimsIdentity = new ClaimsIdentity(claims, "simpleIdentityServer");
                 var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
-                await _generateAuthorizationResponse.ExecuteAsync(result, authorizationParameter, claimsPrincipal, client, issuerName).ConfigureAwait(false);
+                await _generateAuthorizationResponse.ExecuteAsync(result, authorizationParameter,  client, issuerName, claimsPrincipal.GetSubject()).ConfigureAwait(false);
                 var responseMode = authorizationParameter.ResponseMode;
                 if (responseMode == ResponseMode.None)
                 {

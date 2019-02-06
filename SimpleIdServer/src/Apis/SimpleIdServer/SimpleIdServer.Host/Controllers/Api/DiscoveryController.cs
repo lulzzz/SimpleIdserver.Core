@@ -49,7 +49,6 @@ namespace SimpleIdServer.Host.Controllers.Api
             var jwksUri = issuer + "/" + Constants.EndPoints.Jwks;
             var registrationEndPoint = issuer + "/" + Constants.EndPoints.Registration;
             var revocationEndPoint = issuer + "/" + Constants.EndPoints.Revocation;
-            // TODO : implement the session management : http://openid.net/specs/openid-connect-session-1_0.html
             var checkSessionIframe = issuer + "/" + Constants.EndPoints.CheckSession;
             var endSessionEndPoint = issuer + "/" + Constants.EndPoints.EndSession;
             var introspectionEndPoint = issuer + "/" + Constants.EndPoints.Introspection;

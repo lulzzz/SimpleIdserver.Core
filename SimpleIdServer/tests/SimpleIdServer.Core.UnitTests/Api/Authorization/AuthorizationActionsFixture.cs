@@ -87,8 +87,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Authorization
                 {
                     ResponseType.id_token
                 });
-            _getTokenViaImplicitWorkflowOperationFake.Setup(g => g.Execute(It.IsAny<AuthorizationParameter>(),
-                It.IsAny<IPrincipal>(), It.IsAny<Client>(), null)).Returns(Task.FromResult(actionResult));
+            _getTokenViaImplicitWorkflowOperationFake.Setup(g => g.Execute(It.IsAny<AuthorizationParameter>(), It.IsAny<Client>(), null, null, null)).Returns(Task.FromResult(actionResult));
             _authorizationFlowHelperFake.Setup(a => a.GetAuthorizationFlow(It.IsAny<ICollection<ResponseType>>(),
                 It.IsAny<string>()))
                 .Returns(AuthorizationFlow.ImplicitFlow);
@@ -140,8 +139,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Authorization
                 {
                     ResponseType.id_token
                 });
-            _getAuthorizationCodeOperationFake.Setup(g => g.Execute(It.IsAny<AuthorizationParameter>(),
-                It.IsAny<IPrincipal>(), It.IsAny<Client>(), null)).Returns(Task.FromResult(actionResult));
+            _getAuthorizationCodeOperationFake.Setup(g => g.Execute(It.IsAny<AuthorizationParameter>(), It.IsAny<Client>(), null, null, null)).Returns(Task.FromResult(actionResult));
             _authorizationFlowHelperFake.Setup(a => a.GetAuthorizationFlow(It.IsAny<ICollection<ResponseType>>(),
                 It.IsAny<string>()))
                 .Returns(AuthorizationFlow.AuthorizationCodeFlow);
@@ -193,8 +191,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Authorization
                 {
                     ResponseType.id_token
                 });
-            _getAuthorizationCodeAndTokenViaHybridWorkflowOperationFake.Setup(g => g.Execute(It.IsAny<AuthorizationParameter>(),
-                It.IsAny<IPrincipal>(), It.IsAny<Client>(), null)).Returns(Task.FromResult(actionResult));
+            _getAuthorizationCodeAndTokenViaHybridWorkflowOperationFake.Setup(g => g.Execute(It.IsAny<AuthorizationParameter>(), It.IsAny<Client>(), null, null, null)).Returns(Task.FromResult(actionResult));
             _authorizationFlowHelperFake.Setup(a => a.GetAuthorizationFlow(It.IsAny<ICollection<ResponseType>>(),
                 It.IsAny<string>()))
                 .Returns(AuthorizationFlow.HybridFlow);

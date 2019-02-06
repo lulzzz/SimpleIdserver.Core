@@ -65,8 +65,6 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Consent
             {
                 new Claim(Constants.StandardResourceOwnerClaimNames.Subject, subject)
             };
-            var claimsIdentity = new ClaimsIdentity(claims, "SimpleIdentityServer");
-            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
             var client = new Client
             {
                 ClientId = "clientId"
@@ -99,7 +97,7 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Consent
                 .Returns(new List<ResponseType> { ResponseType.id_token, ResponseType.id_token });
 
             // ACT & ASSERT
-            var exception = await Assert.ThrowsAsync<IdentityServerExceptionWithState>(() => _confirmConsentAction.Execute(authorizationParameter, claimsPrincipal, null));
+            var exception = await Assert.ThrowsAsync<IdentityServerExceptionWithState>(() => _confirmConsentAction.Execute(authorizationParameter, subject, null));
             Assert.NotNull(exception);
             Assert.True(exception.Code == ErrorCodes.InvalidRequestCode);
             Assert.True(exception.Message == ErrorDescriptions.TheAuthorizationFlowIsNotSupported);
@@ -131,8 +129,6 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Consent
             {
                 new Claim(Constants.StandardResourceOwnerClaimNames.Subject, subject)
             };
-            var claimsIdentity = new ClaimsIdentity(claims, "SimpleIdentityServer");
-            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
             var client = new Client
             {
                 ClientId = clientId
@@ -165,7 +161,7 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Consent
                 .Returns(Task.FromResult(true));
 
             // ACT
-            await _confirmConsentAction.Execute(authorizationParameter, claimsPrincipal, null);
+            await _confirmConsentAction.Execute(authorizationParameter, subject, null);
 
             // ASSERT
             Assert.NotNull(insertedConsent);
@@ -191,8 +187,6 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Consent
             {
                 new Claim(Constants.StandardResourceOwnerClaimNames.Subject, subject)
             };
-            var claimsIdentity = new ClaimsIdentity(claims, "SimpleIdentityServer");
-            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
             var client = new Client
             {
                 ClientId = "clientId"
@@ -227,7 +221,7 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Consent
                 .Returns(new List<ResponseType> {  ResponseType.code });
 
             // ACT
-            var result = await _confirmConsentAction.Execute(authorizationParameter, claimsPrincipal, null);
+            var result = await _confirmConsentAction.Execute(authorizationParameter, subject, null);
 
             // ASSERT
             _consentRepositoryFake.Verify(c => c.InsertAsync(It.IsAny<SimpleIdServer.Core.Common.Models.Consent>()));

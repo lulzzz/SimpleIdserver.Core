@@ -1,20 +1,4 @@
-﻿#region copyright
-// Copyright 2015 Habart Thierry
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-#endregion
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -35,15 +19,7 @@ namespace SimpleIdServer.Core.WebSite.Consent.Actions
 {
     public interface IDisplayConsentAction
     {
-        /// <summary>
-        /// Fetch the scopes and client name from the ClientRepository and the parameter
-        /// Those informations are used to create the consent screen.
-        /// </summary>
-        /// <param name="authorizationParameter">Authorization code grant type parameter.</param>
-        /// <param name="claimsPrincipal"></param>
-        /// <param name="originUrl"></param>
-        /// <returns>Action result.</returns>
-        Task<DisplayContentResult> Execute(AuthorizationParameter authorizationParameter, ClaimsPrincipal claimsPrincipal, string issuerName);
+        Task<DisplayContentResult> Execute(AuthorizationParameter authorizationParameter, string authenticatedSubject, string issuerName);
     }
 
     public class DisplayContentResult
@@ -79,29 +55,17 @@ namespace SimpleIdServer.Core.WebSite.Consent.Actions
             _actionResultFactory = actionResultFactory;
         }
 
-        /// <summary>
-        /// Fetch the scopes and client name from the ClientRepository and the parameter
-        /// Those informations are used to create the consent screen.
-        /// </summary>
-        /// <param name="authorizationParameter">Authorization code grant type parameter.</param>
-        /// <param name="claimsPrincipal"></param>
-        /// <param name="client">Information about the client</param>
-        /// <param name="allowedScopes">Allowed scopes</param>
-        /// <param name="allowedClaims">Allowed claims</param>
         /// <returns>Action result.</returns>
-        public async Task<DisplayContentResult> Execute(
-            AuthorizationParameter authorizationParameter,
-            ClaimsPrincipal claimsPrincipal, string issuerName)
+        public async Task<DisplayContentResult> Execute(AuthorizationParameter authorizationParameter, string authenticatedSubject, string issuerName)
         {
             if (authorizationParameter == null)
             {
                 throw new ArgumentNullException(nameof(authorizationParameter));
             }
 
-            if (claimsPrincipal == null ||
-                claimsPrincipal.Identity == null)
+            if (string.IsNullOrWhiteSpace(authenticatedSubject))
             {
-                throw new ArgumentNullException(nameof(claimsPrincipal));
+                throw new ArgumentNullException(nameof(authenticatedSubject));
             }
             
             var client = await _clientRepository.GetClientByIdAsync(authorizationParameter.ClientId);
@@ -113,13 +77,12 @@ namespace SimpleIdServer.Core.WebSite.Consent.Actions
             }
 
             ActionResult actionResult;
-            var subject = claimsPrincipal.GetSubject();
-            var assignedConsent = await _consentHelper.GetConfirmedConsentsAsync(subject, authorizationParameter);
+            var assignedConsent = await _consentHelper.GetConfirmedConsentsAsync(authenticatedSubject, authorizationParameter).ConfigureAwait(false);
             // If there's already a consent then redirect to the callback
             if (assignedConsent != null)
             {
                 actionResult = _actionResultFactory.CreateAnEmptyActionResultWithRedirectionToCallBackUrl();
-                await _generateAuthorizationResponse.ExecuteAsync(actionResult, authorizationParameter, claimsPrincipal, client, issuerName);
+                await _generateAuthorizationResponse.ExecuteAsync(actionResult, authorizationParameter, client, issuerName, authenticatedSubject).ConfigureAwait(false);
                 var responseMode = authorizationParameter.ResponseMode;
                 if (responseMode == ResponseMode.None)
                 {
@@ -160,11 +123,6 @@ namespace SimpleIdServer.Core.WebSite.Consent.Actions
             };
         }
 
-        /// <summary>
-        /// Returns a list of scopes from a concatenate list of scopes separated by whitespaces.
-        /// </summary>
-        /// <param name="concatenateListOfScopes"></param>
-        /// <returns>List of scopes</returns>
         private async Task<IEnumerable<Scope>> GetScopes(string concatenateListOfScopes)
         {
             var result = new List<Scope>();

@@ -1,26 +1,10 @@
-﻿#region copyright
-// Copyright 2015 Habart Thierry
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-#endregion
-
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
 using SimpleIdServer.Bus;
 using SimpleIdServer.Core;
-using SimpleIdServer.Core.Api.User;
+using SimpleIdServer.Core.Extensions;
 using SimpleIdServer.Core.Translation;
 using SimpleIdServer.Core.WebSite.Consent;
 using SimpleIdServer.Dtos.Requests;
@@ -52,7 +36,6 @@ namespace SimpleIdServer.Shell.Controllers
             ITranslationManager translationManager,
             IEventPublisher eventPublisher,
             IAuthenticationService authenticationService,
-            IUserActions usersAction,
             IPayloadSerializer payloadSerializer) : base(authenticationService)
         {
             _consentActions = consentActions;
@@ -65,19 +48,17 @@ namespace SimpleIdServer.Shell.Controllers
         public async Task<ActionResult> Index(string code)
         {
             var request = _dataProtector.Unprotect<AuthorizationRequest>(code);
-            var client = new SimpleIdServer.Core.Common.Models.Client();
-            var authenticatedUser = await SetUser();
+            var client = new Core.Common.Models.Client();
+            var authenticatedUser = await SetUser().ConfigureAwait(false);
             var issuerName = Request.GetAbsoluteUriWithVirtualPath();
-            var actionResult = await _consentActions.DisplayConsent(request.ToParameter(),
-                authenticatedUser, issuerName);
-
+            var actionResult = await _consentActions.DisplayConsent(request.ToParameter(), authenticatedUser.GetSubject(), issuerName).ConfigureAwait(false);
             var result = this.CreateRedirectionFromActionResult(actionResult.ActionResult, request);
             if (result != null)
             {
                 return result;
             }
 
-            await TranslateConsentScreen(request.UiLocales);
+            await TranslateConsentScreen(request.UiLocales).ConfigureAwait(false);
             var viewModel = new ConsentViewModel
             {
                 ClientDisplayName = client.ClientName,
@@ -95,13 +76,11 @@ namespace SimpleIdServer.Shell.Controllers
         {
             var request = _dataProtector.Unprotect<AuthorizationRequest>(code);
             var parameter = request.ToParameter();
-            var authenticatedUser = await _authenticationService.GetAuthenticatedUser(this, Constants.CookieNames.CookieName);
+            var authenticatedUser = await _authenticationService.GetAuthenticatedUser(this, Constants.CookieNames.CookieName).ConfigureAwait(false);
             var issuerName = Request.GetAbsoluteUriWithVirtualPath();
-            var actionResult = await _consentActions.ConfirmConsent(parameter,
-                authenticatedUser, issuerName);
-            await LogConsentAccepted(actionResult, parameter.ProcessId);
-            return this.CreateRedirectionFromActionResult(actionResult,
-                request);
+            var actionResult = await _consentActions.ConfirmConsent(parameter, authenticatedUser.GetSubject(), issuerName).ConfigureAwait(false);
+            LogConsentAccepted(actionResult, parameter.ProcessId);
+            return this.CreateRedirectionFromActionResult(actionResult, request);
         }
 
         /// <summary>
@@ -113,7 +92,7 @@ namespace SimpleIdServer.Shell.Controllers
         public async Task<ActionResult> Cancel(string code)
         {
             var request = _dataProtector.Unprotect<AuthorizationRequest>(code);
-            await LogConsentRejected(request.ProcessId);
+            LogConsentRejected(request.ProcessId);
             return Redirect(request.RedirectUri);
         }
 
@@ -133,7 +112,7 @@ namespace SimpleIdServer.Shell.Controllers
             ViewBag.Translations = translations;
         }
 
-        private async Task LogConsentAccepted(Core.Results.ActionResult act, string processId)
+        private void LogConsentAccepted(Core.Results.ActionResult act, string processId)
         {
             if (string.IsNullOrWhiteSpace(processId))
             {
@@ -143,7 +122,7 @@ namespace SimpleIdServer.Shell.Controllers
             _eventPublisher.Publish(new ConsentAccepted(Guid.NewGuid().ToString(), processId, _payloadSerializer.GetPayload(act), 10));
         }
 
-        private async Task LogConsentRejected(string processId)
+        private void LogConsentRejected(string processId)
         {
             if (string.IsNullOrWhiteSpace(processId))
             {

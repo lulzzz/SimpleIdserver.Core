@@ -1,20 +1,4 @@
-﻿#region copyright
-// Copyright 2015 Habart Thierry
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-#endregion
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -36,7 +20,7 @@ namespace SimpleIdServer.Core.WebSite.Consent.Actions
 {
     public interface IConfirmConsentAction
     {
-        Task<ActionResult> Execute(AuthorizationParameter authorizationParameter, ClaimsPrincipal claimsPrincipal, string issuerName);
+        Task<ActionResult> Execute(AuthorizationParameter authorizationParameter, string authenticatedSubject, string issuerName);
     }
 
     public class ConfirmConsentAction : IConfirmConsentAction
@@ -73,27 +57,16 @@ namespace SimpleIdServer.Core.WebSite.Consent.Actions
             _openidEventSource = openidEventSource;
         }
 
-        /// <summary>
-        /// This method is executed when the user confirm the consent
-        /// 1). If there's already consent confirmed in the past by the resource owner
-        /// 1).* then we generate an authorization code and redirects to the callback.
-        /// 2). If there's no consent then we insert it and the authorization code is returned
-        ///  2°.* to the callback url.
-        /// </summary>
-        /// <param name="authorizationParameter">Authorization code grant-type</param>
-        /// <param name="claimsPrincipal">Resource owner's claims</param>
-        /// <returns>Redirects the authorization code to the callback.</returns>
-        public async Task<ActionResult> Execute(AuthorizationParameter authorizationParameter, ClaimsPrincipal claimsPrincipal, string issuerName)
+        public async Task<ActionResult> Execute(AuthorizationParameter authorizationParameter, string authenticatedSubject, string issuerName)
         {
             if (authorizationParameter == null)
             {
                 throw new ArgumentNullException(nameof(authorizationParameter));
             }
 
-            if (claimsPrincipal == null ||
-                claimsPrincipal.Identity == null)
+            if (string.IsNullOrWhiteSpace(authenticatedSubject))
             {
-                throw new ArgumentNullException(nameof(claimsPrincipal));
+                throw new ArgumentNullException(nameof(authenticatedSubject));
             }
 
             var client = await _clientRepository.GetClientByIdAsync(authorizationParameter.ClientId);
@@ -103,8 +76,7 @@ namespace SimpleIdServer.Core.WebSite.Consent.Actions
                     authorizationParameter.ClientId));
             }
 
-            var subject = claimsPrincipal.GetSubject();
-            Common.Models.Consent assignedConsent = await _consentHelper.GetConfirmedConsentsAsync(subject, authorizationParameter);
+            Common.Models.Consent assignedConsent = await _consentHelper.GetConfirmedConsentsAsync(authenticatedSubject, authorizationParameter).ConfigureAwait(false);
             // Insert a new consent.
             if (assignedConsent == null)
             {
@@ -117,7 +89,7 @@ namespace SimpleIdServer.Core.WebSite.Consent.Actions
                     {
                         Id = Guid.NewGuid().ToString(),
                         Client = client,
-                        ResourceOwner = await _resourceOwnerRepository.GetAsync(subject),
+                        ResourceOwner = await _resourceOwnerRepository.GetAsync(authenticatedSubject).ConfigureAwait(false),
                         Claims = claimsParameter.GetClaimNames()
                     };
                 }
@@ -129,20 +101,18 @@ namespace SimpleIdServer.Core.WebSite.Consent.Actions
                         Id = Guid.NewGuid().ToString(),
                         Client = client,
                         GrantedScopes = (await GetScopes(authorizationParameter.Scope)).ToList(),
-                        ResourceOwner = await _resourceOwnerRepository.GetAsync(subject),
+                        ResourceOwner = await _resourceOwnerRepository.GetAsync(authenticatedSubject).ConfigureAwait(false),
                     };
                 }
 
                 // A consent can be given to a set of claims
                 await _consentRepository.InsertAsync(assignedConsent);
 
-                _openidEventSource.GiveConsent(subject,
-                    authorizationParameter.ClientId,
-                    assignedConsent.Id);
+                _openidEventSource.GiveConsent(authenticatedSubject, authorizationParameter.ClientId, assignedConsent.Id);
             }
 
             var result = _actionResultFactory.CreateAnEmptyActionResultWithRedirectionToCallBackUrl();
-            await _generateAuthorizationResponse.ExecuteAsync(result, authorizationParameter, claimsPrincipal, client, issuerName);
+            await _generateAuthorizationResponse.ExecuteAsync(result, authorizationParameter, client, issuerName, authenticatedSubject).ConfigureAwait(false);
 
             // If redirect to the callback and the responde mode has not been set.
             if (result.Type == TypeActionResult.RedirectToCallBackUrl)
