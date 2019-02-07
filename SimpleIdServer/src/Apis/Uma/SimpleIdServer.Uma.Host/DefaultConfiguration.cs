@@ -42,6 +42,17 @@ namespace SimpleIdServer.Uma.Host
             },
 			new Scope
 			{
+                Name = "edit_credentials",
+                IsExposed = false,
+                IsOpenIdScope = false,
+                IsDisplayedInConsent = true,
+                Description = "Edit the credentials",
+                Type = ScopeType.ProtectedApi,
+                UpdateDateTime = DateTime.UtcNow,
+                CreateDateTime = DateTime.UtcNow				
+			},
+			new Scope
+			{
 				Name = "scim_manage",
 				IsExposed = false,
 				IsOpenIdScope = false,
@@ -119,7 +130,11 @@ namespace SimpleIdServer.Uma.Host
                     new Scope
                     {
                         Name = "adminapi"
-                    }
+                    },
+					new Scope
+					{
+						Name = "edit_credentials"
+					}
                 },
                 GrantTypes = new List<GrantType>
                 {

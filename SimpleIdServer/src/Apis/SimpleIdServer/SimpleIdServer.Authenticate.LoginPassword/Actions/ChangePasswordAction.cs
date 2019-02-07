@@ -41,12 +41,6 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Actions
                 throw new IdentityServerException(Core.Errors.ErrorCodes.InternalError, Core.Errors.ErrorDescriptions.TheResourceOwnerDoesntExist);
             }
 
-            var credential = resourceOwner.Credentials.First(c => c.Type == Constants.AMR);
-            if (!string.IsNullOrWhiteSpace(credential.Value) && credential.Value != PasswordHelper.ComputeHash(changePasswordParameter.ActualPassword))
-            {
-                throw new IdentityServerException(Core.Errors.ErrorCodes.InternalError, Core.Errors.ErrorDescriptions.ThePasswordIsNotCorrect);
-            }
-
             var passwordSettings = await _credentialSettingActions.Get(Constants.AMR).ConfigureAwait(false);
             var opts = JsonConvert.DeserializeObject<PwdCredentialOptions>(passwordSettings.Options);
             if (opts.IsRegexEnabled)
@@ -57,6 +51,27 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Actions
                     throw new IdentityServerException(Core.Errors.ErrorCodes.InternalError, string.Format(Core.Errors.ErrorDescriptions.ThePasswordMustRespects, opts.PasswordDescription));
                 }
             }
+
+            var credential = resourceOwner.Credentials.FirstOrDefault(c => c.Type == Constants.AMR);
+            if (credential == null)
+            {
+                await _userActions.AddCredentials(new[]
+                {
+                    new AddUserCredentialParameter
+                    {
+                        CredentialType = Constants.AMR,
+                        UserId = changePasswordParameter.Subject,
+                        Value = PasswordHelper.ComputeHash(changePasswordParameter.NewPassword)
+                    }
+                });
+                return true;
+            }
+
+            if (!string.IsNullOrWhiteSpace(credential.Value) && credential.Value != PasswordHelper.ComputeHash(changePasswordParameter.ActualPassword))
+            {
+                throw new IdentityServerException(Core.Errors.ErrorCodes.InternalError, Core.Errors.ErrorDescriptions.ThePasswordIsNotCorrect);
+            }
+
 
             await _userActions.UpdateCredential(new UpdateUserCredentialParameter
             {
