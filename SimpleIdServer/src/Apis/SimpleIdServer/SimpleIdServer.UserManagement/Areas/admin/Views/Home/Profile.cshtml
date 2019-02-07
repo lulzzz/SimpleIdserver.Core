@@ -18,7 +18,7 @@
     <div class="row">
         <div class="col-md-6">
             <h4>Link to an external identity provider</h4>
-            @using (Html.BeginForm("Link", "User"))
+            @using (Html.BeginForm("Link", "Home"))
             {
                 foreach (var loginProvider in Model.UnlinkedIdentityProviders)
                 {

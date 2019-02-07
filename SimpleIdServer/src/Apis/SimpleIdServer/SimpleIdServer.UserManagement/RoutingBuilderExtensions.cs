@@ -15,7 +15,7 @@ namespace SimpleIdServer.UserManagement
 
             routeBuilder.MapRoute("UserManagement",
                 "admin/{controller}/{action}/{id?}",
-                new { controller = "User", action = "Index", area = "admin" },
+                new { controller = "Home", action = "Index", area = "admin" },
                 constraints: new { area = "admin" });
             return routeBuilder;
         }

@@ -112,7 +112,7 @@ namespace SimpleIdServer.Authenticate.Basic.Controllers
                 Code = code
             };
 
-            // await SetIdProviders(viewModel).ConfigureAwait(false);
+            await SetIdProviders(viewModel).ConfigureAwait(false);
             return View(viewModel);
         }
 

@@ -128,7 +128,7 @@ namespace SimpleIdServer.UserManagement.Controllers
                 throw new ArgumentNullException(nameof(provider));
             }
 
-            var redirectUrl = _urlHelper.AbsoluteAction("LinkCallback", "User", new { area = "UserManagement" });
+            var redirectUrl = _urlHelper.AbsoluteAction("LinkCallback", "Home", new { area = "admin" });
             await _authenticationService.ChallengeAsync(HttpContext, provider, new AuthenticationProperties()
             {
                 RedirectUri = redirectUrl
@@ -154,7 +154,7 @@ namespace SimpleIdServer.UserManagement.Controllers
                 var externalClaims = await _authenticationService.GetAuthenticatedUser(this, Constants.CookieNames.ExternalCookieName);                
                 var resourceOwner = await _profileActions.Link(authenticatedUser.GetSubject(), externalClaims.GetSubject(), externalClaims.Identity.AuthenticationType, false);
                 await _authenticationService.SignOutAsync(HttpContext, Constants.CookieNames.ExternalCookieName, new AuthenticationProperties());
-                return RedirectToAction("Profile", "User", new { area = "UserManagement" });
+                return RedirectToAction("Profile", "Home", new { area = "admin" });
             }
             catch (ProfileAssignedAnotherAccountException)
             {
@@ -180,7 +180,7 @@ namespace SimpleIdServer.UserManagement.Controllers
                 !externalClaims.Identity.IsAuthenticated ||
                 !(externalClaims.Identity is ClaimsIdentity))
             {
-                return RedirectToAction("Profile", "User", new { area = "UserManagement" });
+                return RedirectToAction("Profile", "Home", new { area = "admin" });
             }
 
             await SetUser();
@@ -202,14 +202,14 @@ namespace SimpleIdServer.UserManagement.Controllers
                 !externalClaims.Identity.IsAuthenticated ||
                 !(externalClaims.Identity is ClaimsIdentity))
             {
-                return RedirectToAction("Profile", "User", new { area = "UserManagement" });
+                return RedirectToAction("Profile", "Home", new { area = "admin" });
             }
 
             var authenticatedUser = await SetUser();
             try
             {
                 await _profileActions.Link(authenticatedUser.GetSubject(), externalClaims.GetSubject(), externalClaims.Identity.AuthenticationType, true);
-                return RedirectToAction("Profile", "User", new { area = "UserManagement" });
+                return RedirectToAction("Profile", "Home", new { area = "admin" });
             }
             finally
             {
