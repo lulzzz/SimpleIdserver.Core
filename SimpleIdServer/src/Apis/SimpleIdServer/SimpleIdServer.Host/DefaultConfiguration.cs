@@ -698,6 +698,58 @@ namespace SimpleIdServer.Host
             },
             new Client
             {
+                ClientId = "accessProvisioning",
+                Secrets = new List<ClientSecret>
+                {
+                    new ClientSecret
+                    {
+                        Type = ClientSecretTypes.SharedSecret,
+                        Value = "accessProvisioningSecret"
+                    }
+                },
+                ClientName = "Access Provisioning",
+                TokenEndPointAuthMethod = TokenEndPointAuthenticationMethods.client_secret_post,
+                ApplicationType = ApplicationTypes.web,
+                UpdateDateTime = DateTime.UtcNow,
+                CreateDateTime = DateTime.UtcNow,
+                AllowedScopes = new List<Scope>
+                {
+                    new Scope
+                    {
+                        Name = "openid"
+                    },
+                    new Scope
+                    {
+                        Name = "role"
+                    },
+                    new Scope
+                    {
+                        Name = "profile"
+                    },
+                    new Scope
+                    {
+                        Name = "email"
+                    }
+                },
+                GrantTypes = new List<GrantType>
+                {
+                    GrantType.authorization_code,
+                    GrantType.password
+                },
+                ResponseTypes = new List<ResponseType>
+                {
+                    ResponseType.token,
+                    ResponseType.id_token,
+                    ResponseType.code
+                },
+                RedirectionUrls = new List<string>
+                {
+                    "http://localhost:60041/Authenticate/Callback",
+                    "https://localhost:60051/Authenticate/Callback"
+                }
+            },
+            new Client
+            {
                 ClientId = "uma",
                 Secrets = new List<ClientSecret>
                 {
