@@ -42,17 +42,6 @@ namespace SimpleIdServer.Uma.Host
             },
 			new Scope
 			{
-                Name = "edit_credentials",
-                IsExposed = false,
-                IsOpenIdScope = false,
-                IsDisplayedInConsent = true,
-                Description = "Edit the credentials",
-                Type = ScopeType.ProtectedApi,
-                UpdateDateTime = DateTime.UtcNow,
-                CreateDateTime = DateTime.UtcNow				
-			},
-			new Scope
-			{
 				Name = "scim_manage",
 				IsExposed = false,
 				IsOpenIdScope = false,
@@ -72,11 +61,69 @@ namespace SimpleIdServer.Uma.Host
 				Type = ScopeType.ProtectedApi,
 				UpdateDateTime = DateTime.UtcNow,
 				CreateDateTime = DateTime.UtcNow
-			}		
+			},
+			new Scope
+			{
+                Name = "edit_credentials",
+                IsExposed = false,
+                IsOpenIdScope = false,
+                IsDisplayedInConsent = true,
+                Description = "Edit the credentials",
+                Type = ScopeType.ProtectedApi,
+                UpdateDateTime = DateTime.UtcNow,
+                CreateDateTime = DateTime.UtcNow				
+			},
+			new Scope
+			{
+				Name = "launchjob",
+				IsExposed = false,
+				IsOpenIdScope = false,
+				IsDisplayedInConsent = true,
+				Description = "Launch job",
+				Type = ScopeType.ProtectedApi,
+				UpdateDateTime = DateTime.UtcNow,
+				CreateDateTime = DateTime.UtcNow
+			}
         };
 
         public static List<SimpleIdServer.Core.Common.Models.Client> DEFAULT_CLIENTS = new List<SimpleIdServer.Core.Common.Models.Client>
         {
+            new SimpleIdServer.Core.Common.Models.Client
+            {
+                ClientId = "idProvisioning",
+                Secrets = new List<ClientSecret>
+                {
+                    new ClientSecret
+                    {
+                        Type = ClientSecretTypes.SharedSecret,
+                        Value = "idProvisioningPassword"
+                    }
+                },
+                ClientName = "Identity Provisioning",
+                TokenEndPointAuthMethod = TokenEndPointAuthenticationMethods.client_secret_post,
+                ApplicationType = ApplicationTypes.native,
+                UpdateDateTime = DateTime.UtcNow,
+                CreateDateTime = DateTime.UtcNow,
+                AllowedScopes = new List<Scope>
+                {
+                    new Scope
+                    {
+                        Name = "launchjob"
+                    }
+                },
+                GrantTypes = new List<GrantType>
+                {
+                    GrantType.client_credentials
+                },
+                ResponseTypes = new List<ResponseType>
+                {
+                    ResponseType.token
+                },
+				RedirectionUrls = new List<string>
+				{
+					"http://localhost:4200"
+				}
+            },
             new SimpleIdServer.Core.Common.Models.Client
             {
                 ClientId = "registrationClient",
@@ -107,7 +154,11 @@ namespace SimpleIdServer.Uma.Host
                 ResponseTypes = new List<ResponseType>
                 {
                     ResponseType.token
-                }
+                },
+				RedirectionUrls = new List<string>
+				{
+					"http://localhost:4200"
+				}
             },
             new SimpleIdServer.Core.Common.Models.Client
             {
@@ -143,7 +194,11 @@ namespace SimpleIdServer.Uma.Host
                 ResponseTypes = new List<ResponseType>
                 {
                     ResponseType.token
-                }
+                },
+				RedirectionUrls = new List<string>
+				{
+					"http://localhost:4200"
+				}
             },
             new SimpleIdServer.Core.Common.Models.Client
             {
@@ -179,7 +234,11 @@ namespace SimpleIdServer.Uma.Host
                 ResponseTypes = new List<ResponseType>
                 {
                     ResponseType.token
-                }
+                },
+				RedirectionUrls = new List<string>
+				{
+					"http://localhost:4200"
+				}
             },
             new SimpleIdServer.Core.Common.Models.Client
             {
@@ -211,7 +270,51 @@ namespace SimpleIdServer.Uma.Host
                 ResponseTypes = new List<ResponseType>
                 {
                     ResponseType.token
-                }
+                },
+				RedirectionUrls = new List<string>
+				{
+					"http://localhost:4200"
+				}
+            },
+            new SimpleIdServer.Core.Common.Models.Client
+            {
+                ClientId = "jobOrchestrator",
+                Secrets = new List<ClientSecret>
+                {
+                    new ClientSecret
+                    {
+                        Type = ClientSecretTypes.SharedSecret,
+                        Value = "jobOrchestratorPassword"
+                    }
+                },
+                ClientName = "Job orchestrator",
+                TokenEndPointAuthMethod = TokenEndPointAuthenticationMethods.client_secret_post,
+                ApplicationType = ApplicationTypes.native,
+                UpdateDateTime = DateTime.UtcNow,
+                CreateDateTime = DateTime.UtcNow,
+                AllowedScopes = new List<Scope>
+                {
+                    new Scope
+                    {
+                        Name = "uma_protection"
+                    },
+                    new Scope
+                    {
+                        Name = "adminapi"
+                    }
+                },
+                GrantTypes = new List<GrantType>
+                {
+                    GrantType.client_credentials
+                },
+                ResponseTypes = new List<ResponseType>
+                {
+                    ResponseType.token
+                },
+				RedirectionUrls = new List<string>
+				{
+					"http://localhost:4200"
+				}
             }
         };
     }
