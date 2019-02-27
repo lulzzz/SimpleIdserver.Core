@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using SimpleIdServer.Core.Common.Models;
+﻿using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Helpers;
 using System;
 using System.Collections.Generic;
@@ -36,6 +35,16 @@ namespace SimpleIdServer.Host
             {
                 AmrLst = new List<string>
                 {
+                    "webauthn"
+                },
+                DisplayName = "SID LOA2-1",
+                Name = "sid::loa-2-1",
+                Type = AuthenticationContextclassReferenceTypes.LOA2
+            },
+            new AuthenticationContextclassReference
+            {
+                AmrLst = new List<string>
+                {
                     "pwd",
                     "sms"
                 },
@@ -63,7 +72,7 @@ namespace SimpleIdServer.Host
                 DisplayName = "SID LOA3-2",
                 Name = "sid::loa-3-2",
                 Type = AuthenticationContextclassReferenceTypes.LOA3
-            },
+            }
         };
 
         public static IEnumerable<CredentialSetting> DEFAULT_CREDENTIAL_SETTINGS = new List<CredentialSetting>
@@ -84,6 +93,15 @@ namespace SimpleIdServer.Host
                 AuthenticationIntervalsInSeconds = 10,
                 ExpiresIn = TimeSpan.FromDays(2).TotalSeconds,
                 CredentialType = "eid",
+                Options = ""
+            },
+            new CredentialSetting
+            {
+                IsBlockAccountPolicyEnabled = true,
+                NumberOfAuthenticationAttempts = 3,
+                AuthenticationIntervalsInSeconds = 10,
+                ExpiresIn = TimeSpan.FromDays(2).TotalSeconds,
+                CredentialType = "webauthn",
                 Options = ""
             }
         };
@@ -495,6 +513,16 @@ namespace SimpleIdServer.Host
                         FirstAuthenticationFailureDateTime = null,
                         Type = "eid",
                         Value = ""
+                    },
+                    new ResourceOwnerCredential
+                    {
+                        ExpirationDateTime = DateTime.UtcNow.AddDays(10),
+                        // Value = "AUAPaxbKHFeeNCu9mlRXMeSrEE+4rtQAxMBwx0d//7jbqqZnFsCRroXEw9O4MVq0M1dE2dDzbb81SRaP1vJarXk=",
+                        Value = "AUxoUWXsCbQnqqOaAShbPYqoLvOJkDF6MzQapxvpat4c5DCCAPpT6Ctg2wvvtuvhX4rQwoUZJtQeHwh3PThM5EA",
+                        IsBlocked = false,
+                        FirstAuthenticationFailureDateTime = null,
+                        Type = "webauthn",
+                        NumberOfAttempts = 0
                     }
                 }
             }
