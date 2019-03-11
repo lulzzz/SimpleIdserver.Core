@@ -11,11 +11,6 @@ namespace SimpleIdServer.EF.Mappings
                 .ToTable("resourceOwners")
                 .HasKey(j => j.Id);
             modelBuilder.Entity<ResourceOwner>()
-                .HasMany(r => r.Claims)
-                .WithOne(o => o.ResourceOwner)
-                .HasForeignKey(a => a.ResourceOwnerId)
-                .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<ResourceOwner>()
                 .HasMany(r => r.Consents)
                 .WithOne(c => c.ResourceOwner)
                 .HasForeignKey(a => a.ResourceOwnerId)
@@ -24,11 +19,6 @@ namespace SimpleIdServer.EF.Mappings
                 .HasMany(r => r.Profiles)
                 .WithOne(r => r.ResourceOwner)
                 .HasForeignKey(a => a.ResourceOwnerId)
-                .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<ResourceOwner>()
-                .HasMany(c => c.Credentials)
-                .WithOne(s => s.ResourceOwner)
-                .HasForeignKey(s => s.ResourceOwnerId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

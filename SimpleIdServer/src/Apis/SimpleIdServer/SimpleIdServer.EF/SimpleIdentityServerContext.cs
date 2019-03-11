@@ -25,12 +25,10 @@ namespace SimpleIdServer.EF
         public virtual DbSet<ConsentClaim> ConsentClaims { get; set; }
         public virtual DbSet<ConsentScope> ConsentScopes { get; set; }
         public virtual DbSet<ScopeClaim> ScopeClaims { get; set; }
-        public virtual DbSet<ResourceOwnerClaim> ResourceOwnerClaims { get; set; }
         public virtual DbSet<Profile> Profiles { get; set; }
         public virtual DbSet<CredentialSetting> CredentialSettings { get; set; }
         public virtual DbSet<DefaultSettings> DefaultSettings { get; set; }
         public virtual DbSet<AuthenticationContextclassReference> AuthenticationContextclassReferences { get; set; }
-        public virtual DbSet<ResourceOwnerCredential> ResourceOwnerCredentials { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -45,11 +43,9 @@ namespace SimpleIdServer.EF
             modelBuilder.AddScopeMapping();
             modelBuilder.AddTranslationMapping();
             modelBuilder.AddClientScopeMapping();
-            modelBuilder.AddResourceOwnerClaimMapping();
             modelBuilder.AddClientSecretMapping();
             modelBuilder.AddProfileMapping();
             modelBuilder.AddCredentialsSettingsMapping();
-            modelBuilder.AddResourceCredentialMapping();
             modelBuilder.AddDefaultSettingsMapping();
             modelBuilder.AddAuthenticationContextclassReferenceMapping();
             base.OnModelCreating(modelBuilder);

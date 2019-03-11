@@ -7,6 +7,5 @@
         public string ClaimCode { get; set; }
         public string Value { get; set; }
         public User User { get; set; }
-        public Claim Claim { get; set; }
     }
 }

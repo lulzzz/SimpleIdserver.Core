@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SimpleIdServer.IdentityStore.EF.Mappings;
+using SimpleIdServer.IdentityStore.EF.Models;
 
 namespace SimpleIdServer.IdentityStore.EF
 {
@@ -8,7 +10,9 @@ namespace SimpleIdServer.IdentityStore.EF
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.AddClaimMapping();
+            modelBuilder.AddUserClaimMapping();
+            modelBuilder.AddUserCredentialMapping();
+            modelBuilder.AddUserMapping();
             base.OnModelCreating(modelBuilder);
         }
     }

@@ -15,7 +15,6 @@ namespace SimpleIdServer.EF
             }
 
             serviceCollection.AddTransient<ITranslationRepository, TranslationRepository>();
-            serviceCollection.AddTransient<IResourceOwnerRepository, ResourceOwnerRepository>();
             serviceCollection.AddTransient<IScopeRepository, ScopeRepository>();
             serviceCollection.AddTransient<IClientRepository, ClientRepository>();
             serviceCollection.AddTransient<IConsentRepository, ConsentRepository>();
@@ -25,7 +24,6 @@ namespace SimpleIdServer.EF
             serviceCollection.AddTransient<ICredentialSettingsRepository, CredentialsSettingsRepository>();
             serviceCollection.AddTransient<IDefaultSettingsRepository, DefaultSettingsRepository>();
             serviceCollection.AddTransient<IAuthenticationContextclassReferenceRepository, AuthenticationContextclassReferenceRepository>();
-            serviceCollection.AddTransient<IResourceOwnerCredentialRepository, ResourceOwnerCredentialRepository>();
             return serviceCollection;
         }
     }

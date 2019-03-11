@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace SimpleIdServer.Core.Common.Models
+namespace SimpleIdServer.IdentityStore.Models
 {
-    public class ResourceOwnerCredential
+    public class UserCredential
     {
         /// <summary>
         /// Gets or sets the user id.

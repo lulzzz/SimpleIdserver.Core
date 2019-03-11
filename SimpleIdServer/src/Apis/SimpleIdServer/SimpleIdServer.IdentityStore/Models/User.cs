@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Security.Claims;
 
-namespace SimpleIdServer.IdentityStore
+namespace SimpleIdServer.IdentityStore.Models
 {
     public class User
     {
@@ -26,5 +26,9 @@ namespace SimpleIdServer.IdentityStore
         /// Gets or sets is blocked.
         /// </summary>
         public bool IsBlocked { get; set; }
+        /// <summary>
+        /// Gets or sets the credentials.
+        /// </summary>
+        public IEnumerable<UserCredential> Credentials { get; set; }
     }
 }
