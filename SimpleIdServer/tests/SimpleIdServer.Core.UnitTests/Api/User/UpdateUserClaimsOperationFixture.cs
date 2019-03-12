@@ -4,6 +4,7 @@ using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.Core.Errors;
 using SimpleIdServer.Core.Exceptions;
+using SimpleIdServer.IdentityStore.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.User
 {
     public class UpdateUserClaimsOperationFixture
     {
-        private Mock<IResourceOwnerRepository> _resourceOwnerRepositoryStub;
+        private Mock<IUserRepository> _resourceOwnerRepositoryStub;
         private Mock<IClaimRepository> _claimRepositoryStub;
         private IUpdateUserClaimsOperation _updateUserClaimsOperation;
 
@@ -35,8 +36,8 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.User
         {
             // ARRANGE
             InitializeFakeObjects();
-            _resourceOwnerRepositoryStub.Setup(r => r.GetAsync(It.IsAny<string>()))
-                .Returns(Task.FromResult((ResourceOwner)null));
+            _resourceOwnerRepositoryStub.Setup(r => r.Get(It.IsAny<string>()))
+                .Returns(Task.FromResult((SimpleIdServer.IdentityStore.Models.User)null));
 
             // ACT
             var exception = await Assert.ThrowsAsync<IdentityServerException>(() => _updateUserClaimsOperation.Execute("subject", new List<ClaimAggregate>()));
@@ -52,8 +53,8 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.User
         {
             // ARRANGE
             InitializeFakeObjects();
-            _resourceOwnerRepositoryStub.Setup(r => r.GetAsync(It.IsAny<string>()))
-                .Returns(Task.FromResult(new ResourceOwner
+            _resourceOwnerRepositoryStub.Setup(r => r.Get(It.IsAny<string>()))
+                .Returns(Task.FromResult(new SimpleIdServer.IdentityStore.Models.User
                 {
                     Claims = new List<Claim>
                     {
@@ -76,12 +77,12 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.User
             });
 
             // ASSERT
-            _resourceOwnerRepositoryStub.Verify(p => p.UpdateAsync(It.Is<ResourceOwner>(r => r.Claims.Any(c => c.Type == "type" && c.Value == "value1"))));
+            _resourceOwnerRepositoryStub.Verify(p => p.UpdateAsync(It.Is<SimpleIdServer.IdentityStore.Models.User>(r => r.Claims.Any(c => c.Type == "type" && c.Value == "value1"))));
         }
 
         private void InitializeFakeObjects()
         {
-            _resourceOwnerRepositoryStub = new Mock<IResourceOwnerRepository>();
+            _resourceOwnerRepositoryStub = new Mock<IUserRepository>();
             _claimRepositoryStub = new Mock<IClaimRepository>();
             _updateUserClaimsOperation = new UpdateUserClaimsOperation(_resourceOwnerRepositoryStub.Object,
                 _claimRepositoryStub.Object);

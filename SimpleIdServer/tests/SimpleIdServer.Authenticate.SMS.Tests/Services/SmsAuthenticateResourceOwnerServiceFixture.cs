@@ -8,6 +8,8 @@ using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.Core.Exceptions;
 using SimpleIdServer.Core.Services;
+using SimpleIdServer.IdentityStore.Models;
+using SimpleIdServer.IdentityStore.Repositories;
 using SimpleIdServer.Store;
 using Xunit;
 
@@ -15,7 +17,7 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Services
 {
     public class SmsAuthenticateResourceOwnerServiceFixture
     {
-        private Mock<IResourceOwnerRepository> _resourceOwnerRepositoryStub;
+        private Mock<IUserRepository> _resourceOwnerRepositoryStub;
         private Mock<IConfirmationCodeStore> _confirmationCodeStoreStub;
         private IAuthenticateResourceOwnerService _authenticateResourceOwnerService;
 
@@ -26,8 +28,8 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Services
             InitializeFakeObjects();
 
             // ACTS & ASSERTS
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _authenticateResourceOwnerService.AuthenticateResourceOwnerAsync(null, null));
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _authenticateResourceOwnerService.AuthenticateResourceOwnerAsync("login", null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _authenticateResourceOwnerService.AuthenticateUserAsync(null, null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _authenticateResourceOwnerService.AuthenticateUserAsync("login", null));
         }
 
         [Fact]
@@ -35,15 +37,15 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Services
         {
             // ARRANGE
             InitializeFakeObjects();
-            _resourceOwnerRepositoryStub.Setup(r => r.GetResourceOwnerByClaim(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwner
+            _resourceOwnerRepositoryStub.Setup(r => r.GetUserByClaim(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(new SimpleIdServer.IdentityStore.Models.User
             {
                 Claims = new List<Claim>
                 {
                     new Claim("phone_number", "phone")
                 },
-                Credentials = new List<ResourceOwnerCredential>
+                Credentials = new List<UserCredential>
                 {
-                    new ResourceOwnerCredential
+                    new UserCredential
                     {
                         Type = "sms"
                     }
@@ -55,7 +57,7 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Services
             }));
 
             // ACT
-            var result = await _authenticateResourceOwnerService.AuthenticateResourceOwnerAsync("login", "password").ConfigureAwait(false);
+            var result = await _authenticateResourceOwnerService.AuthenticateUserAsync("login", "password").ConfigureAwait(false);
 
             // ASSERT
             Assert.Null(result);
@@ -65,15 +67,15 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Services
         public async Task When_ConfirmationCode_Is_Expired_Then_Null_Is_Returned()
         {
             // ARRANGE
-            InitializeFakeObjects(); _resourceOwnerRepositoryStub.Setup(r => r.GetResourceOwnerByClaim(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwner
+            InitializeFakeObjects(); _resourceOwnerRepositoryStub.Setup(r => r.GetUserByClaim(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(new User
             {
                 Claims = new List<Claim>
                 {
                     new Claim("phone_number", "phone")
                 },
-                Credentials = new List<ResourceOwnerCredential>
+                Credentials = new List<UserCredential>
                 {
-                    new ResourceOwnerCredential
+                    new UserCredential
                     {
                         Type = "sms"
                     }
@@ -87,7 +89,7 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Services
             }));
 
             // ACT
-            var result = await _authenticateResourceOwnerService.AuthenticateResourceOwnerAsync("phone", "password").ConfigureAwait(false);
+            var result = await _authenticateResourceOwnerService.AuthenticateUserAsync("phone", "password").ConfigureAwait(false);
 
             // ASSERT
             Assert.Null(result);
@@ -98,15 +100,15 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Services
         {
             // ARRANGE
             InitializeFakeObjects();
-            _resourceOwnerRepositoryStub.Setup(r => r.GetResourceOwnerByClaim(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwner
+            _resourceOwnerRepositoryStub.Setup(r => r.GetUserByClaim(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(new User
             {
                 Claims = new List<Claim>
                 {
                     new Claim("phone_number", "phone")
                 },
-                Credentials = new List<ResourceOwnerCredential>
+                Credentials = new List<UserCredential>
                 {
-                    new ResourceOwnerCredential
+                    new UserCredential
                     {
                         Type = "sms"
                     }
@@ -121,16 +123,16 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Services
 
 
             // ACT
-            await _authenticateResourceOwnerService.AuthenticateResourceOwnerAsync("phone", "password");
+            await _authenticateResourceOwnerService.AuthenticateUserAsync("phone", "password");
 
             // ASSERT
-            _resourceOwnerRepositoryStub.Verify(r => r.GetResourceOwnerByClaim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber, "phone"));
+            _resourceOwnerRepositoryStub.Verify(r => r.GetUserByClaim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber, "phone"));
             _confirmationCodeStoreStub.Verify(c => c.Remove("password"));
         }
 
         private void InitializeFakeObjects()
         {
-            _resourceOwnerRepositoryStub = new Mock<IResourceOwnerRepository>();
+            _resourceOwnerRepositoryStub = new Mock<IUserRepository>();
             _confirmationCodeStoreStub = new Mock<IConfirmationCodeStore>();
             _authenticateResourceOwnerService = new SmsAuthenticateResourceOwnerService(_confirmationCodeStoreStub.Object, _resourceOwnerRepositoryStub.Object);
         }

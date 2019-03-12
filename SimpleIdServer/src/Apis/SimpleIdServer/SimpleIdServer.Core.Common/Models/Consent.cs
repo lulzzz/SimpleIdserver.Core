@@ -22,7 +22,7 @@ namespace SimpleIdServer.Core.Common.Models
     {
         public string Id { get; set; }
         public Client Client { get; set; }
-        public ResourceOwner ResourceOwner { get; set; }
+        public string UserId { get; set; }
         public List<Scope> GrantedScopes { get; set; }
         public List<string> Claims { get; set; }
     }

@@ -1,14 +1,15 @@
 ﻿using SimpleIdServer.Core.Common.Models;
+using SimpleIdServer.IdentityStore.Models;
 
 namespace SimpleIdServer.Core.Exceptions
 {
     public class IdentityServerPasswordExpiredException : IdentityServerAuthenticationException
     {
-        public IdentityServerPasswordExpiredException(ResourceOwner resourceOwner) : base(string.Empty)
+        public IdentityServerPasswordExpiredException(User user) : base(string.Empty)
         {
-            ResourceOwner = resourceOwner;
+            User = user;
         }
 
-        public ResourceOwner ResourceOwner { get; private set; }
+        public User User{ get; private set; }
     }
 }

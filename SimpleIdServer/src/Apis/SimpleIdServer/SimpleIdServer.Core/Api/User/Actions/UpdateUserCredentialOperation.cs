@@ -1,6 +1,6 @@
-﻿using SimpleIdServer.Core.Common.Repositories;
-using SimpleIdServer.Core.Exceptions;
+﻿using SimpleIdServer.Core.Exceptions;
 using SimpleIdServer.Core.Parameters;
+using SimpleIdServer.IdentityStore.Repositories;
 using System;
 using System.Threading.Tasks;
 
@@ -13,12 +13,12 @@ namespace SimpleIdServer.Core.Api.User.Actions
 
     internal sealed class UpdateUserCredentialOperation : IUpdateUserCredentialOperation
     {
-        private readonly IResourceOwnerCredentialRepository _resourceOwnerCredentialRepository;
+        private readonly IUserCredentialRepository _userCredentialRepository;
         private readonly ICredentialSettingsRepository _credentialSettingsRepository;
 
-        public UpdateUserCredentialOperation(IResourceOwnerCredentialRepository resourceOwnerCredentialRepository, ICredentialSettingsRepository credentialSettingsRepository)
+        public UpdateUserCredentialOperation(IUserCredentialRepository userCredentialRepository, ICredentialSettingsRepository credentialSettingsRepository)
         {
-            _resourceOwnerCredentialRepository = resourceOwnerCredentialRepository;
+            _userCredentialRepository = userCredentialRepository;
             _credentialSettingsRepository = credentialSettingsRepository;
         }
 
@@ -29,7 +29,7 @@ namespace SimpleIdServer.Core.Api.User.Actions
                 throw new ArgumentNullException(nameof(updateUserCredentialParameter));
             }
 
-            var credential = await _resourceOwnerCredentialRepository.GetUserCredential(updateUserCredentialParameter.UserId, updateUserCredentialParameter.CredentialType).ConfigureAwait(false);
+            var credential = await _userCredentialRepository.GetUserCredential(updateUserCredentialParameter.UserId, updateUserCredentialParameter.CredentialType).ConfigureAwait(false);
             if (credential == null)
             {
                 throw new NotFoundException();
@@ -38,7 +38,7 @@ namespace SimpleIdServer.Core.Api.User.Actions
             var passwordSettings = await _credentialSettingsRepository.Get(updateUserCredentialParameter.CredentialType).ConfigureAwait(false);
             credential.Value = updateUserCredentialParameter.NewValue;
             credential.ExpirationDateTime = DateTime.UtcNow.AddSeconds(passwordSettings.ExpiresIn);
-            await _resourceOwnerCredentialRepository.Update(credential).ConfigureAwait(false);
+            await _userCredentialRepository.Update(credential).ConfigureAwait(false);
             return true;
         }
     }

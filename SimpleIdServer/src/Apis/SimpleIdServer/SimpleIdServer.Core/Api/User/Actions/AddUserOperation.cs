@@ -5,6 +5,7 @@ using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.Core.Exceptions;
 using SimpleIdServer.Core.Parameters;
 using SimpleIdServer.Core.Services;
+using SimpleIdServer.IdentityStore.Repositories;
 using SimpleIdServer.OpenId.Logging;
 using System;
 using System.Collections.Generic;
@@ -21,7 +22,7 @@ namespace SimpleIdServer.Core.Api.User.Actions
     
     public class AddUserOperation : IAddUserOperation
     {
-        private readonly IResourceOwnerRepository _resourceOwnerRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IClaimRepository _claimRepository;
         private readonly IAccountFilter _accountFilter;
         private readonly ILinkProfileAction _linkProfileAction;
@@ -30,7 +31,7 @@ namespace SimpleIdServer.Core.Api.User.Actions
         private readonly ISubjectBuilder _subjectBuilder;
         private readonly IAddUserCredentialsOperation _addUserCredentialsOperation;
 
-        public AddUserOperation(IResourceOwnerRepository resourceOwnerRepository, 
+        public AddUserOperation(IUserRepository userRepository, 
             IClaimRepository claimRepository,
             ILinkProfileAction linkProfileAction,
             IAccountFilter accountFilter, 
@@ -39,7 +40,7 @@ namespace SimpleIdServer.Core.Api.User.Actions
             ISubjectBuilder subjectBuilder,
             IAddUserCredentialsOperation addUserCredentialsOperation)
         {
-            _resourceOwnerRepository = resourceOwnerRepository;
+            _userRepository = userRepository;
             _claimRepository = claimRepository;
             _linkProfileAction = linkProfileAction;
             _accountFilter = accountFilter;
@@ -58,7 +59,7 @@ namespace SimpleIdServer.Core.Api.User.Actions
             
             var subject = await _subjectBuilder.BuildSubject().ConfigureAwait(false);
             // 1. Check the resource owner already exists.
-            if (await _resourceOwnerRepository.GetAsync(subject) != null)
+            if (await _userRepository.Get(subject).ConfigureAwait(false) != null)
             {
                 throw new IdentityServerException(Errors.ErrorCodes.UnhandledExceptionCode, Errors.ErrorDescriptions.TheRoWithCredentialsAlreadyExists);
             }
@@ -115,7 +116,7 @@ namespace SimpleIdServer.Core.Api.User.Actions
             }
 
             // 4. Add the resource owner.
-            var newResourceOwner = new ResourceOwner
+            var newResourceOwner = new IdentityStore.Models.User
             {
                 Id = subject,
                 Claims = newClaims,
@@ -123,7 +124,7 @@ namespace SimpleIdServer.Core.Api.User.Actions
                 UpdateDateTime = DateTime.UtcNow,
                 IsBlocked = false
             };                        
-            if (!await _resourceOwnerRepository.InsertAsync(newResourceOwner).ConfigureAwait(false))
+            if (!await _userRepository.InsertAsync(newResourceOwner).ConfigureAwait(false))
             {
                 throw new IdentityServerException(Errors.ErrorCodes.UnhandledExceptionCode, Errors.ErrorDescriptions.TheResourceOwnerCannotBeAdded);
             }

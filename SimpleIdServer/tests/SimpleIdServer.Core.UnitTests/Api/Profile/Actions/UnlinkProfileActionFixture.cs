@@ -9,12 +9,13 @@ using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.Core.Errors;
 using SimpleIdServer.Core.Exceptions;
 using Xunit;
+using SimpleIdServer.IdentityStore.Repositories;
 
 namespace SimpleIdentityServer.Core.UnitTests.Api.Profile.Actions
 {
     public class UnlinkProfileActionFixture
     {
-        private Mock<IResourceOwnerRepository> _resourceOwnerRepositoryStub;
+        private Mock<IUserRepository> _resourceOwnerRepositoryStub;
         private Mock<IProfileRepository> _profileRepositoryStub;
         private IUnlinkProfileAction _unlinkProfileAction;
 
@@ -34,7 +35,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Profile.Actions
         {
             // ARRANGE
             InitializeFakeObjects();
-            _resourceOwnerRepositoryStub.Setup(r => r.GetAsync(It.IsAny<string>())).Returns(Task.FromResult((ResourceOwner)null));
+            _resourceOwnerRepositoryStub.Setup(r => r.Get(It.IsAny<string>())).Returns(Task.FromResult((SimpleIdServer.IdentityStore.Models.User)null));
 
             // ACT
             var exception = await Assert.ThrowsAsync<IdentityServerException>(() => _unlinkProfileAction.Execute("localSubject", "externalSubject"));
@@ -50,10 +51,10 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Profile.Actions
         {
             // ARRANGE
             InitializeFakeObjects();
-            _resourceOwnerRepositoryStub.Setup(r => r.GetAsync(It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwner()));
+            _resourceOwnerRepositoryStub.Setup(r => r.Get(It.IsAny<string>())).Returns(Task.FromResult(new SimpleIdServer.IdentityStore.Models.User()));
             _profileRepositoryStub.Setup(r => r.Get(It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwnerProfile
             {
-                ResourceOwnerId = "otherSubject"
+                UserId = "otherSubject"
             }));
 
             // ACT
@@ -71,10 +72,10 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Profile.Actions
         {
             // ARRANGE
             InitializeFakeObjects();
-            _resourceOwnerRepositoryStub.Setup(r => r.GetAsync(It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwner()));
+            _resourceOwnerRepositoryStub.Setup(r => r.Get(It.IsAny<string>())).Returns(Task.FromResult(new SimpleIdServer.IdentityStore.Models.User()));
             _profileRepositoryStub.Setup(r => r.Get(It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwnerProfile
             {
-                ResourceOwnerId = "localSubject"
+                UserId = "localSubject"
             }));
 
             // ACT
@@ -86,7 +87,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Profile.Actions
 
         private void InitializeFakeObjects()
         {
-            _resourceOwnerRepositoryStub = new Mock<IResourceOwnerRepository>();
+            _resourceOwnerRepositoryStub = new Mock<IUserRepository>();
             _profileRepositoryStub = new Mock<IProfileRepository>();
             _unlinkProfileAction = new UnlinkProfileAction(_resourceOwnerRepositoryStub.Object,
                 _profileRepositoryStub.Object);

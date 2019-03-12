@@ -1,27 +1,27 @@
-﻿using System;
+﻿using SimpleIdServer.Core.Common.Repositories;
+using SimpleIdServer.IdentityStore.Repositories;
+using System;
 using System.Threading.Tasks;
-using SimpleIdServer.Core.Common.Models;
-using SimpleIdServer.Core.Common.Repositories;
 
 namespace SimpleIdServer.Core.Api.Profile.Actions
 {
     public interface IGetResourceOwnerClaimsAction
     {
-        Task<ResourceOwner> Execute(string externalSubject);
+        Task<IdentityStore.Models.User> Execute(string externalSubject);
     }
 
     internal sealed class GetResourceOwnerClaimsAction : IGetResourceOwnerClaimsAction
     {
         private readonly IProfileRepository _profileRepository;
-        private readonly IResourceOwnerRepository _resourceOwnerRepository;
+        private readonly IUserRepository _userRepository;
 
-        public GetResourceOwnerClaimsAction(IProfileRepository profileRepository, IResourceOwnerRepository resourceOwnerRepository)
+        public GetResourceOwnerClaimsAction(IProfileRepository profileRepository, IUserRepository userRepository)
         {
             _profileRepository = profileRepository;
-            _resourceOwnerRepository = resourceOwnerRepository;
+            _userRepository = userRepository;
         }
 
-        public async Task<ResourceOwner> Execute(string externalSubject)
+        public async Task<IdentityStore.Models.User> Execute(string externalSubject)
         {
             if (string.IsNullOrWhiteSpace(externalSubject))
             {
@@ -34,7 +34,7 @@ namespace SimpleIdServer.Core.Api.Profile.Actions
                 return null;
             }
 
-            return await _resourceOwnerRepository.GetAsync(profile.ResourceOwnerId);
+            return await _userRepository.Get(profile.UserId);
         }
     }
 }

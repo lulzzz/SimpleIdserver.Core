@@ -1,6 +1,7 @@
 ﻿using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.Core.Exceptions;
+using SimpleIdServer.IdentityStore.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,14 +17,14 @@ namespace SimpleIdServer.Core.Api.User.Actions
 
     internal class UpdateUserClaimsOperation : IUpdateUserClaimsOperation
     {
-        private readonly IResourceOwnerRepository _resourceOwnerRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IClaimRepository _claimRepository;
 
         public UpdateUserClaimsOperation(
-            IResourceOwnerRepository resourceOwnerRepository,
+            IUserRepository userRepository,
             IClaimRepository claimRepository)
         {
-            _resourceOwnerRepository = resourceOwnerRepository;
+            _userRepository = userRepository;
             _claimRepository = claimRepository;
         }
         
@@ -39,7 +40,7 @@ namespace SimpleIdServer.Core.Api.User.Actions
                 throw new ArgumentNullException(nameof(claims));
             }
 
-            var resourceOwner = await _resourceOwnerRepository.GetAsync(subject);
+            var resourceOwner = await _userRepository.Get(subject).ConfigureAwait(false);
             if (resourceOwner == null)
             {
                 throw new IdentityServerException(Errors.ErrorCodes.InternalError, Errors.ErrorDescriptions.TheRoDoesntExist);
@@ -74,7 +75,7 @@ namespace SimpleIdServer.Core.Api.User.Actions
             }
 
             resourceOwner.Claims.Add(new Claim(Jwt.Constants.StandardResourceOwnerClaimNames.UpdatedAt, DateTime.UtcNow.ToString()));
-            return await _resourceOwnerRepository.UpdateAsync(resourceOwner);
+            return await _userRepository.UpdateAsync(resourceOwner).ConfigureAwait(false);
         }
     }
 }

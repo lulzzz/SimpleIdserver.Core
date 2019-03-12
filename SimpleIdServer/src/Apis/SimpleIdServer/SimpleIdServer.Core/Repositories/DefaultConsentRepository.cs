@@ -41,7 +41,7 @@ namespace SimpleIdServer.Core.Repositories
                 throw new ArgumentNullException(nameof(subject));
             }
 
-            return Task.FromResult(_consents.Where(c => c.ResourceOwner.Id == subject).Select(r => r.Copy()));
+            return Task.FromResult(_consents.Where(c => c.UserId == subject).Select(r => r.Copy()));
         }
 
         public Task<bool> InsertAsync(Consent record)

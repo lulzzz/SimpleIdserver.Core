@@ -172,7 +172,7 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Controllers
             }
             catch (IdentityServerPasswordExpiredException ex)
             {
-                await SetChangePasswordCookie(ex.ResourceOwner.Claims).ConfigureAwait(false);
+                await SetChangePasswordCookie(ex.User.Claims).ConfigureAwait(false);
                 return RedirectToAction("ChangePassword", "Authenticate", new { area = Constants.AMR, code = viewModel.Code });
             }
             catch (Exception ex)

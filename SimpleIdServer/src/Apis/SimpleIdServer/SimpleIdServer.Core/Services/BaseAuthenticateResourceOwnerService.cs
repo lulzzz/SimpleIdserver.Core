@@ -1,6 +1,6 @@
-﻿using SimpleIdServer.Core.Common.Models;
-using SimpleIdServer.Core.Common.Repositories;
-using SimpleIdServer.Core.Exceptions;
+﻿using SimpleIdServer.Core.Exceptions;
+using SimpleIdServer.IdentityStore.Models;
+using SimpleIdServer.IdentityStore.Repositories;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,15 +12,15 @@ namespace SimpleIdServer.Core.Services
         public abstract string Amr { get; }
 
         private readonly ICredentialSettingsRepository _passwordSettingsRepository;
-        protected readonly IResourceOwnerCredentialRepository _resourceOwnerCredentialRepository;
+        protected readonly IUserCredentialRepository _userCredentialRepository;
 
-        public BaseAuthenticateResourceOwnerService(ICredentialSettingsRepository passwordSettingsRepository, IResourceOwnerCredentialRepository resourceOwnerCredentialRepository)
+        public BaseAuthenticateResourceOwnerService(ICredentialSettingsRepository passwordSettingsRepository, IUserCredentialRepository userCredentialRepository)
         {
             _passwordSettingsRepository = passwordSettingsRepository;
-            _resourceOwnerCredentialRepository = resourceOwnerCredentialRepository;
+            _userCredentialRepository = userCredentialRepository;
         }
 
-        public async Task<ResourceOwner> AuthenticateResourceOwnerAsync(string login, string credentialValue)
+        public async Task<IdentityStore.Models.User> AuthenticateUserAsync(string login, string credentialValue)
         {
             if (string.IsNullOrWhiteSpace(login))
             {
@@ -32,7 +32,7 @@ namespace SimpleIdServer.Core.Services
                 throw new ArgumentNullException(nameof(credentialValue));
             }
 
-            var resourceOwner = await GetResourceOwner(login).ConfigureAwait(false);
+            var resourceOwner = await GetUser(login).ConfigureAwait(false);
             if (resourceOwner == null)
             {
                 throw new IdentityServerUserAccountDoesntExistException();
@@ -74,7 +74,7 @@ namespace SimpleIdServer.Core.Services
                         credential.NumberOfAttempts++;
                     }
 
-                    await _resourceOwnerCredentialRepository.Update(credential).ConfigureAwait(false);
+                    await _userCredentialRepository.Update(credential).ConfigureAwait(false);
                 }
 
                 throw new IdentityServerUserPasswordInvalidException();
@@ -84,8 +84,8 @@ namespace SimpleIdServer.Core.Services
             return resourceOwner;
         }
 
-        public abstract Task<ResourceOwner> GetResourceOwner(string login);
-        public abstract Task<bool> Authenticate(ResourceOwner user, string password);
-        public abstract Task Validate(ResourceOwner user);
+        public abstract Task<User> GetUser(string login);
+        public abstract Task<bool> Authenticate(User user, string password);
+        public abstract Task Validate(User user);
     }
 }

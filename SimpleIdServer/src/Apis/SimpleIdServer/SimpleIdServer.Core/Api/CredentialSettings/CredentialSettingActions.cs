@@ -1,5 +1,5 @@
 ﻿using SimpleIdServer.Core.Api.CredentialSettings.Actions;
-using SimpleIdServer.Core.Common.Models;
+using SimpleIdServer.IdentityStore.Models;
 using System.Threading.Tasks;
 
 namespace SimpleIdServer.Core.Api.CredentialSettings

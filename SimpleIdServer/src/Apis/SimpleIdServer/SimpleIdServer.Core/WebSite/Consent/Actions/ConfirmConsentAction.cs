@@ -28,7 +28,6 @@ namespace SimpleIdServer.Core.WebSite.Consent.Actions
         private readonly IConsentRepository _consentRepository;
         private readonly IClientRepository _clientRepository;
         private readonly IScopeRepository _scopeRepository;
-        private readonly IResourceOwnerRepository _resourceOwnerRepository;
         private readonly IParameterParserHelper _parameterParserHelper;
         private readonly IActionResultFactory _actionResultFactory;
         private readonly IGenerateAuthorizationResponse _generateAuthorizationResponse;
@@ -39,7 +38,6 @@ namespace SimpleIdServer.Core.WebSite.Consent.Actions
             IConsentRepository consentRepository,
             IClientRepository clientRepository,
             IScopeRepository scopeRepository,
-            IResourceOwnerRepository resourceOwnerRepository,
             IParameterParserHelper parameterParserHelper,
             IActionResultFactory actionResultFactory,
             IGenerateAuthorizationResponse generateAuthorizationResponse,
@@ -49,7 +47,6 @@ namespace SimpleIdServer.Core.WebSite.Consent.Actions
             _consentRepository = consentRepository;
             _clientRepository = clientRepository;
             _scopeRepository = scopeRepository;
-            _resourceOwnerRepository = resourceOwnerRepository;
             _parameterParserHelper = parameterParserHelper;
             _actionResultFactory = actionResultFactory;
             _generateAuthorizationResponse = generateAuthorizationResponse;
@@ -89,7 +86,7 @@ namespace SimpleIdServer.Core.WebSite.Consent.Actions
                     {
                         Id = Guid.NewGuid().ToString(),
                         Client = client,
-                        ResourceOwner = await _resourceOwnerRepository.GetAsync(authenticatedSubject).ConfigureAwait(false),
+                        UserId = authenticatedSubject,
                         Claims = claimsParameter.GetClaimNames()
                     };
                 }
@@ -101,7 +98,7 @@ namespace SimpleIdServer.Core.WebSite.Consent.Actions
                         Id = Guid.NewGuid().ToString(),
                         Client = client,
                         GrantedScopes = (await GetScopes(authorizationParameter.Scope)).ToList(),
-                        ResourceOwner = await _resourceOwnerRepository.GetAsync(authenticatedSubject).ConfigureAwait(false),
+                        UserId = authenticatedSubject
                     };
                 }
 

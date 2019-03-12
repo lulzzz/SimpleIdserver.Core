@@ -77,7 +77,7 @@ namespace SimpleIdServer.Core.Repositories
             IEnumerable<ResourceOwnerProfile> result = _profiles;
             if (parameter.ResourceOwnerIds != null && parameter.ResourceOwnerIds.Any())
             {
-                result = result.Where(p => parameter.ResourceOwnerIds.Contains(p.ResourceOwnerId));
+                result = result.Where(p => parameter.ResourceOwnerIds.Contains(p.UserId));
             }
 
             if (parameter.Issuers != null && parameter.Issuers.Any())

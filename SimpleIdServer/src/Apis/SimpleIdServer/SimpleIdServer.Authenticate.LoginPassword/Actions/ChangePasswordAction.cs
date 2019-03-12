@@ -5,6 +5,7 @@ using SimpleIdServer.Core.Api.User;
 using SimpleIdServer.Core.Exceptions;
 using SimpleIdServer.Core.Helpers;
 using SimpleIdServer.Core.Parameters;
+using SimpleIdServer.IdentityStore;
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -71,7 +72,6 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Actions
             {
                 throw new IdentityServerException(Core.Errors.ErrorCodes.InternalError, Core.Errors.ErrorDescriptions.ThePasswordIsNotCorrect);
             }
-
 
             await _userActions.UpdateCredential(new UpdateUserCredentialParameter
             {

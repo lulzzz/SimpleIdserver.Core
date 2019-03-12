@@ -81,11 +81,6 @@ namespace SimpleIdServer.EF.Repositories
             }
 
             IQueryable<Profile> profiles = _context.Profiles;
-            if (parameter.ResourceOwnerIds != null && parameter.ResourceOwnerIds.Any())
-            {
-                profiles = profiles.Where(p => parameter.ResourceOwnerIds.Contains(p.ResourceOwnerId));
-            }
-
             if (parameter.Issuers != null && parameter.Issuers.Any())
             {
                 profiles = profiles.Where(p => parameter.Issuers.Contains(p.Issuer));

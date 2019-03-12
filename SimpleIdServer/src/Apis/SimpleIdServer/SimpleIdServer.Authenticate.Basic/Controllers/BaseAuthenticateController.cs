@@ -182,7 +182,7 @@ namespace SimpleIdServer.Authenticate.Basic.Controllers
             // 5. Rerieve the claims & insert the resource owner if needed.
             var claimsIdentity = authenticatedUser.Identity as ClaimsIdentity;
             var claims = authenticatedUser.Claims.ToList();
-            var resourceOwner = await _profileActions.GetResourceOwner(authenticatedUser.GetSubject()).ConfigureAwait(false);
+            var resourceOwner = await _profileActions.GetUser(authenticatedUser.GetSubject()).ConfigureAwait(false);
             string sub = string.Empty;
             if (resourceOwner == null)
             {
@@ -258,7 +258,7 @@ namespace SimpleIdServer.Authenticate.Basic.Controllers
 
             // 1. Get the authenticated user.
             var authenticatedUser = await _authenticationService.GetAuthenticatedUser(this, Host.Constants.CookieNames.ExternalCookieName);
-            var resourceOwner = await _profileActions.GetResourceOwner(authenticatedUser.GetSubject());
+            var resourceOwner = await _profileActions.GetUser(authenticatedUser.GetSubject()).ConfigureAwait(false);
             string sub = null;
 
             // 2. Automatically create the resource owner.

@@ -23,6 +23,8 @@ using SimpleIdServer.Authenticate.LoginPassword;
 using SimpleIdServer.Core.Common;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Helpers;
+using SimpleIdServer.IdentityStore;
+using SimpleIdServer.IdentityStore.Models;
 
 namespace SimpleIdServer.Host.Tests.Stores
 {
@@ -78,10 +80,7 @@ namespace SimpleIdServer.Host.Tests.Stores
                     {
                         ClientId = "authcode_client"
                     },
-                    ResourceOwner = new ResourceOwner
-                    {
-                        Id = "administrator"
-                    },
+                    UserId = "administrator",
                     GrantedScopes = new List<Scope>
                     {
                         new Scope
@@ -101,10 +100,7 @@ namespace SimpleIdServer.Host.Tests.Stores
                     {
                         ClientId = "implicit_client"
                     },
-                    ResourceOwner = new ResourceOwner
-                    {
-                        Id = "administrator"
-                    },
+                    UserId = "administrator",
                     GrantedScopes = new List<Scope>
                     {
                         new Scope
@@ -124,10 +120,7 @@ namespace SimpleIdServer.Host.Tests.Stores
                     {
                         ClientId = "hybrid_client"
                     },
-                    ResourceOwner = new ResourceOwner
-                    {
-                        Id = "administrator"
-                    },
+                    UserId = "administrator",
                     GrantedScopes = new List<Scope>
                     {
                         new Scope
@@ -147,10 +140,7 @@ namespace SimpleIdServer.Host.Tests.Stores
                     {
                         ClientId = "pkce_client"
                     },
-                    ResourceOwner = new ResourceOwner
-                    {
-                        Id = "administrator"
-                    },
+                    UserId = "administrator",
                     GrantedScopes = new List<Scope>
                     {
                         new Scope
@@ -339,11 +329,11 @@ namespace SimpleIdServer.Host.Tests.Stores
             };
         }
 
-        public static List<ResourceOwner> Users()
+        public static List<User> Users()
         {
-            return new List<ResourceOwner>
+            return new List<User>
             {
-                    new ResourceOwner
+                    new User
                     {
                         Id = "administrator",
                         Claims = new List<Claim>
@@ -353,44 +343,44 @@ namespace SimpleIdServer.Host.Tests.Stores
                             new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber, "phone"),
                             new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Address, "{ country : 'france' }")
                         },
-                        Credentials = new List<ResourceOwnerCredential>
+                        Credentials = new List<UserCredential>
                         {
-                            new ResourceOwnerCredential
+                            new UserCredential
                             {
                                 ExpirationDateTime = DateTime.UtcNow.AddDays(2),
                                 Value = PasswordHelper.ComputeHash("password"),
                                 Type = "pwd"
                             },
-                            new ResourceOwnerCredential
+                            new UserCredential
                             {
                                 ExpirationDateTime = DateTime.UtcNow.AddDays(2),
                                 Type = "sms"
                             }
                         }
                     },
-                    new ResourceOwner
+                    new User
                     {
                         Id = "user",
                         Claims = new List<Claim>
                         {
                             new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject, "user")
                         },
-                        Credentials = new List<ResourceOwnerCredential>
+                        Credentials = new List<UserCredential>
                         {
-                            new ResourceOwnerCredential
+                            new UserCredential
                             {
                                 ExpirationDateTime = DateTime.UtcNow.AddDays(2),
                                 Value = PasswordHelper.ComputeHash("password"),
                                 Type = "pwd"
                             },
-                            new ResourceOwnerCredential
+                            new UserCredential
                             {
                                 ExpirationDateTime = DateTime.UtcNow.AddDays(2),
                                 Type = "sms"
                             }
                         }
                     },
-                    new ResourceOwner
+                    new User
                     {
                         Id = "superuser",
                         Claims = new List<Claim>
@@ -398,22 +388,22 @@ namespace SimpleIdServer.Host.Tests.Stores
                             new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject, "superuser"),
                             new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Role, "[ 'administrator', 'role' ]")
                         },
-                        Credentials = new List<ResourceOwnerCredential>
+                        Credentials = new List<UserCredential>
                         {
-                            new ResourceOwnerCredential
+                            new UserCredential
                             {
                                 ExpirationDateTime = DateTime.UtcNow.AddDays(2),
                                 Value = PasswordHelper.ComputeHash("password"),
                                 Type = "pwd"
                             },
-                            new ResourceOwnerCredential
+                            new UserCredential
                             {
                                 ExpirationDateTime = DateTime.UtcNow.AddDays(2),
                                 Type = "sms"
                             }
                         }
                     },
-                    new ResourceOwner
+                    new User
                     {
                         Id = "blockeduser",
                         Claims = new List<Claim>
@@ -421,61 +411,61 @@ namespace SimpleIdServer.Host.Tests.Stores
                             new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject, "blockeduser")
                         },
                         IsBlocked = true,
-                        Credentials = new List<ResourceOwnerCredential>
+                        Credentials = new List<UserCredential>
                         {
-                            new ResourceOwnerCredential
+                            new UserCredential
                             {
                                 Value = PasswordHelper.ComputeHash("password"),
                                 ExpirationDateTime = DateTime.UtcNow.AddDays(2),
                                 Type = "pwd",
                                 IsBlocked = true
                             },
-                            new ResourceOwnerCredential
+                            new UserCredential
                             {
                                 ExpirationDateTime = DateTime.UtcNow.AddDays(2),
                                 Type = "sms"
                             }
                         }
                     },
-                    new ResourceOwner
+                    new User
                     {
                         Id = "toomanyattemps",
                         Claims = new List<Claim>
                         {
                             new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject, "toomanyattemps")
                         },
-                        Credentials = new List<ResourceOwnerCredential>
+                        Credentials = new List<UserCredential>
                         {
-                            new ResourceOwnerCredential
+                            new UserCredential
                             {
                                 NumberOfAttempts = 10,
                                 FirstAuthenticationFailureDateTime = DateTime.UtcNow.AddSeconds(-1),
                                 Value = PasswordHelper.ComputeHash("password"),
                                 Type = "pwd"
                             },
-                            new ResourceOwnerCredential
+                            new UserCredential
                             {
                                 ExpirationDateTime = DateTime.UtcNow.AddDays(2),
                                 Type = "sms"
                             }
                         }
                     },
-                    new ResourceOwner
+                    new User
                     {
                         Id = "expired",
                         Claims = new List<Claim>
                         {
                             new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject, "expired")
                         },
-                        Credentials = new List<ResourceOwnerCredential>
+                        Credentials = new List<UserCredential>
                         {
-                            new ResourceOwnerCredential
+                            new UserCredential
                             {
                                 ExpirationDateTime = DateTime.UtcNow.AddDays(-2),
                                 Value = PasswordHelper.ComputeHash("password"),
                                 Type = "pwd"
                             },
-                            new ResourceOwnerCredential
+                            new UserCredential
                             {
                                 ExpirationDateTime = DateTime.UtcNow.AddDays(2),
                                 Type = "sms"

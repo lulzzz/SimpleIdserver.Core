@@ -1,5 +1,5 @@
-﻿using SimpleIdServer.Core.Common.Models;
-using SimpleIdServer.Core.Common.Repositories;
+﻿using SimpleIdServer.IdentityStore.Models;
+using SimpleIdServer.IdentityStore.Repositories;
 using System;
 using System.Threading.Tasks;
 

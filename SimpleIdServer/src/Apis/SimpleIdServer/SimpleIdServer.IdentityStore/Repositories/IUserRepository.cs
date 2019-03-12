@@ -8,6 +8,7 @@ namespace SimpleIdServer.IdentityStore.Repositories
 {
     public interface IUserRepository
     {
+        Task<bool> Authenticate(string login, string password);
         Task<User> GetUserByClaim(string key, string value);
         Task<User> Get(string id);
         Task<ICollection<User>> Get(IEnumerable<System.Security.Claims.Claim> claims);

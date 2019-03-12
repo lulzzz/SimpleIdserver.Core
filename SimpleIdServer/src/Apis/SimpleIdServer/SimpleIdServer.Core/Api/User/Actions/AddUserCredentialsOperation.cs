@@ -1,7 +1,7 @@
-﻿using SimpleIdServer.Core.Common.Models;
-using SimpleIdServer.Core.Common.Repositories;
-using SimpleIdServer.Core.Exceptions;
+﻿using SimpleIdServer.Core.Exceptions;
 using SimpleIdServer.Core.Parameters;
+using SimpleIdServer.IdentityStore.Models;
+using SimpleIdServer.IdentityStore.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,12 +16,12 @@ namespace SimpleIdServer.Core.Api.User.Actions
 
     internal sealed class AddUserCredentialsOperation : IAddUserCredentialsOperation
     {
-        private readonly IResourceOwnerCredentialRepository _resourceOwnerCredentialRepository;
+        private readonly IUserCredentialRepository _userCredentialRepository;
         private readonly ICredentialSettingsRepository _credentialSettingsRepository;
 
-        public AddUserCredentialsOperation(IResourceOwnerCredentialRepository resourceOwnerCredentialRepository, ICredentialSettingsRepository credentialSettingsRepository)
+        public AddUserCredentialsOperation(IUserCredentialRepository userCredentialRepository, ICredentialSettingsRepository credentialSettingsRepository)
         {
-            _resourceOwnerCredentialRepository = resourceOwnerCredentialRepository;
+            _userCredentialRepository = userCredentialRepository;
             _credentialSettingsRepository = credentialSettingsRepository;
         }
 
@@ -38,12 +38,12 @@ namespace SimpleIdServer.Core.Api.User.Actions
                 throw new IdentityServerException(Errors.ErrorCodes.InvalidRequestCode, Errors.ErrorDescriptions.SomeCredentialsAreNotValid);
             }
 
-            var resourceOwnerCredentials = new List<ResourceOwnerCredential>();
+            var resourceOwnerCredentials = new List<UserCredential>();
             var currentDateTime = DateTime.UtcNow;
             foreach(var addUserCredentialParameter in addUserCredentialParameterLst)
             {
                 var credentialSetting = credentialSettings.First(c => c.CredentialType == addUserCredentialParameter.CredentialType);
-                resourceOwnerCredentials.Add(new ResourceOwnerCredential
+                resourceOwnerCredentials.Add(new UserCredential
                 {
                     UserId = addUserCredentialParameter.UserId,
                     ExpirationDateTime = currentDateTime.AddSeconds(credentialSetting.ExpiresIn),
@@ -55,7 +55,7 @@ namespace SimpleIdServer.Core.Api.User.Actions
                 });
             }
 
-            await _resourceOwnerCredentialRepository.Add(resourceOwnerCredentials).ConfigureAwait(false);
+            await _userCredentialRepository.Add(resourceOwnerCredentials).ConfigureAwait(false);
             return true;
         }
     }

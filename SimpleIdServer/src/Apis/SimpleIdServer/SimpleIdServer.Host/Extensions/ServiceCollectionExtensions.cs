@@ -15,6 +15,7 @@ using SimpleIdServer.Store;
 using System;
 using System.Linq;
 using System.Security.Claims;
+using SimpleIdServer.IdentityStore;
 
 namespace SimpleIdServer.Host.Extensions
 {
@@ -153,13 +154,14 @@ namespace SimpleIdServer.Host.Extensions
         {
             services.AddSimpleIdentityServerCore(options.OAuthConfigurationOptions, 
                 clients: options.Configuration.Clients == null ? DefaultConfiguration.DEFAULT_CLIENTS : options.Configuration.Clients,
-                resourceOwners: options.Configuration.Users == null ? DefaultConfiguration.DEFAULT_USERS : options.Configuration.Users,
+                
                 translations:options.Configuration.Translations == null ? DefaultConfiguration.DEFAULT_TRANSLATIONS : options.Configuration.Translations,
                 jsonWebKeys: options.Configuration.JsonWebKeys == null ? null : options.Configuration.JsonWebKeys,
                 scopes: DefaultConfiguration.DEFAULT_SCOPES,
                 claims: DefaultConfiguration.DEFAULT_CLAIMS,
-                credentialSettings: options.Configuration.CredentialSettings == null ? DefaultConfiguration.DEFAULT_CREDENTIAL_SETTINGS : options.Configuration.CredentialSettings,
                 acrLst: DefaultConfiguration.DEFAULT_ACR_LST)
+                .AddIdentityStoreEF(users: options.Configuration.Users == null ? DefaultConfiguration.DEFAULT_USERS : options.Configuration.Users,
+                    credentialSettings: options.Configuration.CredentialSettings == null ? DefaultConfiguration.DEFAULT_CREDENTIAL_SETTINGS : options.Configuration.CredentialSettings)
                 .AddSimpleIdentityServerJwt()
                 .AddHostIdentityServer(options)
                 .AddDefaultTokenStore()

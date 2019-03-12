@@ -1,5 +1,4 @@
-﻿using SimpleIdServer.Core.Common.Models;
-using SimpleIdServer.Core.Common.Repositories;
+﻿using SimpleIdServer.IdentityStore.Repositories;
 using System;
 using System.Threading.Tasks;
 
@@ -7,19 +6,19 @@ namespace SimpleIdServer.Core.Api.User.Actions
 {
     public interface IGetUserByClaimOperation
     {
-        Task<ResourceOwner> Execute(string claimKey, string claimValue);
+        Task<IdentityStore.Models.User> Execute(string claimKey, string claimValue);
     }
 
     internal sealed class GetUserByClaimOperation : IGetUserByClaimOperation
     {
-        private readonly IResourceOwnerRepository _resourceOwnerRepository;
+        private readonly IUserRepository _userRepository;
 
-        public GetUserByClaimOperation(IResourceOwnerRepository resourceOwnerRepository)
+        public GetUserByClaimOperation(IUserRepository userRepository)
         {
-            _resourceOwnerRepository = resourceOwnerRepository;
+            _userRepository = userRepository;
         }
 
-        public Task<ResourceOwner> Execute(string claimKey, string claimValue)
+        public Task<IdentityStore.Models.User> Execute(string claimKey, string claimValue)
         {
             if (string.IsNullOrWhiteSpace(claimKey))
             {
@@ -31,7 +30,7 @@ namespace SimpleIdServer.Core.Api.User.Actions
                 throw new ArgumentNullException(nameof(claimValue));
             }
 
-            return _resourceOwnerRepository.GetResourceOwnerByClaim(claimKey, claimValue);
+            return _userRepository.GetUserByClaim(claimKey, claimValue);
         }
     }
 }

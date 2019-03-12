@@ -1,5 +1,4 @@
-﻿using SimpleIdServer.Core.Common.Models;
-using SimpleIdServer.Core.Common.Repositories;
+﻿using SimpleIdServer.IdentityStore.Repositories;
 using System;
 using System.Threading.Tasks;
 
@@ -7,19 +6,19 @@ namespace SimpleIdServer.Core.Api.User.Actions
 {
     public interface IGetUserOperation
     {
-        Task<ResourceOwner> Execute(string subject);
+        Task<IdentityStore.Models.User> Execute(string subject);
     }
 
     internal class GetUserOperation : IGetUserOperation
     {
-        private readonly IResourceOwnerRepository _resourceOwnerRepository;
+        private readonly IUserRepository _userRepository;
 
-        public GetUserOperation(IResourceOwnerRepository resourceOwnerRepository)
+        public GetUserOperation(IUserRepository userRepository)
         {
-            _resourceOwnerRepository = resourceOwnerRepository;
+            _userRepository = userRepository;
         }
         
-        public Task<ResourceOwner> Execute(string subject)
+        public Task<IdentityStore.Models.User> Execute(string subject)
         {
             if (string.IsNullOrWhiteSpace(subject))
             {
@@ -27,7 +26,7 @@ namespace SimpleIdServer.Core.Api.User.Actions
             }
             
             
-            return _resourceOwnerRepository.GetAsync(subject);
+            return _userRepository.Get(subject);
         }
     }
 }

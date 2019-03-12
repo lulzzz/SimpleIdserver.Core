@@ -1,6 +1,6 @@
 ﻿using Moq;
 using SimpleIdServer.Core.Api.CredentialSettings.Actions;
-using SimpleIdServer.Core.Common.Repositories;
+using SimpleIdServer.IdentityStore.Repositories;
 using System;
 using System.Threading.Tasks;
 using Xunit;

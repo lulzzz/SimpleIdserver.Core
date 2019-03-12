@@ -21,7 +21,6 @@ namespace SimpleIdServer.EF
             serviceCollection.AddTransient<IJsonWebKeyRepository, JsonWebKeyRepository>();
             serviceCollection.AddTransient<IClaimRepository, ClaimRepository>();
             serviceCollection.AddTransient<IProfileRepository, ProfileRepository>();
-            serviceCollection.AddTransient<ICredentialSettingsRepository, CredentialsSettingsRepository>();
             serviceCollection.AddTransient<IDefaultSettingsRepository, DefaultSettingsRepository>();
             serviceCollection.AddTransient<IAuthenticationContextclassReferenceRepository, AuthenticationContextclassReferenceRepository>();
             return serviceCollection;

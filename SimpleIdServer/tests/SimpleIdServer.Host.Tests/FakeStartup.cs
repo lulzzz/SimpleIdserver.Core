@@ -53,6 +53,7 @@ using SimpleIdServer.Store;
 using SimpleIdServer.Twilio.Client;
 using SimpleIdServer.UserManagement.Controllers;
 using SimpleIdServer.Logging;
+using SimpleIdServer.IdentityStore;
 
 namespace SimpleIdServer.Host.Tests
 {
@@ -162,8 +163,10 @@ namespace SimpleIdServer.Host.Tests
             services.AddTransient<IAuthenticateResourceOwnerService, SmsAuthenticateResourceOwnerService>();
             services.AddHostIdentityServer(_options)
                 .AddSimpleIdentityServerCore(null, null, 
-                    DefaultStores.Clients(_context), DefaultStores.Consents(), DefaultStores.JsonWebKeys(_context), null, DefaultStores.Users(), DefaultStores.Scopes(), credentialSettings: DefaultStores.GetCredentialSettings(),
+                    DefaultStores.Clients(_context), DefaultStores.Consents(), DefaultStores.JsonWebKeys(_context), null, DefaultStores.Scopes(),
                     acrLst: DefaultStores.GetAcrs())
+                .AddIdentityStoreEF(users: DefaultStores.Users(),
+                    credentialSettings: DefaultStores.GetCredentialSettings())
                 .AddDefaultTokenStore()
                 .AddStorage(o => o.UseInMemoryStorage())
                 .AddSimpleIdentityServerJwt()

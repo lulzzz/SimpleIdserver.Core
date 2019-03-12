@@ -10,11 +10,11 @@ namespace SimpleIdServer.Core.Api.User
     {
         Task<IEnumerable<Consent>> GetConsents(string subject);
         Task<bool> DeleteConsent(string consentId);
-        Task<ResourceOwner> GetUser(string subject);
+        Task<IdentityStore.Models.User> GetUser(string subject);
         Task<bool> UpdateClaims(string subject, IEnumerable<ClaimAggregate> claims);
         Task<string> AddUser(AddUserParameter addUserParameter, string issuer = null);
-        Task<ResourceOwner> GetUserByClaim(string claimKey, string claimValue);
-        Task<ResourceOwner> GetUserByCredentials(string credentialType, string value);
+        Task<IdentityStore.Models.User> GetUserByClaim(string claimKey, string claimValue);
+        Task<IdentityStore.Models.User> GetUserByCredentials(string credentialType, string value);
         Task<bool> AddCredentials(IEnumerable<AddUserCredentialParameter> addUserCredentialParameterLst);
         Task<bool> UpdateCredential(UpdateUserCredentialParameter updateUserCredentialParameter);
     }
@@ -63,7 +63,7 @@ namespace SimpleIdServer.Core.Api.User
             return _removeConsentOperation.Execute(consentId);
         }
 
-        public Task<ResourceOwner> GetUser(string subject)
+        public Task<IdentityStore.Models.User> GetUser(string subject)
         {
             return _getUserOperation.Execute(subject);
         }
@@ -78,12 +78,12 @@ namespace SimpleIdServer.Core.Api.User
             return _addUserOperation.Execute(addUserParameter, issuer);
         }
 
-        public Task<ResourceOwner> GetUserByClaim(string claimKey, string claimValue)
+        public Task<IdentityStore.Models.User> GetUserByClaim(string claimKey, string claimValue)
         {
             return _getUserByClaimOperation.Execute(claimKey, claimValue);
         }
 
-        public Task<ResourceOwner> GetUserByCredentials(string credentialType, string value)
+        public Task<IdentityStore.Models.User> GetUserByCredentials(string credentialType, string value)
         {
             return _getUserByCredentialOperation.Execute(credentialType, value);
         }

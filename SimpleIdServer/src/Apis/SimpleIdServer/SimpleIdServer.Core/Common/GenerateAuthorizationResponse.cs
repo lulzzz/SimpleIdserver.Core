@@ -16,6 +16,7 @@ using SimpleIdServer.OAuth.Logging;
 using SimpleIdServer.Store;
 using Newtonsoft.Json;
 using SimpleIdServer.Core.Common.Repositories;
+using SimpleIdServer.IdentityStore.Repositories;
 
 namespace SimpleIdServer.Core.Common
 {
@@ -36,7 +37,7 @@ namespace SimpleIdServer.Core.Common
         private readonly IOAuthEventSource _oauthEventSource;
         private readonly IClientHelper _clientHelper;
         private readonly IGrantedTokenHelper _grantedTokenHelper;
-        private readonly IResourceOwnerRepository _resourceOwnerRepository;
+        private readonly IUserRepository _userRepository;
 
         public GenerateAuthorizationResponse(
             IAuthorizationCodeStore authorizationCodeStore,
@@ -49,7 +50,7 @@ namespace SimpleIdServer.Core.Common
             IAuthorizationFlowHelper authorizationFlowHelper,
             IClientHelper clientHelper,
             IGrantedTokenHelper grantedTokenHelper,
-            IResourceOwnerRepository resourceOwnerRepository)
+            IUserRepository userRepository)
         {
             _authorizationCodeStore = authorizationCodeStore;
             _tokenStore = tokenStore;
@@ -61,7 +62,7 @@ namespace SimpleIdServer.Core.Common
             _authorizationFlowHelper = authorizationFlowHelper;
             _clientHelper = clientHelper;
             _grantedTokenHelper = grantedTokenHelper;
-            _resourceOwnerRepository = resourceOwnerRepository;
+            _userRepository = userRepository;
         }
 
         public async Task ExecuteAsync(ActionResult actionResult, AuthorizationParameter authorizationParameter, Client client, string issuerName, string authenticatedSubject)
@@ -94,7 +95,7 @@ namespace SimpleIdServer.Core.Common
             _oauthEventSource.StartGeneratingAuthorizationResponseToClient(authorizationParameter.ClientId,
                 authorizationParameter.ResponseType);
             var responses = _parameterParserHelper.ParseResponseTypes(authorizationParameter.ResponseType);
-            var user = await _resourceOwnerRepository.GetAsync(authenticatedSubject).ConfigureAwait(false);
+            var user = await _userRepository.Get(authenticatedSubject).ConfigureAwait(false);
             var claims = user.Claims;
             var idTokenPayload = await GenerateIdTokenPayload(claims, authorizationParameter, issuerName).ConfigureAwait(false);
             var userInformationPayload = await GenerateUserInformationPayload(claims, authorizationParameter).ConfigureAwait(false);

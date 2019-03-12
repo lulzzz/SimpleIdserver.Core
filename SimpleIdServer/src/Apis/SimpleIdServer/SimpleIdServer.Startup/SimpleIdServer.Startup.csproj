@@ -12,6 +12,7 @@
     <ProjectReference Include="..\SimpleIdServer.Authenticate.LoginPassword\SimpleIdServer.Authenticate.LoginPassword.csproj" />
     <ProjectReference Include="..\SimpleIdServer.Authenticate.SMS\SimpleIdServer.Authenticate.SMS.csproj" />
     <ProjectReference Include="..\SimpleIdServer.Host\SimpleIdServer.Host.csproj" />
+    <ProjectReference Include="..\SimpleIdServer.IdentityStore.LDAP\SimpleIdServer.IdentityStore.LDAP.csproj" />
     <ProjectReference Include="..\SimpleIdServer.OAuth2Introspection\SimpleIdServer.OAuth2Introspection.csproj" />
     <ProjectReference Include="..\SimpleIdServer.Shell\SimpleIdServer.Shell.csproj" />
     <ProjectReference Include="..\SimpleIdServer.UserInfoIntrospection\SimpleIdServer.UserInfoIntrospection.csproj" />

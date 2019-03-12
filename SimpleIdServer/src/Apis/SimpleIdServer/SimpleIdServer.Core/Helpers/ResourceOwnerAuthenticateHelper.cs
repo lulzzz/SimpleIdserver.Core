@@ -1,15 +1,15 @@
-﻿using System;
+﻿using SimpleIdServer.Core.Services;
+using SimpleIdServer.IdentityStore.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using SimpleIdServer.Core.Common.Models;
-using SimpleIdServer.Core.Services;
 
 namespace SimpleIdServer.Core.Helpers
 {
     public interface IResourceOwnerAuthenticateHelper
     {
-        Task<ResourceOwner> Authenticate(string login, string password, IEnumerable<string> exceptedAmrValues);
+        Task<User> Authenticate(string login, string password, IEnumerable<string> exceptedAmrValues);
         IEnumerable<string> GetAmrs();
     }
 
@@ -24,7 +24,7 @@ namespace SimpleIdServer.Core.Helpers
             _amrHelper = amrHelper;
         }
 
-        public Task<ResourceOwner> Authenticate(string login, string password, IEnumerable<string> exceptedAmrValues)
+        public Task<User> Authenticate(string login, string password, IEnumerable<string> exceptedAmrValues)
         {
             if (string.IsNullOrWhiteSpace(login))
             {
@@ -39,7 +39,7 @@ namespace SimpleIdServer.Core.Helpers
             var currentAmrs = _services.Select(s => s.Amr);
             var amr = _amrHelper.GetAmr(currentAmrs, exceptedAmrValues);
             var service = _services.FirstOrDefault(s => s.Amr == amr);
-            return service.AuthenticateResourceOwnerAsync(login, password);
+            return service.AuthenticateUserAsync(login, password);
         }
         
         public IEnumerable<string> GetAmrs()

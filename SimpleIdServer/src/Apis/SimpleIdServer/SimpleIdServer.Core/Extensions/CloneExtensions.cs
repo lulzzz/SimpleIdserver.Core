@@ -13,7 +13,7 @@ namespace SimpleIdServer.Core.Extensions
             {
                 CreateDateTime = profile.CreateDateTime,
                 Issuer = profile.Issuer,
-                ResourceOwnerId = profile.ResourceOwnerId,
+                UserId = profile.UserId,
                 Subject = profile.Subject,
                 UpdateTime = profile.UpdateTime
             };
@@ -39,7 +39,7 @@ namespace SimpleIdServer.Core.Extensions
                 Client = consent.Client == null ? null : consent.Client.Copy(),
                 GrantedScopes = consent.GrantedScopes == null ? null : consent.GrantedScopes.Select(s => s.Copy()).ToList(),
                 Id =  consent.Id,
-                ResourceOwner = consent.ResourceOwner == null ? null : consent.ResourceOwner.Copy()
+                UserId = consent.UserId
             };
         }
 
@@ -50,31 +50,6 @@ namespace SimpleIdServer.Core.Extensions
                 Code = translation.Code,
                 LanguageTag = translation.LanguageTag,
                 Value = translation.Value
-            };
-        }
-
-        public static ResourceOwner Copy(this ResourceOwner user)
-        {
-            return new ResourceOwner
-            {
-                Claims = user.Claims == null ? new List<Claim>() : user.Claims.Select(c => c.Copy()).ToList(),
-                CreateDateTime = user.CreateDateTime,
-                Id = user.Id,
-                IsBlocked = user.IsBlocked,
-                UpdateDateTime = user.UpdateDateTime,
-                Credentials = user.Credentials == null ? new List<ResourceOwnerCredential>() : user.Credentials.Select(c =>
-                
-                    new ResourceOwnerCredential
-                    {
-                        BlockedDateTime = c.BlockedDateTime,
-                        ExpirationDateTime = c.ExpirationDateTime,
-                        FirstAuthenticationFailureDateTime   = c.FirstAuthenticationFailureDateTime,
-                        IsBlocked = c.IsBlocked,
-                        NumberOfAttempts = c.NumberOfAttempts,
-                        Type = c.Type,
-                        Value = c.Value
-                    }
-                )
             };
         }
 

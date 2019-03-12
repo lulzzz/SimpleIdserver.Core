@@ -1,23 +1,35 @@
-﻿using SimpleIdServer.Core.Common.Models;
-using SimpleIdServer.Core.Common.Parameters;
-using SimpleIdServer.Core.Common.Repositories;
-using SimpleIdServer.Core.Common.Results;
-using SimpleIdServer.Core.Extensions;
+﻿using SimpleIdServer.Core.Common.Parameters;
+using SimpleIdServer.IdentityStore.Extensions;
+using SimpleIdServer.IdentityStore.Models;
+using SimpleIdServer.IdentityStore.Parameters;
+using SimpleIdServer.IdentityStore.Results;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace SimpleIdServer.Core.Repositories
+namespace SimpleIdServer.IdentityStore.Repositories
 {
-    internal sealed class DefaultResourceOwnerRepository : IResourceOwnerRepository
+    internal sealed class DefaultUserRepository : IUserRepository
     {
-        public ICollection<ResourceOwner> _users;
+        public ICollection<User> _users;
 
-        public DefaultResourceOwnerRepository(ICollection<ResourceOwner> users)
+        public DefaultUserRepository(ICollection<User> users)
         {
-            _users = users == null ? new List<ResourceOwner>() : users;
+            _users = users == null ? new List<User>() : users;
+        }
+
+        public Task<bool> Authenticate(string login, string password)
+        {
+            var user = _users.FirstOrDefault(u => u.Id == login);
+            var pwdCred = user.Credentials.FirstOrDefault(c => c.Type == "pwd");
+            if (pwdCred == null)
+            {
+                return Task.FromResult(false);
+            }
+
+            return Task.FromResult(pwdCred.Value == PasswordHelper.ComputeHash(password));
         }
 
         public Task<bool> DeleteAsync(string subject)
@@ -27,7 +39,7 @@ namespace SimpleIdServer.Core.Repositories
                 throw new ArgumentNullException(nameof(subject));
             }
 
-            var user = _users.FirstOrDefault(u => u.Claims.First(c => c.Type == SimpleIdServer.Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject).Value == subject);
+            var user = _users.FirstOrDefault(u => u.Id == subject);
             if (user == null)
             {
                 return Task.FromResult(false);
@@ -37,42 +49,42 @@ namespace SimpleIdServer.Core.Repositories
             return Task.FromResult(true);
         }
 
-        public Task<ICollection<ResourceOwner>> GetAllAsync()
+        public Task<ICollection<User>> GetAll()
         {
-            ICollection<ResourceOwner> res = _users.Select(u => u.Copy()).ToList();
+            ICollection<User> res = _users.Select(u => u.Copy()).ToList();
             return Task.FromResult(res);
         }
 
-        public Task<ResourceOwner> GetAsync(string id)
+        public Task<User> Get(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
             {
                 throw new ArgumentNullException(nameof(id));
             }
 
-            var user = _users.FirstOrDefault(u => u.Claims.First(c => c.Type == Jwt.Constants.StandardResourceOwnerClaimNames.Subject).Value == id);
+            var user = _users.FirstOrDefault(u => u.Id == id);
             if (user == null)
             {
-                return Task.FromResult((ResourceOwner)null);
+                return Task.FromResult((User)null);
             }
 
             return Task.FromResult(user.Copy());
         }
 
-        public Task<ICollection<ResourceOwner>> GetAsync(IEnumerable<Claim> claims)
+        public Task<ICollection<User>> Get(IEnumerable<Claim> claims)
         {
             if (claims == null)
             {
                 throw new ArgumentNullException(nameof(claims));
             }
 
-            ICollection<ResourceOwner> result = _users.Where(u => claims.All(c => u.Claims.Any(sc => sc.Value == c.Value && sc.Type == c.Type)))
+            ICollection<User> result = _users.Where(u => claims.All(c => u.Claims.Any(sc => sc.Value == c.Value && sc.Type == c.Type)))
                 .Select(u => u.Copy())
                 .ToList();
             return Task.FromResult(result);
         }
 
-        public Task<ResourceOwner> GetResourceOwnerByClaim(string key, string value)
+        public Task<User> GetUserByClaim(string key, string value)
         {
             if (string.IsNullOrWhiteSpace(key))
             {
@@ -87,13 +99,13 @@ namespace SimpleIdServer.Core.Repositories
             var user = _users.FirstOrDefault(u => u.Claims.Any(c => c.Type == key && c.Value == value));
             if (user == null)
             {
-                return Task.FromResult((ResourceOwner)null);
+                return Task.FromResult((User)null);
             }
 
             return Task.FromResult(user.Copy());
         }
 
-        public Task<bool> InsertAsync(ResourceOwner resourceOwner)
+        public Task<bool> InsertAsync(User resourceOwner)
         {
             if (resourceOwner == null)
             {
@@ -105,14 +117,14 @@ namespace SimpleIdServer.Core.Repositories
             return Task.FromResult(true);
         }
 
-        public Task<SearchResourceOwnerResult> Search(SearchResourceOwnerParameter parameter)
+        public Task<SearchUserResult> Search(SearchUserParameter parameter)
         {
             if (parameter == null)
             {
                 throw new ArgumentNullException(nameof(parameter));
             }
 
-            IEnumerable<ResourceOwner> result = _users;
+            IEnumerable<User> result = _users;
             if (parameter.Subjects != null)
             {
                 result = result.Where(r => parameter.Subjects.Any(s => r.Id.Contains(s)));
@@ -146,7 +158,7 @@ namespace SimpleIdServer.Core.Repositories
                 result = result.Skip(parameter.StartIndex).Take(parameter.Count);
             }
 
-            return Task.FromResult(new SearchResourceOwnerResult
+            return Task.FromResult(new SearchUserResult
             {
                 Content = result.Select(u => u.Copy()),
                 StartIndex = parameter.StartIndex,
@@ -154,7 +166,7 @@ namespace SimpleIdServer.Core.Repositories
             });
         }
 
-        public Task<bool> UpdateAsync(ResourceOwner resourceOwner)
+        public Task<bool> UpdateAsync(User resourceOwner)
         {
             if (resourceOwner == null)
             {
@@ -166,16 +178,16 @@ namespace SimpleIdServer.Core.Repositories
             {
                 return Task.FromResult(false);
             }
-            
+
             user.IsBlocked = resourceOwner.IsBlocked;
             user.UpdateDateTime = DateTime.UtcNow;
             user.Claims = resourceOwner.Claims;
             return Task.FromResult(true);
         }
 
-        public Task<bool> UpdateCredential(string subject, ResourceOwnerCredential credential)
+        public Task<bool> UpdateCredential(string subject, UserCredential credential)
         {
-            var user = _users.FirstOrDefault(u => u.Claims.First(c => c.Type == SimpleIdServer.Core.Jwt.Constants.StandardResourceOwnerClaimNames.Subject).Value == subject);
+            var user = _users.FirstOrDefault(u => u.Id == subject);
             if (user == null)
             {
                 return Task.FromResult(false);
@@ -184,7 +196,7 @@ namespace SimpleIdServer.Core.Repositories
             var cr = user.Credentials.FirstOrDefault(c => c.Type == credential.Type);
             if (cr == null)
             {
-                cr = new ResourceOwnerCredential();
+                cr = new UserCredential();
             }
 
             cr.Type = credential.Type;

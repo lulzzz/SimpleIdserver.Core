@@ -1,6 +1,7 @@
 ﻿using SimpleIdServer.Core.Api.User;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Parameters;
+using SimpleIdServer.IdentityStore.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace SimpleIdServer.Authenticate.SMS.Actions
 {
     public interface ISmsAuthenticationOperation
     {
-        Task<ResourceOwner> Execute(string phoneNumber, string authenticatedUserSubject = null);
+        Task<User> Execute(string phoneNumber, string authenticatedUserSubject = null);
     }
 
     internal sealed class SmsAuthenticationOperation : ISmsAuthenticationOperation
@@ -27,7 +28,7 @@ namespace SimpleIdServer.Authenticate.SMS.Actions
 			_smsAuthenticationOptions = smsAuthenticationOptions;
         }
 
-        public async Task<ResourceOwner> Execute(string phoneNumber, string authenticatedUserSubject = null)
+        public async Task<User> Execute(string phoneNumber, string authenticatedUserSubject = null)
         {
             if (string.IsNullOrWhiteSpace(phoneNumber))
             {
@@ -35,30 +36,30 @@ namespace SimpleIdServer.Authenticate.SMS.Actions
             }
 
             // 1. Check user exists
-            ResourceOwner resourceOwner = null;
+            User user = null;
             if (!string.IsNullOrWhiteSpace(authenticatedUserSubject))
             {
-                resourceOwner = await _userActions.GetUser(authenticatedUserSubject).ConfigureAwait(false);
-                if (!resourceOwner.Claims.Any(c => c.Type == Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber && c.Value == phoneNumber))
+                user = await _userActions.GetUser(authenticatedUserSubject).ConfigureAwait(false);
+                if (!user.Claims.Any(c => c.Type == Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber && c.Value == phoneNumber))
                 {
                     throw new InvalidOperationException("the phone number is not valid");
                 }
             }
 			else
             {
-                resourceOwner = await _userActions.GetUserByClaim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber, phoneNumber);
+                user = await _userActions.GetUserByClaim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber, phoneNumber);
             }
 
-			if (!_smsAuthenticationOptions.IsSelfProvisioningEnabled && resourceOwner == null)
+			if (!_smsAuthenticationOptions.IsSelfProvisioningEnabled && user == null)
 			{
 				throw new InvalidOperationException("the user doesn't exist");
 			}
 
             // 2. Send the confirmation code (SMS).
             await _generateAndSendSmsCodeOperation.Execute(phoneNumber);
-            if (resourceOwner != null)
+            if (user != null)
             {
-                return resourceOwner;
+                return user;
             }
 
             // 3. Create a new resource owner.

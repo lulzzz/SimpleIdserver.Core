@@ -22,6 +22,7 @@ using SimpleIdServer.Core.Services;
 using SimpleIdServer.Core.Translation;
 using SimpleIdServer.Dtos.Requests;
 using SimpleIdServer.Host.Extensions;
+using SimpleIdServer.IdentityStore.Models;
 using SimpleIdServer.OpenId.Logging;
 using System;
 using System.Collections.Generic;
@@ -92,10 +93,10 @@ namespace SimpleIdServer.Authenticate.SMS.Controllers
             uiLocales = string.IsNullOrWhiteSpace(request.UiLocales) ? DefaultLanguage : request.UiLocales;
             if (ModelState.IsValid)
             {
-                ResourceOwner resourceOwner = null;
+                User user = null;
                 try
                 {
-                    resourceOwner = await _smsAuthenticationOperation.Execute(viewModel.PhoneNumber, acrUserSubject).ConfigureAwait(false);
+                    user = await _smsAuthenticationOperation.Execute(viewModel.PhoneNumber, acrUserSubject).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -103,9 +104,9 @@ namespace SimpleIdServer.Authenticate.SMS.Controllers
                     ModelState.AddModelError("message_error", ex.Message);
                 }
 
-                if (resourceOwner != null)
+                if (user != null)
                 {
-                    var claims = resourceOwner.Claims;
+                    var claims = user.Claims;
                     claims.Add(new Claim(ClaimTypes.AuthenticationInstant, DateTimeOffset.UtcNow.ConvertToUnixTimestamp().ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer));
                     await SetPasswordLessCookie(claims).ConfigureAwait(false);
                     try
@@ -182,7 +183,7 @@ namespace SimpleIdServer.Authenticate.SMS.Controllers
                 return View("ConfirmCode", confirmCodeViewModel);
             }
 
-            ResourceOwner resourceOwner;
+            User resourceOwner;
             try
             {
                 resourceOwner = await _resourceOwnerAuthenticateHelper.Authenticate(phoneNumber.Value, confirmCodeViewModel.ConfirmationCode, new[] { Constants.AMR }).ConfigureAwait(false);

@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using SimpleIdServer.Core.Common.Models;
+﻿using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Common.Parameters;
 using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.Core.Exceptions;
+using SimpleIdServer.IdentityStore.Repositories;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace SimpleIdServer.Core.Api.Profile.Actions
 {
@@ -15,13 +16,13 @@ namespace SimpleIdServer.Core.Api.Profile.Actions
 
     internal sealed class GetUserProfilesAction : IGetUserProfilesAction
     {
-        private readonly IResourceOwnerRepository _resourceOwnerRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IProfileRepository _profileRepository;
 
-        public GetUserProfilesAction(IProfileRepository profileRepository, IResourceOwnerRepository resourceOwnerRepository)
+        public GetUserProfilesAction(IProfileRepository profileRepository, IUserRepository userRepository)
         {
             _profileRepository = profileRepository;
-            _resourceOwnerRepository = resourceOwnerRepository;
+            _userRepository = userRepository;
         }
 
         /// <summary>
@@ -37,7 +38,7 @@ namespace SimpleIdServer.Core.Api.Profile.Actions
             }
 
 
-            var resourceOwner = await _resourceOwnerRepository.GetAsync(subject);
+            var resourceOwner = await _userRepository.Get(subject).ConfigureAwait(false);
             if (resourceOwner == null)
             {
                 throw new IdentityServerException(Errors.ErrorCodes.InternalError, Errors.ErrorDescriptions.TheResourceOwnerDoesntExist);

@@ -1,4 +1,4 @@
-﻿namespace SimpleIdServer.Core.Common.Models
+﻿namespace SimpleIdServer.IdentityStore.EF.Models
 {
     public class CredentialSetting
     {

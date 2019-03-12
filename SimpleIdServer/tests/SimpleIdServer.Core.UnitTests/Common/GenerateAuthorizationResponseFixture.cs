@@ -1,4 +1,18 @@
 ﻿using Moq;
+using Newtonsoft.Json;
+using SimpleIdServer.Core;
+using SimpleIdServer.Core.Api.Authorization;
+using SimpleIdServer.Core.Common;
+using SimpleIdServer.Core.Common.Models;
+using SimpleIdServer.Core.Helpers;
+using SimpleIdServer.Core.JwtToken;
+using SimpleIdServer.Core.Parameters;
+using SimpleIdServer.Core.Results;
+using SimpleIdServer.IdentityStore.Models;
+using SimpleIdServer.IdentityStore.Repositories;
+using SimpleIdServer.Lib;
+using SimpleIdServer.OAuth.Logging;
+using SimpleIdServer.Store;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,20 +20,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using SimpleIdServer.Core;
-using SimpleIdServer.Core.Api.Authorization;
-using SimpleIdServer.Core.Common;
-using SimpleIdServer.Lib;
-using SimpleIdServer.Core.Common.Models;
-using SimpleIdServer.Core.Helpers;
-using SimpleIdServer.Core.JwtToken;
-using SimpleIdServer.Core.Parameters;
-using SimpleIdServer.Core.Results;
-using SimpleIdServer.OAuth.Logging;
-using SimpleIdServer.Store;
 using Xunit;
-using Newtonsoft.Json;
-using SimpleIdServer.Core.Common.Repositories;
 
 namespace SimpleIdentityServer.Core.UnitTests.Common
 {
@@ -35,7 +36,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Common
         private Mock<IAuthorizationFlowHelper> _authorizationFlowHelperFake;                
         private Mock<IClientHelper> _clientHelperFake;
         private Mock<IGrantedTokenHelper> _grantedTokenHelperStub;
-        private Mock<IResourceOwnerRepository> _resourceOwnerRepoStub;
+        private Mock<IUserRepository> _userRepoStub;
         private IGenerateAuthorizationResponse _generateAuthorizationResponse;
 
         public static string ToHexString(IEnumerable<byte> arr)
@@ -145,7 +146,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Common
                 {
                     ResponseType.id_token  
                 });
-            _resourceOwnerRepoStub.Setup(r => r.GetAsync(It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwner
+            _userRepoStub.Setup(r => r.Get(It.IsAny<string>())).Returns(Task.FromResult(new User
             {
                 Claims = new List<Claim>
                 {
@@ -220,7 +221,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Common
                 It.IsAny<JwsPayload>(),
                 It.IsAny<JwsPayload>()))
                 .Returns(Task.FromResult(grantedToken));
-            _resourceOwnerRepoStub.Setup(r => r.GetAsync(It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwner
+            _userRepoStub.Setup(r => r.Get(It.IsAny<string>())).Returns(Task.FromResult(new User
             {
                 Claims = new List<Claim>
                 {
@@ -280,7 +281,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Common
                 It.IsAny<JwsPayload>(),
                 It.IsAny<JwsPayload>()))
                 .Returns(() => Task.FromResult(grantedToken));
-            _resourceOwnerRepoStub.Setup(r => r.GetAsync(It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwner
+            _userRepoStub.Setup(r => r.Get(It.IsAny<string>())).Returns(Task.FromResult(new User
             {
                 Claims = new List<Claim>
                 {
@@ -331,7 +332,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Common
             _consentHelperFake.Setup(c => c.GetConfirmedConsentsAsync(It.IsAny<string>(),
                 It.IsAny<AuthorizationParameter>()))
                 .Returns(Task.FromResult(consent));
-            _resourceOwnerRepoStub.Setup(r => r.GetAsync(It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwner
+            _userRepoStub.Setup(r => r.Get(It.IsAny<string>())).Returns(Task.FromResult(new User
             {
                 Claims = new List<Claim>
                 {
@@ -387,7 +388,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Common
                 .Returns(Task.FromResult(jwsPayload));
             _jwtGeneratorFake.Setup(j => j.EncryptAsync(It.IsAny<string>(), It.IsAny<JweAlg>(), It.IsAny<JweEnc>()))
                 .Returns(Task.FromResult(idToken));
-            _resourceOwnerRepoStub.Setup(r => r.GetAsync(It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwner
+            _userRepoStub.Setup(r => r.Get(It.IsAny<string>())).Returns(Task.FromResult(new User
             {
                 Claims = new List<Claim>
                 {
@@ -447,7 +448,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Common
             _authorizationFlowHelperFake.Setup(
                 a => a.GetAuthorizationFlow(It.IsAny<ICollection<ResponseType>>(), It.IsAny<string>()))
                 .Returns(AuthorizationFlow.ImplicitFlow);
-            _resourceOwnerRepoStub.Setup(r => r.GetAsync(It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwner
+            _userRepoStub.Setup(r => r.Get(It.IsAny<string>())).Returns(Task.FromResult(new User
             {
                 Claims = new List<Claim>
                 {
@@ -474,7 +475,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Common
             _authorizationFlowHelperFake = new Mock<IAuthorizationFlowHelper>();
             _clientHelperFake = new Mock<IClientHelper>();
             _grantedTokenHelperStub = new Mock<IGrantedTokenHelper>();
-            _resourceOwnerRepoStub = new Mock<IResourceOwnerRepository>();
+            _userRepoStub = new Mock<IUserRepository>();
             _generateAuthorizationResponse = new GenerateAuthorizationResponse(
                 _authorizationCodeRepositoryFake.Object,
                 _grantedTokenRepositoryFake.Object,
@@ -486,7 +487,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Common
                 _authorizationFlowHelperFake.Object,
                 _clientHelperFake.Object,
                 _grantedTokenHelperStub.Object,
-                _resourceOwnerRepoStub.Object);
+                _userRepoStub.Object);
         }
     }
 }

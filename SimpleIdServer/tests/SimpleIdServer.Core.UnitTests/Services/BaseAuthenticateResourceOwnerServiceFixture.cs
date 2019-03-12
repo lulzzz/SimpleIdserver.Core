@@ -1,8 +1,8 @@
 ﻿using Moq;
-using SimpleIdServer.Core.Common.Models;
-using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.Core.Exceptions;
 using SimpleIdServer.Core.Services;
+using SimpleIdServer.IdentityStore.Models;
+using SimpleIdServer.IdentityStore.Repositories;
 using System;
 using System.Threading.Tasks;
 using Xunit;
@@ -12,7 +12,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Services
     public class BaseAuthenticateResourceOwnerServiceFixture
     {
         private Mock<ICredentialSettingsRepository> _credentialSettingsRepositoryStub;
-        private Mock<IResourceOwnerCredentialRepository> _resourceOwnerCredentialsRepositoryStub;
+        private Mock<IUserCredentialRepository> _userCredentialsRepositoryStub;
         private Mock<BaseAuthenticateResourceOwnerService> _baseAuthenticateResourceOwnerServiceStub;
 
         [Fact]
@@ -22,8 +22,8 @@ namespace SimpleIdentityServer.Core.UnitTests.Services
             InitializeFakeObjects();
 
             // ACT & ASSERT
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _baseAuthenticateResourceOwnerServiceStub.Object.AuthenticateResourceOwnerAsync(null, null)).ConfigureAwait(false);
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _baseAuthenticateResourceOwnerServiceStub.Object.AuthenticateResourceOwnerAsync("login", null)).ConfigureAwait(false);
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _baseAuthenticateResourceOwnerServiceStub.Object.AuthenticateUserAsync(null, null)).ConfigureAwait(false);
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _baseAuthenticateResourceOwnerServiceStub.Object.AuthenticateUserAsync("login", null)).ConfigureAwait(false);
         }
 
         [Fact]
@@ -31,10 +31,10 @@ namespace SimpleIdentityServer.Core.UnitTests.Services
         {
             // ARRANGE
             InitializeFakeObjects();
-            _baseAuthenticateResourceOwnerServiceStub.Setup(b => b.GetResourceOwner(It.IsAny<string>())).Returns(Task.FromResult((ResourceOwner)null));
+            _baseAuthenticateResourceOwnerServiceStub.Setup(b => b.GetUser(It.IsAny<string>())).Returns(Task.FromResult((User)null));
 
             // ACT
-            var ex = await Assert.ThrowsAsync<IdentityServerUserAccountDoesntExistException>(() => _baseAuthenticateResourceOwnerServiceStub.Object.AuthenticateResourceOwnerAsync("login", "cred")).ConfigureAwait(false);
+            var ex = await Assert.ThrowsAsync<IdentityServerUserAccountDoesntExistException>(() => _baseAuthenticateResourceOwnerServiceStub.Object.AuthenticateUserAsync("login", "cred")).ConfigureAwait(false);
 
             // ASSERT
             Assert.NotNull(ex);
@@ -45,14 +45,14 @@ namespace SimpleIdentityServer.Core.UnitTests.Services
         {
             // ARRANGE
             InitializeFakeObjects();
-            _baseAuthenticateResourceOwnerServiceStub.Setup(b => b.GetResourceOwner(It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwner
+            _baseAuthenticateResourceOwnerServiceStub.Setup(b => b.GetUser(It.IsAny<string>())).Returns(Task.FromResult(new User
             {
                 IsBlocked = true
             }));
 
 
             // ACT
-            var ex = await Assert.ThrowsAsync<IdentityServerUserAccountBlockedException>(() => _baseAuthenticateResourceOwnerServiceStub.Object.AuthenticateResourceOwnerAsync("login", "cred")).ConfigureAwait(false);
+            var ex = await Assert.ThrowsAsync<IdentityServerUserAccountBlockedException>(() => _baseAuthenticateResourceOwnerServiceStub.Object.AuthenticateUserAsync("login", "cred")).ConfigureAwait(false);
 
             // ASSERT
             Assert.NotNull(ex);
@@ -65,12 +65,12 @@ namespace SimpleIdentityServer.Core.UnitTests.Services
             const string amr = "amr";
             InitializeFakeObjects();
             _baseAuthenticateResourceOwnerServiceStub.Setup(s => s.Amr).Returns(amr);
-            _baseAuthenticateResourceOwnerServiceStub.Setup(b => b.GetResourceOwner(It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwner
+            _baseAuthenticateResourceOwnerServiceStub.Setup(b => b.GetUser(It.IsAny<string>())).Returns(Task.FromResult(new User
             {
                 IsBlocked = false,
                 Credentials = new []
                 {
-                    new ResourceOwnerCredential
+                    new UserCredential
                     {
                         Type = amr,
                         FirstAuthenticationFailureDateTime = DateTime.UtcNow.AddSeconds(-10),
@@ -85,7 +85,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Services
             })); 
             
             // ACT
-            var ex = await Assert.ThrowsAsync<IdentityServerUserTooManyRetryException>(() => _baseAuthenticateResourceOwnerServiceStub.Object.AuthenticateResourceOwnerAsync("login", "cred")).ConfigureAwait(false);
+            var ex = await Assert.ThrowsAsync<IdentityServerUserTooManyRetryException>(() => _baseAuthenticateResourceOwnerServiceStub.Object.AuthenticateUserAsync("login", "cred")).ConfigureAwait(false);
 
             // ASSERT
             Assert.NotNull(ex);
@@ -98,12 +98,12 @@ namespace SimpleIdentityServer.Core.UnitTests.Services
             const string amr = "amr";
             InitializeFakeObjects();
             _baseAuthenticateResourceOwnerServiceStub.Setup(s => s.Amr).Returns(amr);
-            _baseAuthenticateResourceOwnerServiceStub.Setup(b => b.GetResourceOwner(It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwner
+            _baseAuthenticateResourceOwnerServiceStub.Setup(b => b.GetUser(It.IsAny<string>())).Returns(Task.FromResult(new User
             {
                 IsBlocked = false,
                 Credentials = new[]
                 {
-                    new ResourceOwnerCredential
+                    new UserCredential
                     {
                         Type = amr,
                         FirstAuthenticationFailureDateTime = DateTime.UtcNow.AddSeconds(-10),
@@ -118,7 +118,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Services
                 NumberOfAuthenticationAttempts = 10
             }));
             // ACT
-            var ex = await Assert.ThrowsAsync<IdentityServerCredentialBlockedException>(() => _baseAuthenticateResourceOwnerServiceStub.Object.AuthenticateResourceOwnerAsync("login", "cred")).ConfigureAwait(false);
+            var ex = await Assert.ThrowsAsync<IdentityServerCredentialBlockedException>(() => _baseAuthenticateResourceOwnerServiceStub.Object.AuthenticateUserAsync("login", "cred")).ConfigureAwait(false);
 
             // ASSERT
             Assert.NotNull(ex);
@@ -131,12 +131,12 @@ namespace SimpleIdentityServer.Core.UnitTests.Services
             const string amr = "amr";
             InitializeFakeObjects();
             _baseAuthenticateResourceOwnerServiceStub.Setup(s => s.Amr).Returns(amr);
-            _baseAuthenticateResourceOwnerServiceStub.Setup(b => b.GetResourceOwner(It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwner
+            _baseAuthenticateResourceOwnerServiceStub.Setup(b => b.GetUser(It.IsAny<string>())).Returns(Task.FromResult(new User
             {
                 IsBlocked = false,
                 Credentials = new[]
                 {
-                    new ResourceOwnerCredential
+                    new UserCredential
                     {
                         Type = amr,
                         FirstAuthenticationFailureDateTime = DateTime.UtcNow.AddSeconds(-10),
@@ -151,10 +151,10 @@ namespace SimpleIdentityServer.Core.UnitTests.Services
                 NumberOfAuthenticationAttempts = 10,
                 IsBlockAccountPolicyEnabled = false
             }));
-            _baseAuthenticateResourceOwnerServiceStub.Setup(b => b.Authenticate(It.IsAny<ResourceOwner>(), It.IsAny<string>())).Returns(Task.FromResult(false));
+            _baseAuthenticateResourceOwnerServiceStub.Setup(b => b.Authenticate(It.IsAny<User>(), It.IsAny<string>())).Returns(Task.FromResult(false));
 
             // ACT
-            var ex = await Assert.ThrowsAsync<IdentityServerUserPasswordInvalidException>(() => _baseAuthenticateResourceOwnerServiceStub.Object.AuthenticateResourceOwnerAsync("login", "cred")).ConfigureAwait(false);
+            var ex = await Assert.ThrowsAsync<IdentityServerUserPasswordInvalidException>(() => _baseAuthenticateResourceOwnerServiceStub.Object.AuthenticateUserAsync("login", "cred")).ConfigureAwait(false);
 
             // ASSERT
             Assert.NotNull(ex);
@@ -167,12 +167,12 @@ namespace SimpleIdentityServer.Core.UnitTests.Services
             const string amr = "amr";
             InitializeFakeObjects();
             _baseAuthenticateResourceOwnerServiceStub.Setup(s => s.Amr).Returns(amr);
-            _baseAuthenticateResourceOwnerServiceStub.Setup(b => b.GetResourceOwner(It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwner
+            _baseAuthenticateResourceOwnerServiceStub.Setup(b => b.GetUser(It.IsAny<string>())).Returns(Task.FromResult(new User
             {
                 IsBlocked = false,
                 Credentials = new[]
                 {
-                    new ResourceOwnerCredential
+                    new UserCredential
                     {
                         Type = amr,
                         FirstAuthenticationFailureDateTime = DateTime.UtcNow.AddSeconds(-10),
@@ -187,10 +187,10 @@ namespace SimpleIdentityServer.Core.UnitTests.Services
                 NumberOfAuthenticationAttempts = 10,
                 IsBlockAccountPolicyEnabled = false
             }));
-            _baseAuthenticateResourceOwnerServiceStub.Setup(b => b.Authenticate(It.IsAny<ResourceOwner>(), It.IsAny<string>())).Returns(Task.FromResult(true));
+            _baseAuthenticateResourceOwnerServiceStub.Setup(b => b.Authenticate(It.IsAny<User>(), It.IsAny<string>())).Returns(Task.FromResult(true));
 
             // ACT
-            var ro = await _baseAuthenticateResourceOwnerServiceStub.Object.AuthenticateResourceOwnerAsync("login", "cred").ConfigureAwait(false);
+            var ro = await _baseAuthenticateResourceOwnerServiceStub.Object.AuthenticateUserAsync("login", "cred").ConfigureAwait(false);
 
             // ASSERT
             Assert.NotNull(ro);
@@ -199,8 +199,8 @@ namespace SimpleIdentityServer.Core.UnitTests.Services
         private void InitializeFakeObjects()
         {
             _credentialSettingsRepositoryStub = new Mock<ICredentialSettingsRepository>();
-            _resourceOwnerCredentialsRepositoryStub = new Mock<IResourceOwnerCredentialRepository>();
-            var mock = new Mock<BaseAuthenticateResourceOwnerService>(MockBehavior.Loose, _credentialSettingsRepositoryStub.Object, _resourceOwnerCredentialsRepositoryStub.Object);
+            _userCredentialsRepositoryStub = new Mock<IUserCredentialRepository>();
+            var mock = new Mock<BaseAuthenticateResourceOwnerService>(MockBehavior.Loose, _credentialSettingsRepositoryStub.Object, _userCredentialsRepositoryStub.Object);
             mock.CallBase = true;
             _baseAuthenticateResourceOwnerServiceStub = mock;
         }

@@ -5,10 +5,14 @@ using Microsoft.Extensions.Logging;
 using SimpleIdServer.Authenticate.LoginPassword;
 using SimpleIdServer.Authenticate.SMS;
 using SimpleIdServer.Host;
+using SimpleIdServer.IdentityStore.LDAP;
 using SimpleIdServer.Module;
 using SimpleIdServer.Shell;
 using SimpleIdServer.UserManagement;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace SimpleIdServer.Startup
 {
@@ -16,25 +20,32 @@ namespace SimpleIdServer.Startup
     {
         public Startup(IHostingEnvironment env)
         {
+            var assms = AppDomain.CurrentDomain.GetAssemblies();
+            var refAssms = Assembly.GetEntryAssembly().GetReferencedAssemblies();
+            var rl = Microsoft.Extensions.DependencyModel.DependencyContext.Default.RuntimeLibraries.FirstOrDefault(r => r.Name == "SimpleIdServer.Authenticate.LoginPassword");
+            var loginAssm = Assembly.Load(new AssemblyName(rl.Name));
+            var type = loginAssm.GetExportedTypes().Where(t => typeof(IModule).IsAssignableFrom(t));
+            var loginPasswordModule = (IModule)Activator.CreateInstance(type.First());
+
             var simpleIdServerModule = new SimpleIdentityServerHostModule();
             var shellModule = new ShellModule();
-            var loginPasswordModule = new LoginPasswordModule();
-            var smsModule = new SmsModule();
-            var userManagementModule = new UserManagementModule();
-            simpleIdServerModule.Init(null);
-            shellModule.Init(null);
-            loginPasswordModule.Init(new Dictionary<string, string>
-            {
-                { "IsEditCredentialEnabled", "true" }
-            });
-            smsModule.Init(new Dictionary<string, string>
-            {
-                { "IsSelfProvisioningEnabled", "true" }
-            });
-            userManagementModule.Init(new Dictionary<string, string>
-            {
-                { "CanUpdateTwoFactorAuthentication", "true" }
-            });
+            // var loginPasswordModule = new LoginPasswordModule();
+           var smsModule = new SmsModule();
+           var userManagementModule = new UserManagementModule();
+           simpleIdServerModule.Init(null);
+           shellModule.Init(null);
+           loginPasswordModule.Init(new Dictionary<string, string>
+           {
+               { "IsEditCredentialEnabled", "true" }
+           });
+           smsModule.Init(new Dictionary<string, string>
+           {
+               { "IsSelfProvisioningEnabled", "true" }
+           });
+           userManagementModule.Init(new Dictionary<string, string>
+           {
+               { "CanUpdateTwoFactorAuthentication", "true" }
+           });
         }
 
         public void ConfigureServices(IServiceCollection services)
@@ -69,6 +80,16 @@ namespace SimpleIdServer.Startup
             services.AddAuthorization(opts =>
             {
                 AspPipelineContext.Instance().ConfigureServiceContext.AddAuthorization(opts);
+            });
+
+            services.AddIdentityStoreLDAP(new IdentityStoreLDAPOptions
+            {
+                Port = 389,
+                UserName = "cn=thabart,cn=users,cn=system",
+                Password = "password",
+                Server = "127.0.0.1",
+                LDAPBaseDN = "cn=system",
+                LDAPFilterUser = "(cn={0})"
             });
         }
 

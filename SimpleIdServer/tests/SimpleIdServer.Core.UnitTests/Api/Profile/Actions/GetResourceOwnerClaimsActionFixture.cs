@@ -5,13 +5,14 @@ using SimpleIdServer.Core.Api.Profile.Actions;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Common.Repositories;
 using Xunit;
+using SimpleIdServer.IdentityStore.Repositories;
 
 namespace SimpleIdentityServer.Core.UnitTests.Api.Profile.Actions
 {
     public class GetResourceOwnerClaimsActionFixture
     {
         private Mock<IProfileRepository> _profileRepositoryStub;
-        private Mock<IResourceOwnerRepository> _resourceOwnerRepositoryStub;
+        private Mock<IUserRepository> _resourceOwnerRepositoryStub;
         private IGetResourceOwnerClaimsAction _getResourceOwnerClaimsAction;
 
         [Fact]
@@ -45,7 +46,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Profile.Actions
             // INITIALIZE
             InitializeFakeObjects();
             _profileRepositoryStub.Setup(p => p.Get(It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwnerProfile()));
-            _resourceOwnerRepositoryStub.Setup(p => p.GetAsync(It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwner
+            _resourceOwnerRepositoryStub.Setup(p => p.Get(It.IsAny<string>())).Returns(Task.FromResult(new SimpleIdServer.IdentityStore.Models.User
             {
                 Id = "id"
             }));
@@ -61,7 +62,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Profile.Actions
         private void InitializeFakeObjects()
         {
             _profileRepositoryStub = new Mock<IProfileRepository>();
-            _resourceOwnerRepositoryStub = new Mock<IResourceOwnerRepository>();
+            _resourceOwnerRepositoryStub = new Mock<IUserRepository>();
             _getResourceOwnerClaimsAction = new GetResourceOwnerClaimsAction(_profileRepositoryStub.Object,
                 _resourceOwnerRepositoryStub.Object);
         }

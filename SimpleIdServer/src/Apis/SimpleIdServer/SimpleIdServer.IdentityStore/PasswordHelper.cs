@@ -2,7 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace SimpleIdServer.Core.Helpers
+namespace SimpleIdServer.IdentityStore
 {
     public static class PasswordHelper
     {

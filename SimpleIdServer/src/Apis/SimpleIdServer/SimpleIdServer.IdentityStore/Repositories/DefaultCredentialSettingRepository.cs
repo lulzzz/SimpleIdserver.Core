@@ -1,10 +1,9 @@
-﻿using SimpleIdServer.Core.Common.Models;
-using SimpleIdServer.Core.Common.Repositories;
+﻿using SimpleIdServer.IdentityStore.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SimpleIdServer.Core.Repositories
+namespace SimpleIdServer.IdentityStore.Repositories
 {
     internal sealed class DefaultCredentialSettingRepository : ICredentialSettingsRepository
     {

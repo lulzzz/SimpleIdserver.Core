@@ -1,18 +1,19 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SimpleIdServer.Core.Common.Models;
-using SimpleIdServer.Core.Common.Repositories;
-using SimpleIdServer.EF.Extensions;
+using SimpleIdServer.IdentityStore.EF.Extensions;
+using SimpleIdServer.IdentityStore.Models;
+using SimpleIdServer.IdentityStore.Repositories;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SimpleIdServer.EF.Repositories
+namespace SimpleIdServer.IdentityStore.EF.Repositories
 {
-    internal sealed class CredentialsSettingsRepository : ICredentialSettingsRepository
+    internal sealed class CredentialSettingsRepository : ICredentialSettingsRepository
     {
-        private readonly SimpleIdentityServerContext _context;
+        private readonly IdentityStoreEFContext _context;
 
-        public CredentialsSettingsRepository(SimpleIdentityServerContext context)
+        public CredentialSettingsRepository(IdentityStoreEFContext context)
         {
             _context = context;
         }

@@ -1,6 +1,7 @@
 ﻿using SimpleIdServer.Core;
 using SimpleIdServer.Core.Common;
 using SimpleIdServer.Core.Common.Models;
+using SimpleIdServer.IdentityStore.Models;
 using System.Collections.Generic;
 
 namespace SimpleIdServer.Host.Extensions
@@ -13,7 +14,7 @@ namespace SimpleIdServer.Host.Extensions
 
     public class OpenIdServerConfiguration
     {
-        public List<ResourceOwner> Users { get; set; }
+        public List<User> Users { get; set; }
         public List<Client> Clients { get; set; }
         public List<Translation> Translations { get; set; }
         public List<JsonWebKey> JsonWebKeys { get; set; }

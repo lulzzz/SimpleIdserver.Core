@@ -1,12 +1,12 @@
 ﻿using Moq;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using SimpleIdServer.Core.Api.Profile.Actions;
-using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Common.Parameters;
 using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.Core.Exceptions;
+using SimpleIdServer.IdentityStore.Repositories;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace SimpleIdentityServer.Core.UnitTests.Api.Profile.Actions
@@ -14,7 +14,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Profile.Actions
     public class GetUserProfilesActionFixture
     {
         private Mock<IProfileRepository> _profileRepositoryStub;
-        private Mock<IResourceOwnerRepository> _resourceOwnerRepositoryStub;
+        private Mock<IUserRepository> _resourceOwnerRepositoryStub;
         private IGetUserProfilesAction _getProfileAction;
 
         [Fact]
@@ -47,7 +47,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Profile.Actions
             const string subject = "subject";
             // ARRANGE
             InitializeFakeObjects();
-            _resourceOwnerRepositoryStub.Setup(r => r.GetAsync(It.IsAny<string>())).Returns(Task.FromResult(new ResourceOwner()));
+            _resourceOwnerRepositoryStub.Setup(r => r.Get(It.IsAny<string>())).Returns(Task.FromResult(new SimpleIdServer.IdentityStore.Models.User()));
 
             // ACT
             await _getProfileAction.Execute(subject);
@@ -59,7 +59,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Profile.Actions
         private void InitializeFakeObjects()
         {
             _profileRepositoryStub = new Mock<IProfileRepository>();
-            _resourceOwnerRepositoryStub = new Mock<IResourceOwnerRepository>();
+            _resourceOwnerRepositoryStub = new Mock<IUserRepository>();
             _getProfileAction = new GetUserProfilesAction(_profileRepositoryStub.Object, _resourceOwnerRepositoryStub.Object);
         }
     }

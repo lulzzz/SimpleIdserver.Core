@@ -1,8 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
-using SimpleIdServer.Core.Common.Models;
+﻿using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.Core.Exceptions;
+using SimpleIdServer.IdentityStore.Repositories;
+using System;
+using System.Threading.Tasks;
 
 namespace SimpleIdServer.Core.Api.Profile.Actions
 {
@@ -13,12 +14,12 @@ namespace SimpleIdServer.Core.Api.Profile.Actions
 
     internal sealed class LinkProfileAction : ILinkProfileAction
     {
-        private readonly IResourceOwnerRepository _resourceOwnerRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IProfileRepository _profileRepository;
 
-        public LinkProfileAction(IResourceOwnerRepository resourceOwnerRepository, IProfileRepository profileRepository)
+        public LinkProfileAction(IUserRepository userRepository, IProfileRepository profileRepository)
         {
-            _resourceOwnerRepository = resourceOwnerRepository;
+            _userRepository = userRepository;
             _profileRepository = profileRepository;
         }
 
@@ -39,14 +40,14 @@ namespace SimpleIdServer.Core.Api.Profile.Actions
                 throw new ArgumentNullException(nameof(issuer));
             }
 
-            var resourceOwner = await _resourceOwnerRepository.GetAsync(localSubject);
+            var resourceOwner = await _userRepository.Get(localSubject).ConfigureAwait(false);
             if (resourceOwner == null)
             {
                 throw new IdentityServerException(Errors.ErrorCodes.InternalError, Errors.ErrorDescriptions.TheResourceOwnerDoesntExist);
             }
 
             var profile = await _profileRepository.Get(externalSubject);
-            if (profile != null && profile.ResourceOwnerId != localSubject)
+            if (profile != null && profile.UserId != localSubject)
             {
                 if (!force)
                 {
@@ -55,9 +56,9 @@ namespace SimpleIdServer.Core.Api.Profile.Actions
                 else
                 {
                     await _profileRepository.Remove(new[] { externalSubject });
-                    if (profile.ResourceOwnerId == profile.Subject)
+                    if (profile.UserId == profile.Subject)
                     {
-                        await _resourceOwnerRepository.DeleteAsync(profile.ResourceOwnerId);
+                        await _userRepository.DeleteAsync(profile.UserId).ConfigureAwait(false);
                     }
 
                     profile = null;
@@ -73,7 +74,7 @@ namespace SimpleIdServer.Core.Api.Profile.Actions
             {
                 new ResourceOwnerProfile
                 {
-                    ResourceOwnerId = localSubject,
+                    UserId = localSubject,
                     Subject = externalSubject,
                     Issuer = issuer,
                     CreateDateTime = DateTime.UtcNow,

@@ -5,6 +5,7 @@ using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.Core.Parameters;
 using SimpleIdServer.Core.Services;
+using SimpleIdServer.IdentityStore.Models;
 using System;
 using System.Threading.Tasks;
 using Xunit;
@@ -34,13 +35,13 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Actions
         {
             // ARRANGE
             const string phone = "phone";
-            var resourceOwner = new ResourceOwner
+            var resourceOwner = new User
             {
                 Id = "id"
             };
             InitializeFakeObjects();
             _smsAuthenticationOptions.IsSelfProvisioningEnabled = false;
-            _userActionsStub.Setup(p => p.GetUserByClaim("phone_number", phone)).Returns(() => Task.FromResult((ResourceOwner)null));
+            _userActionsStub.Setup(p => p.GetUserByClaim("phone_number", phone)).Returns(() => Task.FromResult((User)null));
 
             // ACT 
             var result = await Assert.ThrowsAsync<InvalidOperationException>(() => _smsAuthenticationOperation.Execute(phone));
@@ -54,7 +55,7 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Actions
         {
             // ARRANGE
             const string phone = "phone";
-            var resourceOwner = new ResourceOwner
+            var resourceOwner = new User
             {
                 Id = "id"
             };
@@ -77,7 +78,7 @@ namespace SimpleIdServer.Authenticate.SMS.Tests.Actions
             const string phone = "phone";
             InitializeFakeObjects();
             _smsAuthenticationOptions.IsSelfProvisioningEnabled = true;
-            _userActionsStub.Setup(p => p.GetUserByClaim("phone", phone)).Returns(() => Task.FromResult((ResourceOwner)null));
+            _userActionsStub.Setup(p => p.GetUserByClaim("phone", phone)).Returns(() => Task.FromResult((User)null));
             
             // ACT
             await _smsAuthenticationOperation.Execute(phone);

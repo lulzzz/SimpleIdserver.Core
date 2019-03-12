@@ -15,7 +15,7 @@ namespace SimpleIdServer.Core.Common.Models
         /// <summary>
         /// Gets or sets the resource owner id.
         /// </summary>
-        public string ResourceOwnerId { get; set; }
+        public string UserId { get; set; }
         /// <summary>
         /// Gets or sets the create datetime.
         /// </summary>

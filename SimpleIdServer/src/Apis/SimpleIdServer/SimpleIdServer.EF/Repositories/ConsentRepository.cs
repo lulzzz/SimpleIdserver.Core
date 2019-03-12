@@ -14,15 +14,15 @@
 // limitations under the License.
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using SimpleIdServer.Core.Common.Repositories;
 using SimpleIdServer.EF.Extensions;
 using SimpleIdServer.EF.Models;
 using SimpleIdServer.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SimpleIdServer.EF.Repositories
 {
@@ -39,20 +39,8 @@ namespace SimpleIdServer.EF.Repositories
         
         public async Task<IEnumerable<Core.Common.Models.Consent>> GetConsentsForGivenUserAsync(string subject)
         {
-            var resourceOwnerClaim = await _context.ResourceOwnerClaims
-                .Include(r => r.Claim)
-                .Include(r => r.ResourceOwner).ThenInclude(r => r.Consents).ThenInclude(r => r.ConsentClaims)
-                .Include(r => r.ResourceOwner).ThenInclude(r => r.Consents).ThenInclude(r => r.ConsentScopes).ThenInclude(r => r.Scope)
-                .Include(r => r.ResourceOwner).ThenInclude(r => r.Consents).ThenInclude(r => r.Client)
-                .Where(r => r.Claim != null && r.Claim.IsIdentifier == true && r.Value == subject)
-                .FirstOrDefaultAsync()
-                .ConfigureAwait(false);
-            if (resourceOwnerClaim == null)
-            {
-                return null;
-            }
-
-            return resourceOwnerClaim.ResourceOwner.Consents == null ? new Core.Common.Models.Consent[0] : resourceOwnerClaim.ResourceOwner.Consents.Select<Consent, Core.Common.Models.Consent>(c => c.ToDomain());
+            var consents = await _context.Consents.Where(s => s.UserId == subject).ToListAsync().ConfigureAwait(false);
+            return consents.Select(c => c.ToDomain());
         }
 
         public async Task<bool> InsertAsync(Core.Common.Models.Consent record)
@@ -63,9 +51,8 @@ namespace SimpleIdServer.EF.Repositories
                 try
                 {
                     var clientId = record.Client.ClientId;
-                    var resourceOwnerId = record.ResourceOwner.Id;
+                    var userId = record.UserId;
                     var client = await _context.Clients.FirstOrDefaultAsync(c => c.ClientId == clientId).ConfigureAwait(false);
-                    var resourceOwner = await _context.ResourceOwners.FirstOrDefaultAsync(r => r.Id == resourceOwnerId).ConfigureAwait(false);
                     var assignedClaims = new List<ConsentClaim>();
                     var assignedScopes = new List<ConsentScope>();
                     if (record.Claims != null)
@@ -98,7 +85,7 @@ namespace SimpleIdServer.EF.Repositories
                     {
                         Id = record.Id,
                         Client = client,
-                        ResourceOwner = resourceOwner,
+                        UserId = userId,
                         ConsentClaims = assignedClaims,
                         ConsentScopes = assignedScopes
                     };

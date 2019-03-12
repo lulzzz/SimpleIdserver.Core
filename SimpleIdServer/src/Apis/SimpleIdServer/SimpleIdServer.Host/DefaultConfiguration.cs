@@ -1,5 +1,7 @@
 ﻿using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Helpers;
+using SimpleIdServer.IdentityStore;
+using SimpleIdServer.IdentityStore.Models;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -481,9 +483,9 @@ namespace SimpleIdServer.Host
             }
         };
 
-        public static List<ResourceOwner> DEFAULT_USERS = new List<ResourceOwner>
+        public static List<User> DEFAULT_USERS = new List<User>
         {
-            new ResourceOwner
+            new User
             {
                 Id = "administrator",
                 CreateDateTime = DateTime.UtcNow,
@@ -495,9 +497,9 @@ namespace SimpleIdServer.Host
                     new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.PhoneNumber, "+32485350536"),
                     new Claim(Core.Jwt.Constants.StandardResourceOwnerClaimNames.Email, "habarthierry@hotmail.fr")
                 },
-                Credentials = new List<ResourceOwnerCredential>
+                Credentials = new List<UserCredential>
                 {
-                    new ResourceOwnerCredential
+                    new UserCredential
                     {
                         ExpirationDateTime = DateTime.UtcNow.AddDays(10),
                         Value = PasswordHelper.ComputeHash("password"),
@@ -506,7 +508,7 @@ namespace SimpleIdServer.Host
                         Type = "pwd",
                         NumberOfAttempts = 0
                     },
-                    new ResourceOwnerCredential
+                    new UserCredential
                     {
                         ExpirationDateTime = DateTime.UtcNow.AddDays(10),
                         IsBlocked = false,
@@ -514,7 +516,7 @@ namespace SimpleIdServer.Host
                         Type = "eid",
                         Value = ""
                     },
-                    new ResourceOwnerCredential
+                    new UserCredential
                     {
                         ExpirationDateTime = DateTime.UtcNow.AddDays(10),
                         // Value = "AUAPaxbKHFeeNCu9mlRXMeSrEE+4rtQAxMBwx0d//7jbqqZnFsCRroXEw9O4MVq0M1dE2dDzbb81SRaP1vJarXk=",

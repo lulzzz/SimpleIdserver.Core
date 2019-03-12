@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using SimpleIdServer.Core.Common.Parameters;
+using System.Collections.Generic;
 
 namespace SimpleIdServer.IdentityStore.Parameters
 {

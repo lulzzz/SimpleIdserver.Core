@@ -12,7 +12,7 @@ namespace SimpleIdServer.Core.Api.Profile
         Task<bool> Unlink(string localSubject, string externalSubject);
         Task<bool> Link(string localSubject, string externalSubject, string issuer, bool force = false);
         Task<IEnumerable<ResourceOwnerProfile>> GetProfiles(string subject);
-        Task<ResourceOwner> GetResourceOwner(string externalSubject);
+        Task<IdentityStore.Models.User> GetUser(string externalSubject);
     }
 
     internal sealed class ProfileActions : IProfileActions
@@ -60,7 +60,7 @@ namespace SimpleIdServer.Core.Api.Profile
             return _getUserProfilesAction.Execute(subject);
         }
 
-        public Task<ResourceOwner> GetResourceOwner(string externalSubject)
+        public Task<IdentityStore.Models.User> GetUser(string externalSubject)
         {
             return _getResourceOwnerClaimsAction.Execute(externalSubject);
         }

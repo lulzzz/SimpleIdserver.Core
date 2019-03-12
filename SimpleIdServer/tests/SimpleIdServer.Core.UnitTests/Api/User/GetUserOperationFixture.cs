@@ -1,7 +1,6 @@
 ﻿using Moq;
 using SimpleIdServer.Core.Api.User.Actions;
-using SimpleIdServer.Core.Common.Models;
-using SimpleIdServer.Core.Common.Repositories;
+using SimpleIdServer.IdentityStore.Repositories;
 using System;
 using System.Threading.Tasks;
 using Xunit;
@@ -10,7 +9,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.User
 {
     public class GetUserOperationFixture
     {
-        private Mock<IResourceOwnerRepository> _resourceOwnerRepositoryStub;
+        private Mock<IUserRepository> _resourceOwnerRepositoryStub;
         private IGetUserOperation _getUserOperation;
 
         [Fact]
@@ -28,8 +27,8 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.User
         {
             // ARRANGE
             InitializeFakeObjects();
-            _resourceOwnerRepositoryStub.Setup(r => r.GetAsync(It.IsAny<string>()))
-                .Returns(Task.FromResult(new ResourceOwner()));
+            _resourceOwnerRepositoryStub.Setup(r => r.Get(It.IsAny<string>()))
+                .Returns(Task.FromResult(new SimpleIdServer.IdentityStore.Models.User()));
 
             // ACT
             var result = await _getUserOperation.Execute("subject").ConfigureAwait(false);
@@ -40,7 +39,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.User
         
         private void InitializeFakeObjects()
         {
-            _resourceOwnerRepositoryStub = new Mock<IResourceOwnerRepository>();
+            _resourceOwnerRepositoryStub = new Mock<IUserRepository>();
             _getUserOperation = new GetUserOperation(_resourceOwnerRepositoryStub.Object);
         }
     }

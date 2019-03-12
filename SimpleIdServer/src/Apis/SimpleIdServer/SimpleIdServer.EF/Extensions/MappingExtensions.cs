@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using Domain = SimpleIdServer.Core.Common.Models;
 using Jwt = SimpleIdServer.Core.Common;
 using Model = SimpleIdServer.EF.Models;
 
 namespace SimpleIdServer.EF.Extensions
 {
-    public static class MappingExtensions
+    internal static class MappingExtensions
     {
         #region To Domain Objects
 
@@ -46,24 +45,6 @@ namespace SimpleIdServer.EF.Extensions
             };
         }
 
-        public static Domain.CredentialSetting ToDomain(this Model.CredentialSetting credentialSetting)
-        {
-            if (credentialSetting == null)
-            {
-                throw new ArgumentNullException(nameof(credentialSetting));
-            }
-
-            return new Domain.CredentialSetting
-            {
-                CredentialType = credentialSetting.CredentialType,
-                ExpiresIn = credentialSetting.ExpiresIn,
-                Options = credentialSetting.Options,
-                AuthenticationIntervalsInSeconds = credentialSetting.AuthenticationIntervalsInSeconds,
-                IsBlockAccountPolicyEnabled = credentialSetting.IsBlockAccountPolicyEnabled,
-                NumberOfAuthenticationAttempts = credentialSetting.NumberOfAuthenticationAttempts
-            };
-        }
-
         public static Domain.ResourceOwnerProfile ToDomain(this Model.Profile profile)
         {
             if (profile == null)
@@ -74,7 +55,7 @@ namespace SimpleIdServer.EF.Extensions
             return new Domain.ResourceOwnerProfile
             {
                 Issuer = profile.Issuer,
-                ResourceOwnerId = profile.ResourceOwnerId,
+                UserId = profile.UserId,
                 Subject = profile.Subject,
                 CreateDateTime = profile.CreateDateTime,
                 UpdateTime = profile.UpdateDateTime
@@ -120,51 +101,6 @@ namespace SimpleIdServer.EF.Extensions
                 Claims = scope.ScopeClaims == null ? new List<string>() : scope.ScopeClaims.Select(c => c.ClaimCode).ToList(),
                 UpdateDateTime = scope.UpdateDateTime,
                 CreateDateTime = scope.CreateDateTime
-            };
-        }
-
-        public static Domain.ResourceOwner ToDomain(this Model.ResourceOwner resourceOwner)
-        {
-            if (resourceOwner == null)
-            {
-                return null;
-            }
-
-            var claims = new List<Claim>();
-            var credentials = new List<Domain.ResourceOwnerCredential>();
-            if (resourceOwner.Claims != null && resourceOwner.Claims.Any())
-            {
-                foreach(var c in resourceOwner.Claims)
-                {
-                    claims.Add(new Claim(c.ClaimCode, c.Value));
-                }
-            }
-
-            if (resourceOwner.Credentials != null && resourceOwner.Credentials.Any())
-            {
-                foreach(var cr in resourceOwner.Credentials)
-                {
-                    credentials.Add(new Domain.ResourceOwnerCredential
-                    {
-                        BlockedDateTime = cr.BlockedDateTime,
-                        ExpirationDateTime = cr.ExpirationDateTime,
-                        FirstAuthenticationFailureDateTime = cr.FirstAuthenticationFailureDateTime,
-                        IsBlocked = cr.IsBlocked,
-                        NumberOfAttempts = cr.NumberOfAttempts,
-                        Type = cr.Type,
-                        Value = cr.Value
-                    });
-                }
-            }
-
-            return new Domain.ResourceOwner
-            {
-                Id = resourceOwner.Id,
-                IsBlocked = resourceOwner.IsBlocked,
-                Claims = claims,
-                CreateDateTime = resourceOwner.CreateDateTime,
-                UpdateDateTime = resourceOwner.UpdateDateTime,
-                Credentials = credentials
             };
         }
 
@@ -306,7 +242,7 @@ namespace SimpleIdServer.EF.Extensions
                 Id = consent.Id,
                 Client = consent.Client == null ? null : consent.Client.ToDomain(),
                 Claims = consent.ConsentClaims == null ? null : consent.ConsentClaims.Select(c => c.ClaimCode).ToList(),
-                ResourceOwner = consent.ResourceOwner == null ? null : consent.ResourceOwner.ToDomain(),
+                UserId = consent.UserId,
                 GrantedScopes = consent.ConsentScopes == null ? null : consent.ConsentScopes.Select(consentScope => consentScope.Scope.ToDomain()).ToList()
             };
         }
@@ -325,7 +261,7 @@ namespace SimpleIdServer.EF.Extensions
             return new Model.Profile
             {
                 Issuer = profile.Issuer,
-                ResourceOwnerId = profile.ResourceOwnerId,
+                UserId = profile.UserId,
                 Subject = profile.Subject,
                 UpdateDateTime = profile.UpdateTime,
                 CreateDateTime = profile.CreateDateTime

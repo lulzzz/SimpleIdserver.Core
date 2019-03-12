@@ -1,8 +1,4 @@
 ﻿using Moq;
-using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using SimpleIdServer.Core.Common;
 using SimpleIdServer.Core.Common.Models;
 using SimpleIdServer.Core.Common.Repositories;
@@ -15,7 +11,12 @@ using SimpleIdServer.Core.Parameters;
 using SimpleIdServer.Core.Results;
 using SimpleIdServer.Core.Services;
 using SimpleIdServer.Core.WebSite.Consent.Actions;
+using SimpleIdServer.IdentityStore.Repositories;
 using SimpleIdServer.OpenId.Logging;
+using System;
+using System.Collections.Generic;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace SimpleIdentityServer.Core.UnitTests.WebSite.Consent
@@ -25,7 +26,6 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Consent
         private Mock<IConsentRepository> _consentRepositoryFake;
         private Mock<IClientRepository> _clientRepositoryFake;
         private Mock<IScopeRepository> _scopeRepositoryFake;
-        private Mock<IResourceOwnerRepository> _resourceOwnerRepositoryFake;
         private Mock<IParameterParserHelper> _parameterParserHelperFake;
         private Mock<IActionResultFactory> _actionResultFactoryFake;
         private Mock<IGenerateAuthorizationResponse> _generateAuthorizationResponseFake;
@@ -69,7 +69,7 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Consent
             {
                 ClientId = "clientId"
             };
-            var resourceOwner = new ResourceOwner
+            var resourceOwner = new SimpleIdServer.IdentityStore.Models.User
             {
                 Id = subject
             };
@@ -87,8 +87,6 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Consent
                 .Returns(Task.FromResult(client));
             _parameterParserHelperFake.Setup(p => p.ParseScopes(It.IsAny<string>()))
                 .Returns(scopeNames);
-            _resourceOwnerRepositoryFake.Setup(r => r.GetAsync(It.IsAny<string>()))
-                .Returns(Task.FromResult(resourceOwner));
             _actionResultFactoryFake.Setup(a => a.CreateAnEmptyActionResultWithRedirectionToCallBackUrl())
                 .Returns(actionResult);
             _scopeRepositoryFake.Setup(s => s.SearchByNamesAsync(It.IsAny<IEnumerable<string>>()))
@@ -133,7 +131,7 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Consent
             {
                 ClientId = clientId
             };
-            var resourceOwner = new ResourceOwner
+            var resourceOwner = new SimpleIdServer.IdentityStore.Models.User
             {
                 Id = subject
             };
@@ -151,8 +149,6 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Consent
                 .Returns(new List<string>());
             _scopeRepositoryFake.Setup(s => s.SearchByNamesAsync(It.IsAny<IEnumerable<string>>()))
                 .Returns(Task.FromResult(scopes));
-            _resourceOwnerRepositoryFake.Setup(r => r.GetAsync(It.IsAny<string>()))
-                .Returns(Task.FromResult(resourceOwner));
             _actionResultFactoryFake.Setup(a => a.CreateAnEmptyActionResultWithRedirectionToCallBackUrl())
                 .Returns(actionResult);
             SimpleIdServer.Core.Common.Models.Consent insertedConsent = null;
@@ -166,7 +162,7 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Consent
             // ASSERT
             Assert.NotNull(insertedConsent);
             Assert.True(insertedConsent.Claims.Contains(Constants.StandardResourceOwnerClaimNames.Subject));
-            Assert.True(insertedConsent.ResourceOwner.Id == subject);
+            Assert.True(insertedConsent.UserId == subject);
             Assert.True(insertedConsent.Client.ClientId == clientId);
             _actionResultFactoryFake.Verify(a => a.CreateAnEmptyActionResultWithRedirectionToCallBackUrl());
         }
@@ -191,7 +187,7 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Consent
             {
                 ClientId = "clientId"
             };
-            var resourceOwner = new ResourceOwner
+            var resourceOwner = new SimpleIdServer.IdentityStore.Models.User
             {
                 Id = subject
             };
@@ -213,8 +209,6 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Consent
                 .Returns(new List<string>());
             _scopeRepositoryFake.Setup(s => s.SearchByNamesAsync(It.IsAny<IEnumerable<string>>()))
                 .Returns(Task.FromResult(scopes));
-            _resourceOwnerRepositoryFake.Setup(r => r.GetAsync(It.IsAny<string>()))
-                .Returns(Task.FromResult(resourceOwner));
             _actionResultFactoryFake.Setup(a => a.CreateAnEmptyActionResultWithRedirectionToCallBackUrl())
                 .Returns(actionResult);
             _parameterParserHelperFake.Setup(p => p.ParseResponseTypes(It.IsAny<string>()))
@@ -234,7 +228,6 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Consent
             _consentRepositoryFake = new Mock<IConsentRepository>();
             _clientRepositoryFake = new Mock<IClientRepository>();
             _scopeRepositoryFake = new Mock<IScopeRepository>();
-            _resourceOwnerRepositoryFake = new Mock<IResourceOwnerRepository>();
             _parameterParserHelperFake = new Mock<IParameterParserHelper>();
             _actionResultFactoryFake = new Mock<IActionResultFactory>();
             _generateAuthorizationResponseFake = new Mock<IGenerateAuthorizationResponse>();
@@ -245,7 +238,6 @@ namespace SimpleIdentityServer.Core.UnitTests.WebSite.Consent
                 _consentRepositoryFake.Object,
                 _clientRepositoryFake.Object,
                 _scopeRepositoryFake.Object,
-                _resourceOwnerRepositoryFake.Object,
                 _parameterParserHelperFake.Object,
                 _actionResultFactoryFake.Object,
                 _generateAuthorizationResponseFake.Object,

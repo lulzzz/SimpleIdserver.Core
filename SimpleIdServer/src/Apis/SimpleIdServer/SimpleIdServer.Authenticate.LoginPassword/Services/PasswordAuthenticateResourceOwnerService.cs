@@ -1,8 +1,8 @@
-﻿using SimpleIdServer.Core.Common.Models;
-using SimpleIdServer.Core.Common.Repositories;
-using SimpleIdServer.Core.Exceptions;
+﻿using SimpleIdServer.Core.Exceptions;
 using SimpleIdServer.Core.Helpers;
 using SimpleIdServer.Core.Services;
+using SimpleIdServer.IdentityStore.Models;
+using SimpleIdServer.IdentityStore.Repositories;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,12 +11,12 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Services
 {
     internal sealed class PasswordAuthenticateResourceOwnerService : BaseAuthenticateResourceOwnerService
     {
-        private readonly IResourceOwnerRepository _resourceOwnerRepository;
+        private readonly IUserRepository _userRepository;
 
-        public PasswordAuthenticateResourceOwnerService(ICredentialSettingsRepository credentialSettingsRepository, IResourceOwnerCredentialRepository resourceOwnerCredentialRepository,
-            IResourceOwnerRepository resourceOwnerRepository) : base(credentialSettingsRepository, resourceOwnerCredentialRepository)
+        public PasswordAuthenticateResourceOwnerService(ICredentialSettingsRepository credentialSettingsRepository, IUserCredentialRepository userCredentialRepository,
+            IUserRepository userRepository) : base(credentialSettingsRepository, userCredentialRepository)
         {
-            _resourceOwnerRepository = resourceOwnerRepository;
+            _userRepository = userRepository;
         }
 
         public override string Amr
@@ -27,23 +27,17 @@ namespace SimpleIdServer.Authenticate.LoginPassword.Services
             }
         }
 
-        public override Task<bool> Authenticate(ResourceOwner user, string credentialValue)
+        public override Task<bool> Authenticate(User user, string credentialValue)
         {
-            var credential = user.Credentials.FirstOrDefault(c => c.Type == Constants.AMR);
-            if (credential == null)
-            {
-                return Task.FromResult(false);
-            }
-
-            return Task.FromResult(credential.Value == PasswordHelper.ComputeHash(credentialValue));
+            return _userRepository.Authenticate(user.Id, credentialValue);
         }
 
-        public override Task<ResourceOwner> GetResourceOwner(string login)
+        public override Task<User> GetUser(string login)
         {
-            return _resourceOwnerRepository.GetAsync(login);
+            return _userRepository.Get(login);
         }
 
-        public override Task Validate(ResourceOwner user)
+        public override Task Validate(User user)
         {
             var credential = user.Credentials.FirstOrDefault(c => c.Type == Constants.AMR);
             if (credential == null)

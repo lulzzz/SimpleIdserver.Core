@@ -1,28 +1,27 @@
-﻿using SimpleIdServer.Core.Common.Models;
-using SimpleIdServer.Core.Common.Repositories;
+﻿using SimpleIdServer.IdentityStore.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SimpleIdServer.Core.Repositories
+namespace SimpleIdServer.IdentityStore.Repositories
 {
-    internal sealed class DefaultResourceOwnerCredentialRepository : IResourceOwnerCredentialRepository
+    internal sealed class DefaultUserCredentialRepository : IUserCredentialRepository
     {
-        public ICollection<ResourceOwner> _users;
+        public ICollection<User> _users;
 
-        public DefaultResourceOwnerCredentialRepository(ICollection<ResourceOwner> users)
+        public DefaultUserCredentialRepository(ICollection<User> users)
         {
             _users = users;
         }
 
-        public Task<bool> Add(IEnumerable<ResourceOwnerCredential> resourceOwnerCredentials)
+        public Task<bool> Add(IEnumerable<UserCredential> resourceOwnerCredentials)
         {
             if (resourceOwnerCredentials == null)
             {
                 return Task.FromResult(true);
             }
 
-            foreach(var resourceOwnerCredential in resourceOwnerCredentials)
+            foreach (var resourceOwnerCredential in resourceOwnerCredentials)
             {
                 var user = _users.FirstOrDefault(u => u.Id == resourceOwnerCredential.UserId);
                 if (user == null)
@@ -30,8 +29,8 @@ namespace SimpleIdServer.Core.Repositories
                     continue;
                 }
 
-                var credentials = user.Credentials == null ? new List<ResourceOwnerCredential>() : user.Credentials.ToList();
-                credentials.Add(new ResourceOwnerCredential
+                var credentials = user.Credentials == null ? new List<UserCredential>() : user.Credentials.ToList();
+                credentials.Add(new UserCredential
                 {
                     BlockedDateTime = resourceOwnerCredential.BlockedDateTime,
                     ExpirationDateTime = resourceOwnerCredential.ExpirationDateTime,
@@ -68,9 +67,9 @@ namespace SimpleIdServer.Core.Repositories
             return Task.FromResult(true);
         }
 
-        public Task<ResourceOwnerCredential> Get(string type, string value)
+        public Task<UserCredential> Get(string type, string value)
         {
-            foreach(var user in _users)
+            foreach (var user in _users)
             {
                 if (user.Credentials == null)
                 {
@@ -84,22 +83,22 @@ namespace SimpleIdServer.Core.Repositories
                 }
             }
 
-            return Task.FromResult((ResourceOwnerCredential)null);
+            return Task.FromResult((UserCredential)null);
         }
 
-        public Task<ResourceOwnerCredential> GetUserCredential(string subject, string type)
+        public Task<UserCredential> GetUserCredential(string subject, string type)
         {
             var user = _users.FirstOrDefault(u => u.Id == subject);
             if (user == null)
             {
-                return Task.FromResult((ResourceOwnerCredential)null);
+                return Task.FromResult((UserCredential)null);
             }
-            
+
             var credential = user.Credentials.FirstOrDefault(c => c.Type == type);
             return Task.FromResult(credential);
         }
 
-        public async Task<bool> Update(ResourceOwnerCredential resourceOwnerCredential)
+        public async Task<bool> Update(UserCredential resourceOwnerCredential)
         {
             var cred = await GetUserCredential(resourceOwnerCredential.UserId, resourceOwnerCredential.Type).ConfigureAwait(false);
             if (cred == null)

@@ -27,6 +27,7 @@
     <ProjectReference Include="..\SimpleIdServer.AccountFilter\SimpleIdServer.AccountFilter.csproj" />
     <ProjectReference Include="..\SimpleIdServer.Core.Common\SimpleIdServer.Core.Common.csproj" />
     <ProjectReference Include="..\SimpleIdServer.Core.Jwt\SimpleIdServer.Core.Jwt.csproj" />
+    <ProjectReference Include="..\SimpleIdServer.IdentityStore\SimpleIdServer.IdentityStore.csproj" />
     <ProjectReference Include="..\SimpleIdServer.OAuth.Events\SimpleIdServer.OAuth.Events.csproj" />
     <ProjectReference Include="..\SimpleIdServer.OAuth.Logging\SimpleIdServer.OAuth.Logging.csproj" />
     <ProjectReference Include="..\SimpleIdServer.OpenId.Events\SimpleIdServer.OpenId.Events.csproj" />

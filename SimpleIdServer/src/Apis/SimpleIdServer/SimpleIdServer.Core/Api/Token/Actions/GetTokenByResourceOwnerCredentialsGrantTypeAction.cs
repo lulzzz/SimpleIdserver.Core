@@ -92,10 +92,10 @@ namespace SimpleIdServer.Core.Api.Token.Actions
             }
 
             // 3. Try to authenticate a resource owner
-            ResourceOwner resourceOwner = null;
+            IdentityStore.Models.User user = null;
             try
             {
-                resourceOwner = await _resourceOwnerAuthenticateHelper.Authenticate(resourceOwnerGrantTypeParameter.UserName,
+                user = await _resourceOwnerAuthenticateHelper.Authenticate(resourceOwnerGrantTypeParameter.UserName,
                     resourceOwnerGrantTypeParameter.Password,
                     resourceOwnerGrantTypeParameter.AmrValues).ConfigureAwait(false);
             }
@@ -116,7 +116,7 @@ namespace SimpleIdServer.Core.Api.Token.Actions
                 throw new IdentityServerException(ErrorCodes.InvalidGrant, ErrorDescriptions.ResourceOwnerCredentialsAreNotValid);
             }
 
-            if (resourceOwner == null)
+            if (user == null)
             {
                 throw new IdentityServerException(ErrorCodes.InvalidGrant, ErrorDescriptions.ResourceOwnerCredentialsAreNotValid);
             }
@@ -135,7 +135,7 @@ namespace SimpleIdServer.Core.Api.Token.Actions
             }
 
             // 5. Generate the user information payload and store it.
-            var claims = resourceOwner.Claims;
+            var claims = user.Claims;
             var authorizationParameter = new AuthorizationParameter
             {
                 Scope = resourceOwnerGrantTypeParameter.Scope

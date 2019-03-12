@@ -201,7 +201,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Token
                 .Returns(() => Task.FromResult(client));
             _resourceOwnerAuthenticateHelperFake.Setup(
                 r => r.Authenticate(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>()))
-                .Returns(() => Task.FromResult((ResourceOwner)null));
+                .Returns(() => Task.FromResult((SimpleIdServer.IdentityStore.Models.User)null));
 
             // ACT & ASSERTS
             var exception = await Assert.ThrowsAsync<IdentityServerException>(() => _getTokenByResourceOwnerCredentialsGrantTypeAction.Execute(resourceOwnerGrantTypeParameter, null, null, null));
@@ -240,7 +240,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Token
                     ResponseType.token
                 }
             }, null);
-            var resourceOwner = new ResourceOwner();
+            var resourceOwner = new SimpleIdServer.IdentityStore.Models.User();
             
             _authenticateInstructionGeneratorStub.Setup(a => a.GetAuthenticateInstruction(It.IsAny<AuthenticationHeaderValue>()))
                 .Returns(new AuthenticateInstruction());
@@ -293,7 +293,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.Token
                     ResponseType.token
                 }
             }, null);
-            var resourceOwner = new ResourceOwner();
+            var resourceOwner = new SimpleIdServer.IdentityStore.Models.User();
             var userInformationJwsPayload = new JwsPayload();
             var grantedToken = new GrantedToken
             {

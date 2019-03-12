@@ -1,5 +1,4 @@
-﻿using SimpleIdServer.Core.Common.Models;
-using SimpleIdServer.Core.Common.Repositories;
+﻿using SimpleIdServer.IdentityStore.Repositories;
 using System;
 using System.Threading.Tasks;
 
@@ -7,21 +6,21 @@ namespace SimpleIdServer.Core.Api.User.Actions
 {
     public interface IGetUserByCredentialOperation
     {
-        Task<ResourceOwner> Execute(string credentialType, string value);
+        Task<IdentityStore.Models.User> Execute(string credentialType, string value);
     }
 
     internal sealed class GetUserByCredentialOperation : IGetUserByCredentialOperation
     {
-        private readonly IResourceOwnerCredentialRepository _resourceOwnerCredentialRepository;
-        private readonly IResourceOwnerRepository _resourceOwnerRepository;
+        private readonly IUserCredentialRepository _userCredentialRepository;
+        private readonly IUserRepository _userRepository;
 
-        public GetUserByCredentialOperation(IResourceOwnerCredentialRepository resourceOwnerCredentialRepository, IResourceOwnerRepository resourceOwnerRepository)
+        public GetUserByCredentialOperation(IUserCredentialRepository userCredentialRepository, IUserRepository userRepository)
         {
-            _resourceOwnerCredentialRepository = resourceOwnerCredentialRepository;
-            _resourceOwnerRepository = resourceOwnerRepository;
+            _userCredentialRepository = userCredentialRepository;
+            _userRepository = userRepository;
         }
 
-        public async Task<ResourceOwner> Execute(string credentialType, string value)
+        public async Task<IdentityStore.Models.User> Execute(string credentialType, string value)
         {
             if (string.IsNullOrWhiteSpace(credentialType))
             {
@@ -33,13 +32,13 @@ namespace SimpleIdServer.Core.Api.User.Actions
                 throw new ArgumentNullException(nameof(value));
             }
 
-            var userCredential = await _resourceOwnerCredentialRepository.Get(credentialType, value).ConfigureAwait(false);
+            var userCredential = await _userCredentialRepository.Get(credentialType, value).ConfigureAwait(false);
             if (userCredential == null)
             {
                 return null;
             }
 
-            return await _resourceOwnerRepository.GetAsync(userCredential.UserId).ConfigureAwait(false);
+            return await _userRepository.Get(userCredential.UserId).ConfigureAwait(false);
         }
     }
 }

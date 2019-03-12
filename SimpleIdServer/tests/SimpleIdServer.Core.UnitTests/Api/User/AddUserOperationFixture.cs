@@ -14,12 +14,13 @@ using SimpleIdServer.Core.Services;
 using SimpleIdServer.OpenId.Logging;
 using Xunit;
 using SimpleIdServer.Core.Api.User.Actions;
+using SimpleIdServer.IdentityStore.Repositories;
 
 namespace SimpleIdentityServer.Core.UnitTests.Api.User
 {
     public class AddUserOperationFixture
     {
-        private Mock<IResourceOwnerRepository> _resourceOwnerRepositoryStub;
+        private Mock<IUserRepository> _resourceOwnerRepositoryStub;
         private Mock<IClaimRepository> _claimsRepositoryStub;
         private Mock<ILinkProfileAction> _linkProfileActionStub;
         private Mock<IOpenIdEventSource> _openidEventSourceStub;
@@ -47,8 +48,8 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.User
             InitializeFakeObjects();
             var parameter = new AddUserParameter(null);
 
-            _resourceOwnerRepositoryStub.Setup(r => r.GetAsync(It.IsAny<string>()))
-                .Returns(Task.FromResult(new ResourceOwner()));
+            _resourceOwnerRepositoryStub.Setup(r => r.Get(It.IsAny<string>()))
+                .Returns(Task.FromResult(new SimpleIdServer.IdentityStore.Models.User()));
 
             // ACT
             var exception = await Assert.ThrowsAsync<IdentityServerException>(() => _addResourceOwnerAction.Execute(parameter, null));
@@ -68,7 +69,7 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.User
             {
                 IsValid = true
             }));
-            _resourceOwnerRepositoryStub.Setup(r => r.InsertAsync(It.IsAny<ResourceOwner>())).Returns(Task.FromResult(false));
+            _resourceOwnerRepositoryStub.Setup(r => r.InsertAsync(It.IsAny<SimpleIdServer.IdentityStore.Models.User>())).Returns(Task.FromResult(false));
             var parameter = new AddUserParameter(null);
 
             // ACT
@@ -91,21 +92,21 @@ namespace SimpleIdentityServer.Core.UnitTests.Api.User
                 IsValid = true
             }));
             _subjectBuilderStub.Setup(s => s.BuildSubject()).Returns(Task.FromResult("sub"));
-            _resourceOwnerRepositoryStub.Setup(r => r.GetAsync(It.IsAny<string>()))
-                .Returns(Task.FromResult((ResourceOwner)null));
-            _resourceOwnerRepositoryStub.Setup(r => r.InsertAsync(It.IsAny<ResourceOwner>())).Returns(Task.FromResult(true));
+            _resourceOwnerRepositoryStub.Setup(r => r.Get(It.IsAny<string>()))
+                .Returns(Task.FromResult((SimpleIdServer.IdentityStore.Models.User)null));
+            _resourceOwnerRepositoryStub.Setup(r => r.InsertAsync(It.IsAny<SimpleIdServer.IdentityStore.Models.User>())).Returns(Task.FromResult(true));
 
             // ACT
             await _addResourceOwnerAction.Execute(parameter, null);
 
             // ASSERT
-            _resourceOwnerRepositoryStub.Verify(r => r.InsertAsync(It.IsAny<ResourceOwner>()));
+            _resourceOwnerRepositoryStub.Verify(r => r.InsertAsync(It.IsAny<SimpleIdServer.IdentityStore.Models.User>()));
             _openidEventSourceStub.Verify(o => o.AddResourceOwner("sub"));
         }
 
         private void InitializeFakeObjects()
         {
-            _resourceOwnerRepositoryStub = new Mock<IResourceOwnerRepository>();
+            _resourceOwnerRepositoryStub = new Mock<IUserRepository>();
             _claimsRepositoryStub = new Mock<IClaimRepository>();
             _linkProfileActionStub = new Mock<ILinkProfileAction>();
             _openidEventSourceStub = new Mock<IOpenIdEventSource>();

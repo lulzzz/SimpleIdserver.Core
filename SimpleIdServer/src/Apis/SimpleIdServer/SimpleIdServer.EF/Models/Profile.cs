@@ -6,9 +6,8 @@ namespace SimpleIdServer.EF.Models
     {
         public string Subject { get; set; }
         public string Issuer { get; set; }
-        public string ResourceOwnerId { get; set; }
+        public string UserId { get; set; }
         public DateTime UpdateDateTime { get; set; }
         public DateTime CreateDateTime { get; set; }
-        public virtual ResourceOwner ResourceOwner { get; set; }
     }
 }

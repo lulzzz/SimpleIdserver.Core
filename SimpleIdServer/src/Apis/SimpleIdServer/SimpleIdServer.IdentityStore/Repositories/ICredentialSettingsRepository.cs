@@ -1,8 +1,8 @@
-﻿using SimpleIdServer.Core.Common.Models;
+﻿using SimpleIdServer.IdentityStore.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace SimpleIdServer.Core.Common.Repositories
+namespace SimpleIdServer.IdentityStore.Repositories
 {
     public interface ICredentialSettingsRepository
     {
