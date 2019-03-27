@@ -84,12 +84,14 @@ namespace SimpleIdServer.Startup
 
             services.AddIdentityStoreLDAP(new IdentityStoreLDAPOptions
             {
+                /*
                 Port = 389,
                 UserName = "cn=thabart,cn=users,cn=system",
                 Password = "password",
                 Server = "127.0.0.1",
                 LDAPBaseDN = "cn=system",
                 LDAPFilterUser = "(cn={0})"
+                */
             });
         }
 

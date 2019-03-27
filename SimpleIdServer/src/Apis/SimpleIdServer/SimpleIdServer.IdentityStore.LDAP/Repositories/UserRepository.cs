@@ -1,8 +1,11 @@
-﻿using SimpleIdServer.IdentityStore.Parameters;
+﻿using SimpleIdServer.IdentityStore.LDAP.Extensions;
+using SimpleIdServer.IdentityStore.Parameters;
 using SimpleIdServer.IdentityStore.Repositories;
 using SimpleIdServer.IdentityStore.Results;
 using System;
 using System.Collections.Generic;
+using System.DirectoryServices.Protocols;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Domains = SimpleIdServer.IdentityStore.Models;
@@ -11,91 +14,235 @@ namespace SimpleIdServer.IdentityStore.LDAP.Repositories
 {
     internal sealed class UserRepository : IUserRepository
     {
+        private readonly ILdapHelperFactory _ldapHelperFactory;
         private readonly IdentityStoreLDAPOptions _identityStoreLDAPOptions;
 
-        public UserRepository(IdentityStoreLDAPOptions identityStoreLDAPOptions)
+        public UserRepository(ILdapHelperFactory ldapHelperFactory, IdentityStoreLDAPOptions identityStoreLDAPOptions)
         {
+            _ldapHelperFactory = ldapHelperFactory;
             _identityStoreLDAPOptions = identityStoreLDAPOptions;
         }
 
         public Task<bool> Authenticate(string login, string password)
         {
-            using (var ldapHelper = new LdapHelper())
-            {
-                return Task.FromResult(ldapHelper.Connect(_identityStoreLDAPOptions.Server, _identityStoreLDAPOptions.Port, login, password));
-            }
+            var ldapHelper = _ldapHelperFactory.Build();
+            return Task.FromResult(ldapHelper.AuthenticateBasicLoginAndPassword(login, password) != null);
         }
 
-        public Task<bool> DeleteAsync(string subject)
+        public Task<bool> DeleteAsync(string id)
         {
-            throw new NotImplementedException();
+            var ldapHelper = _ldapHelperFactory.Build();
+            return Task.FromResult(ldapHelper.DeleteUser(id));
         }
 
         public Task<Domains.User> Get(string id)
         {
-            using (var ldapHelper = new LdapHelper())
+            var ldapHelper = _ldapHelperFactory.Build();
+            var searchResultEntry = ldapHelper.GetUser(id);
+            if (searchResultEntry == null)
             {
-                ldapHelper.Connect(_identityStoreLDAPOptions.Server, _identityStoreLDAPOptions.Port, _identityStoreLDAPOptions.UserName, _identityStoreLDAPOptions.Password);
-                var search = ldapHelper.Search(_identityStoreLDAPOptions.LDAPBaseDN, string.Format(_identityStoreLDAPOptions.LDAPFilterUser, id));
-                if (search.Entries.Count != 1)
-                {
-                    return Task.FromResult((Domains.User)null);
-                }
-
-                var firstEntry = search.Entries[0];
-                var result = new Domains.User
-                {
-                    Id = firstEntry.DistinguishedName,
-                    Claims = new List<Claim>
-                    {
-                        new Claim("sub", "thabart"),
-                        new Claim("name", "Thierry Habart")
-                    },
-                    IsBlocked = false,
-                    CreateDateTime = DateTime.UtcNow,
-                    UpdateDateTime = DateTime.UtcNow,
-                    Credentials = new List<Domains.UserCredential>
-                    {
-                        new Domains.UserCredential
-                        {
-                            Type = "pwd",
-                            IsBlocked = false,
-                            ExpirationDateTime = DateTime.UtcNow.AddYears(10)
-                        }
-                    }
-                };
-                return Task.FromResult(result);
+                return Task.FromResult((Domains.User)null);
             }
+
+            return Task.FromResult(GetUser(searchResultEntry));
         }
 
         public Task<ICollection<Domains.User>> Get(IEnumerable<Claim> claims)
         {
-            throw new NotImplementedException();
+            if (claims == null)
+            {
+                throw new ArgumentNullException(nameof(claims));
+            }
+
+            var filters = new List<string>();
+            foreach(var claim in claims)
+            {
+                filters.Add(BuildFilter(claim.Type, claim.Value));
+            }
+
+            var filter = $"(|{string.Join("", filters.ToArray())})";
+            var ldapHelper = _ldapHelperFactory.Build();
+            var users = ldapHelper.GetCollection(filter);
+            ICollection<Domains.User> result = new List<Domains.User>();
+            foreach(SearchResultEntry searchResultEntry in users)
+            {
+                result.Add(GetUser(searchResultEntry));
+            }
+
+            return Task.FromResult(result);
         }
 
         public Task<ICollection<Domains.User>> GetAll()
         {
-            throw new NotImplementedException();
+            var ldapHelper = _ldapHelperFactory.Build();
+            var searchResultEntryCollection = ldapHelper.GetAllUsers();
+            ICollection<Domains.User> result = new List<Domains.User>();
+            foreach(SearchResultEntry record in searchResultEntryCollection)
+            {
+                result.Add(GetUser(record));
+            }
+
+            return Task.FromResult(result);            
         }
 
         public Task<Domains.User> GetUserByClaim(string key, string value)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
+            var ldapAttributeName = GetLDAPAttributeName(key);
+            if (ldapAttributeName == null)
+            {
+                return Task.FromResult((Domains.User)null);
+            }
+
+            var ldapHelper = _ldapHelperFactory.Build();     
+            var searchResultEntry = ldapHelper.Get(BuildFilter(ldapAttributeName, value));
+            if (searchResultEntry == null)
+            {
+                return Task.FromResult((Domains.User)null);
+            }
+
+            return Task.FromResult(GetUser(searchResultEntry));            
         }
 
         public Task<bool> InsertAsync(Domains.User user)
         {
-            throw new NotImplementedException();
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            var directoryAttributes = new List<DirectoryAttribute>();
+            if(user.Claims != null)
+            {
+                foreach(var cl in user.Claims)
+                {
+                    var ldapAttr = GetLDAPAttributeName(cl.Type);
+                    if (string.IsNullOrWhiteSpace(ldapAttr))
+                    {
+                        continue;
+                    }
+
+                    directoryAttributes.Add(new DirectoryAttribute(ldapAttr, cl.Value));
+                }
+            }
+
+            var ldapHelper = _ldapHelperFactory.Build();
+            return Task.FromResult(ldapHelper.InsertUser(user.Id, directoryAttributes));
         }
 
         public Task<SearchUserResult> Search(SearchUserParameter parameter)
         {
-            throw new NotImplementedException();
+            if (parameter == null)
+            {
+                throw new ArgumentNullException(nameof(parameter));
+            }
+
+            var ldapHelper = _ldapHelperFactory.Build();            
+            SearchResultEntryCollection searchResultEntryCollection;
+            if (parameter.Subjects == null || !parameter.Subjects.Any())
+            {
+                searchResultEntryCollection = ldapHelper.GetPagedUsers(parameter.Count, parameter.StartIndex);
+            }
+            else
+            {
+                searchResultEntryCollection = ldapHelper.GetUsers(parameter.Subjects);
+            }
+
+            ICollection<Domains.User> users = new List<Domains.User>();
+            foreach(SearchResultEntry record in searchResultEntryCollection)
+            {
+                users.Add(GetUser(record));
+            }
+
+            var result = new SearchUserResult
+            {
+                Content = users,
+                StartIndex = parameter.StartIndex,
+                TotalResults = parameter.Count
+            };
+            return Task.FromResult(result);            
         }
 
         public Task<bool> UpdateAsync(Domains.User user)
         {
-            throw new NotImplementedException();
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+            
+            var distinguishedName = user.Id;
+            var directoryAttributes = new List<DirectoryAttributeModification>();
+            if (user.Claims != null)
+            {
+                foreach (var cl in user.Claims)
+                {
+                    var ldapAttr = GetLDAPAttributeName(cl.Type);
+                    if (string.IsNullOrWhiteSpace(ldapAttr))
+                    {
+                        continue;
+                    }
+
+                    var directoryAttributeModification = new DirectoryAttributeModification
+                    {
+                        Name = ldapAttr,
+                        Operation = DirectoryAttributeOperation.Replace
+                    };
+                    directoryAttributeModification.Add(cl.Value);
+                    directoryAttributes.Add(directoryAttributeModification);
+                }
+            }
+
+            var ldapHelper = _ldapHelperFactory.Build();
+            var result = ldapHelper.UpdateUser(distinguishedName, directoryAttributes);
+            return Task.FromResult(result);
+        }
+
+        private string GetLDAPAttributeName(string openidClaimName)
+        {
+            var claimMapping = _identityStoreLDAPOptions.User.ClaimMappings.FirstOrDefault(c => c.OpenidClaim == openidClaimName);
+            if (claimMapping == null)
+            {
+                return null;
+            }
+
+            return claimMapping.LDAPAttribute;
+        }
+        
+        private Domains.User GetUser(SearchResultEntry searchResultEntry)
+        {
+            var result = new Domains.User();
+            var claims = new List<Claim>();
+            foreach(var cm in _identityStoreLDAPOptions.User.ClaimMappings)
+            {
+                var attrs = searchResultEntry.Attributes.GetAttributes(cm.LDAPAttribute);
+                if (!attrs.Any())
+                {
+                    continue;
+                }
+
+                foreach(var attr in attrs)
+                {
+                    claims.Add(new Claim(cm.OpenidClaim, attr));
+                }
+            }
+
+            result.Id = searchResultEntry.DistinguishedName;
+            result.Claims = claims;
+            return result;
+        }
+
+        private static string BuildFilter(string key, string value)
+        {
+            return $"({key}={value})";
         }
     }
 }

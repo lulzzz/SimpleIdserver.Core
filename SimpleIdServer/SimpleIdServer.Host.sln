@@ -161,6 +161,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleIdServer.IdentityStor
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleIdServer.IdentityStore.LDAP", "src\Apis\SimpleIdServer\SimpleIdServer.IdentityStore.LDAP\SimpleIdServer.IdentityStore.LDAP.csproj", "{ACE102DE-BA01-4678-B1F6-D4702735D420}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleIdServer.IdentityStore.LDAP.Tests", "tests\SimpleIdServer.IdentityStore.LDAP.Tests\SimpleIdServer.IdentityStore.LDAP.Tests.csproj", "{CD3AE594-2FE0-4D53-BA1F-5BC0C29901B5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -504,6 +506,12 @@ Global
 		{ACE102DE-BA01-4678-B1F6-D4702735D420}.Fake|Any CPU.Build.0 = Debug|Any CPU
 		{ACE102DE-BA01-4678-B1F6-D4702735D420}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ACE102DE-BA01-4678-B1F6-D4702735D420}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD3AE594-2FE0-4D53-BA1F-5BC0C29901B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD3AE594-2FE0-4D53-BA1F-5BC0C29901B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD3AE594-2FE0-4D53-BA1F-5BC0C29901B5}.Fake|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD3AE594-2FE0-4D53-BA1F-5BC0C29901B5}.Fake|Any CPU.Build.0 = Debug|Any CPU
+		{CD3AE594-2FE0-4D53-BA1F-5BC0C29901B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD3AE594-2FE0-4D53-BA1F-5BC0C29901B5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -583,6 +591,7 @@ Global
 		{8AB6E529-8A3E-4F11-8D99-E113B21258D0} = {E75991E2-AC99-4731-9290-F7602E304D62}
 		{4D1C554D-15D0-43A7-99EB-4E639C78470F} = {E75991E2-AC99-4731-9290-F7602E304D62}
 		{ACE102DE-BA01-4678-B1F6-D4702735D420} = {E75991E2-AC99-4731-9290-F7602E304D62}
+		{CD3AE594-2FE0-4D53-BA1F-5BC0C29901B5} = {CAE43B3B-7250-43E3-B4FE-DC28D81805D0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9BEEBF69-C26F-4148-BDA9-941BFEC401A7}
